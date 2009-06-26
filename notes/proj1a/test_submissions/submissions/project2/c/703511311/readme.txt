@@ -1,0 +1,21 @@
+Name: John (An Gyun) Gang
+SID: 703-511-311
+
+Name: Tetsuya Takahashi
+SID: 503-638-523
+
+Project 2A:
+Used fgets to fetch upto 256 characters per line
+
+Project 2B:
+Included structure to hold data in each class
+Casted the data struct to (char *) to stored it in the PageFile
+
+Project 2C:
+Modifications in the structure
+
+Project 2D:
+The given test script does not include 'with index' for loading
+  tables, so when testing the parameter must be set
+Using a value in the condition prevents the database from using index
+Count(*) will only check the index

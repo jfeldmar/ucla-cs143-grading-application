@@ -1,0 +1,20 @@
+seung-hyo choi
+003-484-434
+seunghyo@ucla.edu
+
+readme.txt
+--------
+
+this was a really time-consuming project. wow. for this project, i largely worked 
+with tarun solanki and sendie hudaya.
+
+the only thing worth mentioning is the structures of the non/leafnodes:
+
+	leaf node:
+		metadata(16) | recordid(8) | key(4) | recordid(8) | key(4) | ... |
+
+	non-leaf node:
+		metadata(16) | pageid(4) | key(4) | pageid(4) | key(4) | ... |
+
+i added one function for debugging: get_buffer that returns a pointer to an internal 
+array of characters.

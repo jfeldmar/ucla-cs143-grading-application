@@ -1,0 +1,11 @@
+Raymond Moy 203484560
+Jeffrey Su 703449121
+
+Raymond did the implementation of the less-than and less-than-or-equal-to functionality.
+Jeffrey did the implementation of the greater-than and the greater-than-or-equal functionality 
+and the functionality allowing the user to AND conditions.
+
+We already implemented the equals functionality to test project 2C.
+
+Any tbl and idx files should be deleted before running bruinbase.
+There are no known bugs.

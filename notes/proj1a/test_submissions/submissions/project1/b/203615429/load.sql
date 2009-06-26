@@ -1,0 +1,53 @@
+/*Load Data*/
+/*Chi Kin Cheang ~ 203-615-429*/
+
+LOAD DATA LOCAL INFILE './data/actor1.del'
+INTO TABLE Actor
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"';
+
+LOAD DATA LOCAL INFILE './data/actor2.del'
+INTO TABLE Actor
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"';
+
+LOAD DATA LOCAL INFILE './data/actor3.del'
+INTO TABLE Actor
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"';
+
+LOAD DATA LOCAL INFILE './data/director.del'
+INTO TABLE Director
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"';
+
+LOAD DATA LOCAL INFILE './data/movie.del'
+INTO TABLE Movie
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"';
+
+LOAD DATA LOCAL INFILE './data/movieactor1.del'
+INTO TABLE MovieActor
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"';
+
+LOAD DATA LOCAL INFILE './data/movieactor2.del'
+INTO TABLE MovieActor
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"';
+
+LOAD DATA LOCAL INFILE './data/moviedirector.del'
+INTO TABLE MovieDirector
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"';
+
+LOAD DATA LOCAL INFILE './data/MovieGenre.del'
+INTO TABLE MovieGenre
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"';
+
+
+/*Insert MaxPersonID and MaxMovieID*/
+INSERT INTO MaxPersonID VALUES(69000);
+
+INSERT INTO MaxMovieID VALUES(4750);

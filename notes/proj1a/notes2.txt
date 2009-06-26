@@ -1,0 +1,16 @@
+localhost at /var/www
+start page: start.html
+should redirect to initialize.cgi which generates initialize.html
+
+NOTE: for CGI to work:
+	- open file: /etc/apache2/sites-available/default
+	- make sure ScriptAlias /cgi-bin/ points to correct directory
+		- in our case: /var/www/
+		- this will allow cgi script in all subdirectories
+		
+NOTE: For file upload to work:
+- make sure directory of where file is uploaded and cgi-bin directory have
+permissions set to 777
+
+NOTE: Text::CSV Module must be installed for parsing of student data
+	- add check at beginning of program to detect presence or required modules

@@ -1,0 +1,398 @@
+/*
+ * Copyright (C) 2008 by The Regents of the University of California
+ * Redistribution of this file is permitted under the terms of the GNU
+ * Public License (GPL).
+ *
+ * @author Junghoo "John" Cho <cho AT cs.ucla.edu>
+ * @date 3/24/2008
+ */
+ 
+#include "BTreeIndex.h"
+#include "BTreeNode.h"
+
+#include <stack>
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+/**
+ * BTreeIndex constructor
+ */
+BTreeIndex::BTreeIndex()
+{
+	// Initialize the variables
+    rootPid = -1;
+	treeHeight = 0;
+}
+
+/**
+ * Open the index file in read or write mode.
+ * Under 'w' mode, the index file should be created if it does not exist.
+ * @param indexname[IN] the name of the index file
+ * @param mode[IN] 'r' for read, 'w' for write
+ * @return error code. 0 if no error
+ */
+RC BTreeIndex::open(const string& indexname, char mode)
+{
+    int error_code = pf.open(indexname, mode);
+	if ( error_code != 0 )
+		return error_code;
+
+	// Check if this is a new file
+	int buffer[256];
+	if ( pf.endPid() == 0 )
+	{
+		treeHeight = 0;
+		rootPid = -1;
+		
+		// Store rootPid and treeHeight to disk
+		pf.read(0, buffer);
+		buffer[0] = rootPid;
+		buffer[1] = treeHeight;
+		pf.write(0, buffer);
+	}
+
+	// Retrieve the treeHeight and rootPid from disk
+	pf.read(0, buffer);
+	rootPid = buffer[0];
+	treeHeight = buffer[1];
+
+	return 0;
+}
+
+/**
+ * Close the index file.
+ * @return error code. 0 if no error
+ */
+RC BTreeIndex::close()
+{
+	// Store rootPid and treeHeight to disk
+	int buffer[256];
+	pf.read(0, buffer);
+	buffer[0] = rootPid;
+	buffer[1] = treeHeight;
+	pf.write(0, buffer);
+
+	// Close the file
+    return pf.close();
+}
+
+/**
+ * Insert (key, RecordId) pair to the index.
+ * @param key[IN] the key for the value inserted into the index
+ * @param rid[IN] the RecordId for the record being inserted into the index
+ * @return error code. 0 if no error
+ */
+RC BTreeIndex::insert(int key, const RecordId& rid)
+{
+	// Create a stack to remember how we traversed the B+ tree
+	stack<PageId> treePath;
+
+	// No Root Node Case
+	if ( rootPid == -1 )
+	{
+		// Create the root node
+		BTNonLeafNode rootNode;
+		rootPid = pf.endPid();
+		rootNode.write(rootPid, pf);
+		
+		// Create 2 leaf nodes
+		BTLeafNode leafNode1;
+		BTLeafNode leafNode2;
+		//leafNode2.insert(key, rid);
+		PageId leafNodePid1 = pf.endPid();
+		leafNode1.write(leafNodePid1, pf);
+		PageId leafNodePid2 = pf.endPid();
+		leafNode2.write(leafNodePid2, pf);
+
+		// Store the children in the root node
+		rootNode.initializeRoot(leafNodePid1, key, leafNodePid2);
+		rootNode.write(rootPid, pf);
+
+		// Increment Tree Height
+		++treeHeight;
+
+		// Store rootPid and treeHeight to disk
+		int buffer[256];
+		pf.read(0, buffer);
+		buffer[0] = rootPid;
+		buffer[1] = treeHeight;
+		pf.write(0, buffer);
+
+		// return success
+		//return 0;
+	}
+
+	// Simple Case
+	// The leaf node has an available slot open
+
+	/* STEPS:
+	 * 1) Go through the nonleaf nodes and find the leaf node we want to insert into
+	 * 2) Check if there is enough room
+	 * 3) Insert the value into the availble space in the leaf node
+	 */
+
+	// Create a temporary non-leaf node
+	BTNonLeafNode nonLeafNode;
+	PageId nextPid = rootPid;
+
+	// Follow each node until we get to a leaf node
+	for (int i = 0; i < treeHeight; i++)
+	{
+		treePath.push(nextPid);
+		nonLeafNode.read(nextPid, pf);
+		nonLeafNode.locateChildPtr( key, nextPid);
+	}
+
+	// nextPid points to the child node where the key belongs
+
+	BTLeafNode leafNode;
+	leafNode.read( nextPid, pf);
+	if ( leafNode.getKeyCount() < leafNode.MAX_KEYS )
+	{
+		// Simple Case:
+		leafNode.insert( key, rid);
+		leafNode.write(nextPid, pf);
+
+		// return success
+		return 0;
+	}
+
+
+	// Leaf overflow
+	// The leaf node you're trying to insert into is full
+
+	/* STEPS:
+	 * 1) Insert and Split the leaf node
+	 * 2) Copy the first key of the new sibling node to the parent
+	 */
+
+	// Create a new sibling node
+	int siblingKey;
+	PageId siblingPid = pf.endPid();
+	BTLeafNode siblingNode;
+	siblingNode.write( siblingPid, pf);
+
+	// Insert and Split the leaf node
+	leafNode.insertAndSplit( key, rid, siblingNode, siblingKey);
+	leafNode.write(nextPid, pf);
+	siblingNode.write( siblingPid, pf);
+
+	// Insert the sibling key into the parent
+	nonLeafNode.read(treePath.top(), pf);
+	if  ( nonLeafNode.getKeyCount() < nonLeafNode.MAX_KEYS )
+	{
+		// Insert the first key of the new sibling into the parent
+		nonLeafNode.insert( siblingKey, siblingPid);
+		nonLeafNode.write(treePath.top(), pf);
+
+		// Return success
+		return 0;
+	}
+
+	// Non-Leaf Overflow
+	// The leaf node you're trying to insert into is full AND the parent node is also full
+
+	/* STEPS:
+	 * 1) Insert and Split the leaf node
+	 * 2) Copy the first key of the new sibling node to the parent
+	 * 3) So Insert and Split the parent non leaf node and move the middle key up to its parent
+	 * 4) So Insert the middle key into the parent
+	 */
+
+	// Get ready for the loop
+	int midKey;
+	PageId siblingNonLeafId = pf.endPid();
+
+	while ( treePath.size() > 2 )
+	{
+		// Create the sibling
+		BTNonLeafNode siblingNonLeafNode;
+		siblingNonLeafNode.write( siblingNonLeafId, pf);
+
+		// Read the parent non leaf node
+		nonLeafNode.read( treePath.top(), pf);
+		treePath.pop();
+
+		nonLeafNode.insertAndSplit( siblingKey, siblingPid, siblingNonLeafNode, midKey);
+		nonLeafNode.write(treePath.top(), pf);
+		siblingNonLeafNode.write(siblingPid, pf);
+
+		// Insert the mid key into the parent
+		// but if the parent is full then we need to continue the loop
+
+		BTNonLeafNode parentNonLeafNode;
+		parentNonLeafNode.read( treePath.top(), pf);
+		if ( parentNonLeafNode.getKeyCount() < parentNonLeafNode.MAX_KEYS )
+		{
+			parentNonLeafNode.insert(midKey, siblingNonLeafId);
+			parentNonLeafNode.write(treePath.top(), pf);
+
+			// return success
+			return 0;
+		}
+
+		// Change the parent to the current
+		nonLeafNode = parentNonLeafNode;
+		siblingKey = midKey;
+		siblingPid = siblingNonLeafId;
+
+		// Create a new sibling for the next round
+		siblingNonLeafId = pf.endPid();
+	}
+
+	// New Root
+	// When there non-leaf overflow on the current root
+
+	/* STEPS:
+	 * 1) Insert and Split the leaf node
+	 * 2) Copy the first key of the new sibling node to the parent
+	 * 3) Insert and Split the parent non leaf node and move the middle key up to its parent
+	 * 4) Do this until the root node is also split
+	 * 5) Create a new root node
+	 * 6) Insert the middle key as the only value of the root node
+	 */
+
+	// Create the sibling
+	BTNonLeafNode siblingNonLeafNode;
+	siblingNonLeafNode.write( siblingNonLeafId, pf);
+
+	// Insert and Split on the root node
+	nonLeafNode.insertAndSplit( siblingKey, siblingPid, siblingNonLeafNode, midKey);
+	nonLeafNode.write(treePath.top(), pf);
+	treePath.pop();
+	siblingNonLeafNode.write(siblingPid, pf);
+
+	// root node has just been split, insert into parent midKey and siblingNonLeafId
+
+	// Create a new root node
+	BTNonLeafNode newRootNode;
+	PageId newRootPid = pf.endPid();
+	newRootNode.write(newRootPid, pf);
+
+	// Insert the middle key as the only value of the root node
+	newRootNode.initializeRoot(treePath.top(), midKey, siblingNonLeafId);
+	newRootNode.write(treePath.top(), pf);
+
+	// Increment Tree Height
+	++treeHeight;
+
+    return 0;
+}
+
+/**
+ * Find the leaf-node index entry whose key value is larger than or 
+ * equal to searchKey, and output the location of the entry in IndexCursor.
+ * IndexCursor is a "pointer" to a B+tree leaf-node entry consisting of
+ * the PageId of the node and the SlotID of the index entry.
+ * Note that, for range queries, we need to scan the B+tree leaf nodes.
+ * For example, if the query is "key > 1000", we should scan the leaf
+ * nodes starting with the key value 1000. For this reason,
+ * it is better to return the location of the leaf node entry 
+ * for a given searchKey, instead of returning the RecordId
+ * associated with the searchKey directly.
+ * Once the location of the index entry is identified and returned 
+ * from this function, you should call readForward() to retrieve the
+ * actual (key, rid) pair from the index.
+ * @param key[IN] the key to find.
+ * @param cursor[OUT] the cursor pointing to the first index entry
+ *                    with the key value.
+ * @return error code. 0 if no error.
+ */
+RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
+{
+	// Create a temporary non-leaf node
+	BTNonLeafNode nonLeafNode;
+	PageId nextPid = rootPid;
+
+	// Follow each node until we get to a leaf node
+	for (int i = 0; i < treeHeight; i++)
+	{
+		nonLeafNode.read(nextPid, pf);
+		nonLeafNode.locateChildPtr( searchKey, nextPid);
+	}
+
+	//BTLeafNode leafNode;
+	//leafNode.read(nextPid, pf);
+	//leafNode.print();
+	// nextPid points to the child node containing the searchKey
+
+	// Set the Cursor values
+	cursor.pid = nextPid;
+	cursor.eid = 0;
+
+	// Create temporary values
+	int tempKey;
+	RecordId tempRid;
+
+	// Read each value linearly in the node
+	do
+	{
+		int error_code = readForward( cursor, tempKey, tempRid);
+		if ( error_code != 0 )
+			return error_code;
+
+		// if the searchKey is less than the tempKey then
+		// it doesn't exists, since the node is sorted
+		if ( searchKey < tempKey )
+			return RC_NO_SUCH_RECORD;
+	} while ( searchKey != tempKey );
+
+	// Adjust the read pointer
+	if ( cursor.eid > 0 )
+		cursor.eid -= 1;
+
+	// return success
+	return 0;
+}
+
+/**
+ * Read the (key, rid) pair at the location specified by the index cursor,
+ * and move foward the cursor to the next entry.
+ * @param cursor[IN/OUT] the cursor pointing to an leaf-node index entry in the b+tree
+ * @param key[OUT] the key stored at the index cursor location.
+ * @param rid[OUT] the RecordId stored at the index cursor location.
+ * @return error code. 0 if no error
+ */
+RC BTreeIndex::readForward(IndexCursor& cursor, int& key, RecordId& rid)
+{
+	// Check the cursor
+	if ( cursor.pid < 0 )
+		return RC_INVALID_CURSOR;
+
+    // Create a temporary leaf node and read the (key, rid) pair
+	BTLeafNode leafNode;
+
+	int error_code = leafNode.read( cursor.pid, pf);
+	if ( error_code != 0 )
+		return error_code;
+
+	error_code = leafNode.readEntry( cursor.eid, key, rid);
+	if ( error_code != 0 )
+		return error_code;
+
+	// Determine if the next entry is in the current node or the next sibling node
+	if ( cursor.eid < leafNode.getKeyCount() - 1 )
+	{
+		++cursor.eid;
+	}
+	else
+	{
+		cursor.eid = 0;
+		cursor.pid = leafNode.getNextNodePtr();
+	}
+
+	// return success
+	return 0;
+}
+
+int BTreeIndex::getTreeHeight()
+{
+	return treeHeight;
+}
+
+int BTreeIndex::getRootPid()
+{
+	return rootPid;
+}

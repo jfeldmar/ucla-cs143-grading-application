@@ -1,0 +1,69 @@
+DROP TABLE IF EXISTS Movie;
+CREATE TABLE Movie (
+	id	INTEGER NOT NULL,
+	title	VARCHAR(100),
+	year	INTEGER,
+	rating	VARCHAR(10),
+	company VARCHAR(50)
+);
+
+DROP TABLE IF EXISTS Actor;
+CREATE TABLE Actor (
+	id	INTEGER NOT NULL,
+	last	VARCHAR(20),
+	first	VARCHAR(20),
+	sex	VARCHAR(6),
+	dob	DATE,
+	dod	DATE
+);
+
+DROP TABLE IF EXISTS Director;
+CREATE TABLE Director (
+	id	INTEGER NOT NULL,
+	last	VARCHAR(20),
+	first	VARCHAR(20),
+	dob	DATE,
+	dod	DATE
+);
+
+DROP TABLE IF EXISTS MovieGenre;
+CREATE TABLE MovieGenre (
+	mid	INTEGER NOT NULL,
+	genre	VARCHAR(20)
+);
+
+DROP TABLE IF EXISTS MovieDirector;
+CREATE TABLE MovieDirector (
+	mid	INTEGER NOT NULL,
+	did	INTEGER NOT NULL
+);
+
+DROP TABLE IF EXISTS MovieActor;
+CREATE TABLE MovieActor (
+	mid	INTEGER NOT NULL,
+	aid	INTEGER NOT NULL,
+	role	VARCHAR(50)
+);
+
+DROP TABLE IF EXISTS Review;
+CREATE TABLE Review (
+	name	VARCHAR(20),
+	time	TIMESTAMP,
+	mid	INTEGER,
+	rating	INTEGER,
+	comment	VARCHAR(500)
+);
+
+DROP TABLE IF EXISTS MaxPersonID;
+CREATE TABLE MaxPersonID (
+	id	INTEGER
+);
+
+INSERT INTO MaxPersonID (id) VALUES (69000);
+
+DROP TABLE IF EXISTS MaxMovieID;
+CREATE TABLE MaxMovieID (
+	id	INTEGER
+);
+
+INSERT INTO MaxMovieID (id) VALUES (4750);

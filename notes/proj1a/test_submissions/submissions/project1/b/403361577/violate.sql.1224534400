@@ -1,0 +1,60 @@
+-- To save typing, will mostly use Movie as an example to illustrate similar problems for other tables.
+-- examples of each type of violations are shown below.
+
+-- NOT NULL violations
+
+-- Movie id must have a value
+-- ERROR 1048 (23000) at line 6: Column 'id' cannot be null
+INSERT INTO Movie VALUES (\N, 'a', 1, 'a', 'a');
+-- Movie title must have a value
+-- ERROR 1048 (23000) at line 9: Column 'title' cannot be null
+INSERT INTO Movie VALUES (1, \N, 1, 'a', 'a');
+-- Movie year must have a value
+-- ERROR 1048 (23000) at line 12: Column 'year' cannot be null
+INSERT INTO Movie VALUES (1, 'a', \N, 'a', 'a');
+-- Movie rating must have a value
+-- ERROR 1048 (23000) at line 15: Column 'rating' cannot be null
+INSERT INTO Movie VALUES (1, 'a', 1, \N, 'a');
+-- Movie company must have a value
+-- ERROR 1048 (23000) at line 18: Column 'company' cannot be null
+INSERT INTO Movie VALUES (1, 'a', 1, 'a', \N);
+
+-- Primary key violations
+-- Movie id must be unique
+-- ERROR 1062 (23000) at line 24: Duplicate entry '4734' for key 1
+INSERT INTO Movie VALUES (4734, 'a', 1, 'a', 'a');
+-- Primary key violations
+-- Actor id must be unique
+-- ERROR 1062 (23000) at line 29: Duplicate entry '68635' for key 1
+INSERT INTO Actor VALUES (68635, 'a', 'a', 'a', 1978-04-01, \N);
+-- Primary key violations
+-- Director id must be unique
+-- ERROR 1062 (23000) at line 33: Duplicate entry '68626' for key 1
+INSERT INTO Director VALUES (68626, 'a', 'a', 1940-03-16, \N);
+
+-- Referential violations
+-- ERROR 1452 (23000) at line 28: Cannot add or update a child row:
+-- a foreign key constraint fails (`CS143/MovieGenre`,
+-- CONSTRAINT `MovieGenre_ibfk_1` FOREIGN KEY (`mid`)
+-- REFERENCES `Movie` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
+INSERT INTO MovieGenre VALUES (4735, 'Foreign Test');
+-- Referential violations
+-- ERROR 1452 (23000) at line 43: Cannot add or update a child row: a foreign key constraint fails (`CS143/MovieDirector`, CONSTRAINT `MovieDirector_ibfk_1` FOREIGN KEY (`mid`) REFERENCES `Movie` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
+INSERT INTO MovieDirector VALUES (4735, 68626);
+-- Referential violations
+-- ERROR 1452 (23000) at line 46: Cannot add or update a child row: a foreign key constraint fails (`CS143/MovieActor`, CONSTRAINT `MovieActor_ibfk_1` FOREIGN KEY (`mid`) REFERENCES `Movie` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
+INSERT INTO MovieActor VALUES (4735, 68635, 'Foreign Test');
+
+-- Check constraint violations
+-- Movie id must be positive and year
+-- However, MySQL doesn't support CHECK constraints, so there's no error report for this.
+INSERT INTO Movie VALUES (-1, 'a', -1, 'a', 'a');
+-- Check constraint violations
+-- Actor id must be positive
+-- However, MySQL doesn't support CHECK constraints, so there's no error report for this.
+INSERT INTO Actor VALUES (-68635, 'a', 'a', 'a', 1978-04-01, \N);
+-- Check constraint violations
+-- Director id must be positive
+-- However, MySQL doesn't support CHECK constraints, so there's no error report for this.
+INSERT INTO Director VALUES (-68626, 'a', 'a', 1940-03-16, \N);
+

@@ -1,0 +1,43 @@
+Project 1A - Calculator:
+
+      1. Algorithm
+      upload each students *.php file to localhost
+      for each student
+	      restart server (use script to run ./shutdown and ./startup)
+	      wait a few seconds
+	      telnet or netcat(nc) to page (with and w/o input, get input from editable file)
+	      parse output (i.e. get student's answer)
+	      compare/record correctness
+
+      2. Telnet vs. Netcat
+      - netcat has easier redirection of output (can use -t option)
+      - telnet solution: use 'script' command: run 'script </path/to/file>' before
+      running telnet. All the text gets written to the terminal and also to
+      /path/to/file. You have to do 'exit' or Ctrl-D to actually write to the file
+      (man script)
+
+      3. Example command (telnet):
+      telnet localhost 8080
+      GET /comprehensive/ HTTP/1.1
+      OR GET /comprehensive/?expr=3+8 HTTP/1.1
+
+      => returns the html page (store in temp folder)
+      => get result by id (getElementById)
+      => http/1.1 - persistent connection by default
+
+      4. Scripting options
+      - perl (has html TagParser)
+      - python
+
+Project 1B:
+      run sql queries to make sure database generation done correctly
+      check size and schema of tables
+      ensure required integrity constraints implemented
+      
+Project 1C:
+      Same process as 1A
+      need to figure out a good way to extract output from HTML page
+      run a solution script first to get comparison for grading
+
+Project 2:
+      requires different approach

@@ -1,0 +1,27 @@
+--I1--
+The I1 page is basically a form that takes in the Actor's information and passes it to the database.  The form is formatted as to reduce the possibility for invalid inputs.
+
+--I2--
+The I2 page is also just a form that takes in Reviews for a movie.  This page is also special because it has a table with which you can select whatever movie you would like to add a comment to.  Whatever movie you have clicked on will show up on the form as the movie you are adding the comments to.
+
+--S1--
+The S1 page is a page that takes in a search field and displays the results in a table.  It also has functionality to return all results by searching nothing.
+
+--info_mov--
+This is just basically an information page for movies.  It shows all the proper information, reviews, and actors in the movie and links the actors that are in the movie to the info_act page.
+
+--info_act--
+This is an information page for actors and is basically the same as info_mov except that it shows what movies the actor has been in and it does not show reviews.
+
+--I3.php I3_addActor.php I3_addDir.php--
+I3.php is the page to add Movie information. The user inputs the title and company, selects the year and rating, and clicks the Add button to add a new movie. When a movie is successfully added, two new buttons show up for the user to add Actors to the movie or Director(s) to the movie. Following either one will take the user to the appropriate page. In each page, there are buttons to take the user to the other page to add Actors/Directors.
+
+In both pages, the user can browse through a paginated table for an Actor or a director. The user selects the person she wants to add then (inputting Role if is an Actor) clicks Add to add the person.
+
+The person is then associated with the newly added movie.
+
+
+Richard: Worked on the I1,I2,S1,info_mov,info_act pages mostly and did small work on the other pages.  Handled most of the CSS stuff.  Overall worked more on the frontend/application stuff.
+Gene: Worked on I3,I3_addActor,I3_addDir,S1 pages mostly and worked a little on the other pages.  Handled most of the Javascript stuff.  Worked more on the backend/sql stuff.
+
+This was quite complicated because we had to send emails to each other constantly and work on different files in order to avoid confusion.  The next time around we will definitely work with a version control program like SVN.

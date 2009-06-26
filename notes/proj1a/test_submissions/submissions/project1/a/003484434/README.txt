@@ -1,0 +1,40 @@
+seung-hyo choi
+003-484-434
+seunghyochoi@gmail.com
+seunghyo@ucla.edu
+
+readme.txt
+----------
+
+the only assumption made would be that the file remain named as "calculator.php" 
+because when referencing an action for the <form> tag, calculator.php is used. 
+
+from what was tested, all functions of my calculator.php and the demo calculator 
+are the same, down to the error messages and formatting of results.
+
+in line with the demo calculator, expressions that consist only of a number 
+beginning with 0 will be interpreted as an octal. any other strange behavior as 
+a result of using eval() will also be reflected. 
+
+virtually all decimals are supported in my version of calculator.php. example:
+
+	89067/8+0.9+.8+9. 
+
+will properly validate under calculator.php while the online calc will be unable 
+to parse this correctly. calculator.php will consider any numbers of the form
+
+	abcd.
+	.abcd
+	ab.cd
+
+to be valid. as a result, calculator.php covers a wider range of possible valid 
+numerical values. possible exceptions include expressions such as
+
+	.999/.999
+
+which fails to validate under both the provided calc and calculator.php. numbers 
+that begin with 0 tend to be evaulated as octal numbers with the eval() function. 
+
+seeing as that there were multiple specs changes, this version of calculator.php 
+most closely mimics the first version of the demo calc given to us. the inclusion 
+of negative (-) numbers was added after that.
