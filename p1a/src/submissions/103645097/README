@@ -1,0 +1,9 @@
+Project 1A
+Submission by: Evan Lloyd
+SID: 103645097
+elloyd@ucla.edu
+
+Quirks / differences from example program:
+Correctly handles negative numbers. For example, inputting "-1" returns "-1" instead of error.
+"30--70" for example would be parsed as "30-(-70)" and will return "100".
+Similarly, "80+-30" is parsed as "80+(-30)" and will return "50".

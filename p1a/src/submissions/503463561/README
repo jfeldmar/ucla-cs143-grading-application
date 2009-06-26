@@ -1,0 +1,46 @@
+Name: Brian Nguyen
+SID: 503463561
+E-mail: mtxcoll@yahoo.com
+
+================================================================================
+Lessons Learned
+================================================================================
+
+- Regular expressions are tricky! When syntax-checking using the preg_check()
+  function, I found that it was difficult to get right even seemingly simple
+  cases like making sure an operator comes in between two operands or checking for
+  division by 0 (e.g., '3/0' or '5/.000'). Additionally, I found that it was
+  simpler to use preg_match to check for all the possible exceptions that can
+  cause a syntax error (rather than actually parsing the string to check for valid
+  syntax).
+
+- The boundary between string data and actual code in PHP is much more fluid due
+  to the fact that PHP is loosely typed. The eval() function allows us to
+  evaluate a string as if it were actual PHP code; no equivalent for this exists
+  in a more strongly-typed, compiled language like C/C++ (any support would have
+  to be programmed in manually).
+
+- GET is very useful when you want dynamic pages to be accessed repeatedly and
+  easily by clients.
+
+================================================================================
+Interesting Problems
+================================================================================
+
+- Is it possible to use preg_match() to proofread the string by parsing it?
+- Since regular expressions don't allow us to check for mismatched parentheses,
+  how might we implement parentheses in our calculator code?
+- Try adding support for exponents and common functions like sqrt(), log(), etc.
+- Try adding support for constants like pi and e
+- Replace the eval() statement with our own calculation code (which is more
+  secure)
+
+================================================================================
+Known Issues
+================================================================================
+
+- Placing 0 before any valid number puts eval() in octal mode, causing
+  unexpected results. For example, the calculator evaluates 010 = 8, rather
+  than 010 = 10, as we would expect.
+- No whitespace, parentheses, powers, and other features that you would see in a
+  real calculator are supported in this version.

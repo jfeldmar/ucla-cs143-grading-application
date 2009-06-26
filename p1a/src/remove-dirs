@@ -1,0 +1,6 @@
+rmdir file-uploads;
+rmdir submissions;
+rmdir temp;
+rmdir logs;
+rmdir grades;
+rmdir test_cases;

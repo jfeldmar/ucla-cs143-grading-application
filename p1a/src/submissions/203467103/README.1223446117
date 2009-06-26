@@ -1,0 +1,12 @@
+Name:	Matthew Pham
+SID:	203467103
+EMAIL:	mattpham@ucla.edu
+
+NOTES:
+This README is for CS143 project 1A. It is a calculator written in PHP
+to emulate the demo calculator as well as possible. The HTML portion
+is basically a copy of the demo's HTML, so that it looks exactly like
+the demo page. However, there are some cases where my calculator does
+not return the same thing as the demo calculator.
+These cases are exceptional cases where the demo calculator does not
+behave as expected, such as "-1-+1".

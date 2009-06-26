@@ -1,0 +1,15 @@
+CS143 Project 1A
+Justin Meza
+503355401
+justin.meza@gmail.com
+
+In addition to satisfying the project specification to the best of my knowledge, I chose to expand the project in the following ways:
+
+  - I used JavaScript to create calculator buttons which dynamically modify the text box used to edit the expression.
+
+  - I added a history feature which keeps track of previously evaluated expressions and allows them to be re-input when clicked upon. It also supports a clear operation which clears the history.
+
+I chose to parse and evaluate the expression recursively as opposed to using the ``preg_match()'' and ``eval()'' functions. This let me be more explicit about the way errors were handled. My calculator detects two kinds of errors: syntax and division by zero.
+
+I used session variables to keep track of the history across page refreshes.
+
