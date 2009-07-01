@@ -35,20 +35,21 @@ print <<ENDHTML;
 ENDHTML
 
 #empty: file-uploads, submissions, temp, logs, grades, test-cases
-print "<p>deleting/recreating directories... </p>";
+print "<p>Deleting/recreating directories... </p>";
 
 foreach my $dir (@clear_dirs)
 {
 	#Delete directory and all contents if it exists
 	if (-d $dir){
 		if ($verbose) { print "<p>";}
-		rmtree($dir,$verbose, 0 ) or die("Cannot remove $dir directory: $!");
+		rmtree($dir,$verbose, 0 ) or die("Cannot remove contents of $dir directory: $!");
 		if ($verbose) { print "</p>";}
 		if(!$verbose) {
-			print $dir.', ';
+			print 'Deleted '.$dir.', <br />';
 		}
 	}
 	#Recreate empty directory
+	##!system("mkdir $dir") or die("Cannot $dir directory: $!");
 	mkdir($dir) or die "Cannot create $dir directory: $!";
 	if ($verbose){
 		print "Created directory $dir";
@@ -60,7 +61,7 @@ print "Done.</p>";
 #Copy saved test cases into the test_cases directory
 #####################################################
 
-print "<p>Copying default test-cases...</p>";
+print "<p>Generating default test-cases...</p>";
 !system("tar -C ../test_cases/ -xf ../default-data/test-cases.tar ") or die("Unable to Copy Default Test Cases: $!");;
 print "Done.</p>";
 
