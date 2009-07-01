@@ -11,6 +11,8 @@ NOTE: for CGI to work:
 NOTE: For file upload to work:
 - make sure directory of where file is uploaded and cgi-bin directory have
 permissions set to 777
+- if n1-... script fails on deleting/creating directories (permission denied), change (chmod) mode
+of src (top level directory) to 777
 
 NOTE: Text::CSV Module must be installed for parsing of student data
 	- add check at beginning of program to detect presence or required modules
