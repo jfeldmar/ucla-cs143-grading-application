@@ -48,6 +48,7 @@ foreach my $dir (@clear_dirs)
 			print 'Deleted '.$dir.', <br />';
 		}
 	}
+
 	#Recreate empty directory
 	##!system("mkdir $dir") or die("Cannot $dir directory: $!");
 	mkdir($dir) or die "Cannot create $dir directory: $!";

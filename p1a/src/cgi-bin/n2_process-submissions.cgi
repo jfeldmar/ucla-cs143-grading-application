@@ -4,6 +4,7 @@
 #  This script processes the form submitted in n1_initialize.cgi
 #1. Uploads compressed tar file of submissions to $upload_dir/$zip_filename
 #2. Uploads sample PHP calculator solution to $upload_dir/$php_filename
+#3. Extract compressed tar file into submissions directory
 ###################################################
 
 use strict;
@@ -136,6 +137,13 @@ if ( $sampleCalcFile )
 	my $filesize = -s "$upload_dir/$php_filename";
 	print "<p>Size of PHP file: " . $filesize . "</p>"; 
 	print "<p>uploaded PHP Sample Calculator Solution file.</p>";
+	
+	#
+	# 3. extract into submissions directory
+	#
+	!system("tar -C ../submissions/ -xf $upload_dir/$zip_filename") or die("Unable to Copy Default Test Cases: $!");
+
+
 }
 
 print '<p align=right><a href="n3_error_process_uploads.cgi" >Continue</a></p>';
