@@ -30,10 +30,10 @@ function addSelection()
 {
 	var optn = document.createElement("OPTION");
 	optn.text = prompt("Type in your test query", "2+3");
-	optn.value = optn.text;
 	if (optn.text != false){
 		var soltn = prompt("Confirm or edit solution", eval(optn.text));
 		if (soltn != null){
+			optn.value = optn.text + "," + soltn;
 			optn.text = optn.text + " (SOLN: " + soltn +")";
 			document.getElementById("tests").options.add(optn);
 		}
@@ -58,7 +58,17 @@ function choosesubmit(state)
 		alert("warning: default test cases will be overwritten");
 	}
 	document.getElementById("savetype").value = state;
+	selectAll();
 	document.getElementById("myform").submit();
+}
+function selectAll()
+{
+	var opts = document.getElementById("tests").options;
+	for (var i = 0; i < opts.length; i++)
+	{
+		opts[i].selected = true;
+	}
+	
 }
 </script>
 </head>
@@ -81,7 +91,7 @@ my @selected = $query->param("check") or warn("No File Selected");
 
 open FH, ">$sids_to_grade_file" or die("Unable to open/create $sids_to_grade_file file: $!");
 foreach (@selected){
-	print FH "$_,\n";
+	print FH "$_\n";
 }
 close FH;
 
@@ -102,14 +112,14 @@ my @qfiles = grep { $_ ne '.' && $_ ne '..' } readdir QDIR;
 opendir SDIR, "$solutions_directory" or die("Can't open solutions directory $solutions_directory: $!");
 my @sfiles = grep { $_ ne '.' && $_ ne '..' } readdir SDIR;
 
-print qq(\n<form id="myform" method=POST action="../cgi-bin/n5-run-test.cgi">\n);
+print qq(\n<form id="myform" method=GET action="../cgi-bin/n5-run-test.cgi">\n);
 print qq(<p align=center>);
 print qq(<a href="javascript:addSelection();">Add Item</a>\n);
 print qq(<BR/><a href="javascript:deleteSelection();">Delete Item</a>\n);
 print qq(</p>);
 
-print qq(<p align=center>);
-print qq(<SELECT id="tests" MULTIPLE SIZE=10 style="min-width=15" width=auto>);
+print qq(<p align=center>\n);
+print qq(<SELECT id="tests" name="tests" MULTIPLE SIZE=10>\n);
 
 foreach my $query (@qfiles)
 {
@@ -121,7 +131,7 @@ foreach my $query (@qfiles)
 	chomp(my $s = <SFILE>);
 	close SFILE;
 	
-	print qq(<OPTION VALUE="$q" >$q (SOLN: $s)</OPTION>\n);
+	print qq(\n<OPTION VALUE="$q,$s" >$q (SOLN: $s)</OPTION>\n);
 }
 
 print qq(</SELECT>);
@@ -129,7 +139,7 @@ print qq(</p>\n);
 
 #print qq(<BR/><BR/><input type=button onclick="alert('hi')" value="Test"/>\n);
 
-print qq(<input type=hidden id="savetype" name="savetype" value=""/>);
+print qq(<input type=hidden id="savetype" name="savetype" value=""/>\n);
 print qq(<BR/><BR/><input type=button onClick="choosesubmit('load')" value="Save Test Cases"/>\n);
 print qq(<BR/><BR/><input type=button onClick="choosesubmit('save')" value="Save Test Cases as Default Test Cases"/>\n);
 print qq(</form>\n);

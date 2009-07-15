@@ -141,7 +141,7 @@ if ( $sampleCalcFile )
 	#
 	# 3. extract into submissions directory
 	#
-	!system("tar -C ../submissions/ -xf $upload_dir/$zip_filename") or die("Unable to Copy Default Test Cases: $!");
+	!system("tar -C ../submissions/ -xf $upload_dir/$zip_filename") or die("Unable to Extract compressed submissions $upload_dir/$zip_filename into ../submissions/ : $!");
 
 
 }
