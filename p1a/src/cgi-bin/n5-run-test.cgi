@@ -116,8 +116,8 @@ foreach my $i (0..$#queries)
 
 #save to default-data directory if option selected
 if ($savetype eq "save"){
-	print "<p>Saving as default test-cases...</p>";
-	!system("tar  -c -f $default_data_tarfile -C $test_cases_dir queries solutions") or die("Unable to Save Default Test Cases: $!");;
+	print "<p>Saving as default test-cases...";
+	!system("tar  -c -f $default_data_tarfile -C $test_cases_dir queries solutions") or die("Unable to Save Default Test Cases: $!");
 	print "Done.</p>";	
 }	
  
