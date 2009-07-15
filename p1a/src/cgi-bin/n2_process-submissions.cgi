@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl -w
 
 ###################################################
 #  This script processes the form submitted in n1_initialize.cgi

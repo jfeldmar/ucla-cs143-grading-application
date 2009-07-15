@@ -12,7 +12,7 @@ print <<ENDHTML;
 <html>
 <head>
 <title>CS143 - Project 1A Grading Application</title>
-<link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />
+	s<link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />
 </head>
 <body>
 <script type="text/javascript" src="../html-css/js/wz_tooltip.js"></script>
@@ -114,7 +114,7 @@ else
 		my $name = $fields[1];
 		#begin table row/checkbox
         	print qq(<tr id=$sid> \n);		#prints id=SID for <tr> tag "id"
-		print qq(\t <td><input type=checkbox name=$sid></td> \n);
+		print qq(\t <td><input type=checkbox name="check" value=$sid></td> \n);
 		print qq(\t <td>$sid</td> \n);		#prints SID
 		print qq(\t <td>$name</td> \n);		#prints Name
 		
