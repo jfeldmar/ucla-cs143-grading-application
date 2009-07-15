@@ -27,7 +27,14 @@ print <<ENDHTML;
 <head>
 <title>CS143 - Project 1A Grading Application</title>
 <link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />
-
+<script language="JavaScript" type="text/javascript">
+<!--
+function sizeTbl(section, button) {
+  var tbl = document.getElementById(section);
+  tbl.style.display = (button.value == 'Hide') ? 'none' : 'block';
+  button.value = (button.value == 'Hide') ? 'Show' : 'Hide';
+}
+</script> 
 </head>
 <body>
 
@@ -118,7 +125,7 @@ foreach my $i (0..$#queries)
 if ($savetype eq "save"){
 	print "<p>Saving as default test-cases...";
 	!system("tar  -c -f $default_data_tarfile -C $test_cases_dir queries solutions") or die("Unable to Save Default Test Cases: $!");
-	print "Done.</p>";	
+	print "Done.</p>";
 }	
  
 
@@ -135,4 +142,101 @@ while (chomp($sid = <FH>))
 	print qq(<p>$sid</p>);
 }
 close FH;
+
+print <<ENDHTML;
+
+<br/><input type="button" style="width:4em" onclick="javascript:sizeTbl('s1', this);" value="Show" >
+Test Case Results for Student 1
+<div id=s1 style="overflow:hidden;display:none">
+<table width="851" height="90" border="1" align="center">
+  <tr>
+    <td>QUERY</td>
+    <td>INPUT</td>
+    <td>EXPECTED SOLUTION</td>
+    <td>RESULT</td>
+  </tr>
+  <tr>
+    <td>query1 (links to page)</td>
+    <td>2+3</td>
+    <td>5</td>
+    <td>5</td>
+  </tr>
+  <tr>
+    <td>query2</td>
+    <td>5-9</td>
+    <td>-4</td>
+    <td>-4</td>
+  </tr>
+  <tr>
+    <td>query3</td>
+    <td>3*7</td>
+    <td>21</td>
+    <td>21</td>
+  </tr>
+</table>
+</div>
+
+
+<br/><input type="button"  style="width:4em" onclick="javascript:sizeTbl('s2', this);" value="Show" >
+Test Case Results for Student 2
+<div id=s2 style="overflow:hidden;display:none">
+<table width="851" height="90" border="1"  align="center">
+  <tr>
+    <td>QUERY</td>
+    <td>INPUT</td>
+    <td>EXPECTED SOLUTION</td>
+    <td>RESULT</td>
+  </tr>
+  <tr>
+    <td>query1 (links to page)</td>
+    <td>2+3</td>
+    <td>5</td>
+    <td>5</td>
+  </tr>
+  <tr>
+    <td>query2</td>
+    <td>5-9</td>
+    <td>-4</td>
+    <td>-4</td>
+  </tr>
+  <tr>
+    <td>query3</td>
+    <td>3*7</td>
+    <td>21</td>
+    <td>21</td>
+  </tr>
+</table>
+</div>
+
+<br/><input type="button" style="width:4em" onclick="javascript:sizeTbl('s3', this);" value="Show" >
+Test Case Results for Student 3
+<div id=s3 style="overflow:hidden;display:none">
+<table width="851" height="90" border="1"  align="center">
+  <tr>
+    <td>QUERY</td>
+    <td>INPUT</td>
+    <td>EXPECTED SOLUTION</td>
+    <td>RESULT</td>
+  </tr>
+  <tr>
+    <td>query1 (links to page)</td>
+    <td>2+3</td>
+    <td>5</td>
+    <td>5</td>
+  </tr>
+  <tr>
+    <td>query2</td>
+    <td>5-9</td>
+    <td>-4</td>
+    <td>-4</td>
+  </tr>
+  <tr>
+    <td>query3</td>
+    <td>3*7</td>
+    <td>21</td>
+    <td>21</td>
+  </tr>
+</table>
+</div>
+ENDHTML
 print qq(</body></html>);
