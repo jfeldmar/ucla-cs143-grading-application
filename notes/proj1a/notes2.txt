@@ -22,3 +22,5 @@ TO-DO:
 - in n3, create option to display only the latest submitted files (by default),
 if display all, show a "date/time submitted" column
 	(how? read all SIDs in csv into array, take out duplicate from array)
+- in n5, implement inline editable cell for "Notes" and "Result"
+- in n5, allow user to choose which file gets processed

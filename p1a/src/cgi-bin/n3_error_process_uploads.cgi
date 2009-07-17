@@ -7,6 +7,17 @@
 ###################################################
 use strict;
 
+	my $safe_filename_characters = "a-zA-Z0-9_.-";
+	my $upload_dir = "../file-uploads";
+	my $zip_filename = "project1A-Submissions.tar";
+	my $php_filename = "sampleCalculator.php";
+	my $submissions_directory = "../submissions";
+	my $temp_directory = "../temp";
+	my $html_images_dir = "../html-css/images/";
+	my $editable_src = "editable_src";
+	my $submissions_csv_file = "../submissions/submission.csv";
+
+
 print "Content-type: text/html\n\n";
 print <<ENDHTML;
 <html>
@@ -44,16 +55,6 @@ else
 	use CGI;
 	use CGI::Carp qw ( fatalsToBrowser );
 	my $query = new CGI;
-
-	my $safe_filename_characters = "a-zA-Z0-9_.-";
-	my $upload_dir = "../file-uploads";
-	my $zip_filename = "project1A-Submissions.tar";
-	my $php_filename = "sampleCalculator.php";
-	my $submissions_directory = "../submissions";
-	my $temp_directory = "../temp";
-	my $html_images_dir = "../html-css/images/";
-	my $editable_src = "editable_src";
-	my $submissions_csv_file = "../submissions/submission.csv";
 
 	# If sample Calculator PHP solution was uploaded by user
 	# Display a link to it
