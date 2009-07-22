@@ -49,6 +49,10 @@ close FH;
 my %hash = map { $_, 1 } @ids;
 my @unique_sids = keys %hash;
 
+$" = ', ';
+print qq(var unique_sids = new Array(@unique_sids);\n);
+$" = ' ';
+
 # for each unique sid, create "files-sid" array listing all files submitted
 foreach my $sid (@unique_sids)
 {
@@ -82,12 +86,14 @@ foreach my $sid (@unique_sids)
 print <<ENDHTML;
 </script>
 </head>
+
 <body onload="update_totals();">
 
 <h1>CS143 - Project 1A Grading Application</h1>
 <h2> Confirm/Add/Delete/Save Test Cases </h2>
 
 <script type="text/javascript" src="../html-css/js/n5-script-functions.js"></script>
+<script type="text/javascript" src="../html-css/js/wz_tooltip.js"></script>
 
 ENDHTML
 
@@ -189,9 +195,17 @@ print qq(<hr/>\n);
 ## 3. Display table summarizing test case output 
 ##	for selected submissions (use log for reference)
 
+print qq(<p><input type=button value="Show All" onclick="show_all('Show');"/>&nbsp;\n);
+print qq(<input type=button value="Hide All" onclick="hide_all('Hide');"/></p>\n);
+
 foreach my $sid (@unique_sids)
 {
-       print qq(<br/><input type="button" style="width:4em" onclick="javascript:ShowHideSection('$sid', this);" value="Show" >\n);
+	## separator for each submission's code
+	print qq(\n\n\n<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->\n);
+	print qq(<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^sid:$sid^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->\n);
+	print qq(<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->\n\n\n);
+
+       print qq(<br/><input type="button" class="$sid" style="width:4em" onclick="javascript:ShowHideSection('$sid', this);" value='Show'>\n);
        print qq(&nbsp;&nbsp;Test Case Results for Student $sid\n);
        print qq(<input type="button" onclick="javascript:update_total_score('$sid');" value="Sum Scores" >\n);
        print qq(<input type="button" onclick="javascript:update_notes('$sid');" value="Concat Notes" >\n);
@@ -201,7 +215,7 @@ foreach my $sid (@unique_sids)
        print qq(&nbsp;or&nbsp;<input type="button" value="Choose PHP File to Grade" onclick="ChooseFilePopUp('$pop_up_window','$sid');"/></p>\n);
        
        print qq(<table width=90% border="1" align="center">);
-       print qq(<tr><th></th><th>QUERY</th><th>Sample Solution</th><th>RESULT</th><th>Score</th><th>Notes</th></tr>);
+       print qq(<tr><th></th><th>QUERY</th><th>Sample Solution</th><th>RESULT</th><th>Score</th><th>Notes</th></tr>\n);
        
        # For each Query
        ###################################################
@@ -209,47 +223,49 @@ foreach my $sid (@unique_sids)
        {
        		my $temp = $i + 1;
 	       print qq(<tr>);
-	       print qq(<td>$temp</td>);
+	       print qq(<td>$temp</td>\n);
 
 	       # link to student's solution with given input
-	       print qq(<td>);
-	       print qq(<script type="text/javascript">);
-	       print qq(document.write('<a class="php_editable" href=\"$submissions_directory/$sid/$default_php?expr=' + encodeURIComponent("@queries[$i]") + '\" target=_blank > @queries[$i] </a>'););
-	       print qq(</script>);
-	       print qq(</td>);
+	       print qq(<td>\n);
+	       print qq(<script type="text/javascript">\n);
+	       print qq(document.write('<a class="php_editable" href=\"$submissions_directory/$sid/$default_php?expr=' + encodeURIComponent("@queries[$i]") + '\" target=_blank > @queries[$i] </a>');\n);
+	       print qq(</script>\n);
+	       print qq(</td>\n);
 
 	       # expected result (link to sample solution)
-	       print qq(<td>);
-	       print qq(<script type="text/javascript">);
-	       print qq(document.write('<a href=\"$sample_php?expr=' + encodeURIComponent("@queries[$i]") + '\" target=_blank > @solutions[$i] </a>'););
-	       print qq(</script>);
-	       print qq(</td>);
+	       print qq(<td>\n);
+	       print qq(<script type="text/javascript">\n);
+	       print qq(document.write('<a href=\"$sample_php?expr=' + encodeURIComponent("@queries[$i]") + '\" target=_blank > @solutions[$i] </a>');\n);
+	       print qq(</script>\n);
+	       print qq(</td>\n);
 	       
 	       # extract student's result for given query
-	       print qq(<td>);
-	       print qq(<script type="text/javascript">);
-	       print qq(document.write('<input type=button id=\"$submissions_directory/$sid/$default_php?expr=' + encodeURIComponent("@queries[$i]") + '\" onload="get_result(this);" value="Plug In Result">'););
-	       print qq(</script>);
-	       print qq(</td>);
+	       print qq(<td>\n);
+
+	       print qq(<script type="text/javascript">\n);
+	       print qq( document.write(get_result("$submissions_directory/$sid/$default_php?expr="+encodeURIComponent("@queries[$i]"), $sid$i));\n);
+	       print qq(</script>\n);
+
+	       print qq(</td>\n);
 
 	       # score based on matching solution and output
 	       $temp = 100 + $temp;
-	       print qq(<td class="qscore" onClick="editCell(this, 'number', $sid);">$temp</td>);
+	       print qq(<td class="qscore" onClick="editCell(this, 'number', $sid);">$temp</td>\n);
 
 	       # comments based on score
-	       print qq(<td class="qnotes" onClick="editCell(this, 'text', $sid);">Correct?</td>);
-	       print qq(</tr>);
+	       print qq(<td class="qnotes" onClick="editCell(this, 'text', $sid);">Correct?</td>\n);
+	       print qq(</tr>\n);
        }
        ###################################################
        
-       print qq(<tr>);
-       print qq(<td colspan=4>Total Score</td>);
-       print qq(<td class="tscore">($#queries + 1) * 100</td>);
-       print qq(<td class="tnotes">Notes:</td>);
-       print qq(</tr>);
+       print qq(<tr>\n);
+       print qq(<td colspan=4>Total Score</td>\n);
+       print qq(<td class="tscore">($#queries + 1) * 100</td>\n);
+       print qq(<td class="tnotes">Notes:</td>\n);
+       print qq(</tr>\n);
 
-       print qq(</table>);
-       print qq(</div>);
+       print qq(</table>\n);
+       print qq(</div>\n);
 }
 
 print qq(</body></html>);
