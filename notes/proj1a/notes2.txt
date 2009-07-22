@@ -15,7 +15,11 @@ permissions set to 777
 of src (top level directory) to 777
 
 NOTE: Text::CSV Module must be installed for parsing of student data
-	- add check at beginning of program to detect presence or required modules
+	- add check at beginning of program to detect presence or required modules	
+
+NOTE: calculator.php submission must have a tag with id='result' around
+	calculation result and name=expr in the input tag where the math problem
+	is to be inserted
 
 TO-DO:
 - add class="code" definition to CSS

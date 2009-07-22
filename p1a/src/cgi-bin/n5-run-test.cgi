@@ -21,103 +21,74 @@ my $solutions_directory = "../test_cases/solutions";
 my $default_data_tarfile = "../default-data/test-cases2.tar";
 my $sids_to_grade_file = "../logs/SIDstoGrade.csv";
 
+my $default_php = "calculator.php";
 my $sample_php = "../file-uploads/sampleCalculator.php";
 my $submissions_directory = "../submissions";
 my $temp_directory = "../temp";
+my $pop_up_window = "../html-css/choosefile-popup.html";
 
+print qq(Content-type: text/html\n\n);
+print qq(<html><head>\n);
+print qq(<title>CS143 - Project 1A Grading Application</title>\n);
+print qq(<link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />\n);
+print qq(<script type="text/javascript">\n);
 
-print "Content-type: text/html\n\n";
-print <<ENDHTML;
-<html>
-<head>
-<title>CS143 - Project 1A Grading Application</title>
-<link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />
+## for each submission, print a javascript array containing all files submitted by that student
+###################################################
 
-<script language="JavaScript" type="text/javascript">
-<!--
-function ShowHideSection(section, button) {
-  var tbl = document.getElementById(section);
-  tbl.style.display = (button.value == 'Hide') ? 'none' : 'block';
-  button.value = (button.value == 'Hide') ? 'Show' : 'Hide';
+## Open log that lists submissions to grade, create array of unique SIDs
+open FH, $sids_to_grade_file or die("Unable to open $sids_to_grade_file; contains list of submission SID's to grade: $!");
+
+my @ids = ();
+while (chomp(my $sid = <FH>))
+{
+	push(@ids, $sid);
 }
+close FH;
 
-function editCell (cell, type, sid) {
-	var input;
-	if (type == "number")
-		input = prompt("Please enter your text", "100");
-	else
-		input = prompt("Please enter your text", "Correct");
+my %hash = map { $_, 1 } @ids;
+my @unique_sids = keys %hash;
+
+# for each unique sid, create "files-sid" array listing all files submitted
+foreach my $sid (@unique_sids)
+{
+	# open directory and read files,
+	# then print javascript array variable containing the data
+	my $declaration = "";
+
+	opendir DIR, "$submissions_directory/$sid" or die("Can't open submission directory $submissions_directory/$sid for $sid: $!");
+	my @files = grep { $_ ne '.' && $_ ne '..' } readdir DIR;
+
+	# print files to array
+	$declaration = "var files_$sid = new Array(";
 	
-	if (input != null){
-		if (type == "number")
-		{
-			if (!is_numeric(input))
-				alert("Error: Please enter a number greater than 0");
-			else{
-				cell.innerHTML = input;
-				update_total_score(sid);
+	my $i = 0;
+	foreach my $submitted_file (@files){
+		unless (-d "$submissions_directory/$sid/$submitted_file"){
+			#if ($submitted_file =~ m/.php/){
+			if ($i > 0){
+				$declaration .= ", ";
 			}
-		}else if (type == "text"){
-			cell.innerHTML = input;
-			update_notes(sid);
-		}else{
-			alert("Error: Invalid editCell Input (not number or text)");
+			$declaration .= qq("$submitted_file");
+			$i++;
 		}
 	}
+	$declaration .= ")";
+	closedir DIR;
+	
+	print "$declaration\n";
 }
 
-function is_numeric(input){
-	return !isNaN(input) && (input >= 0);
-}
-
-function update_total_score(tablediv){
-	var t =  document.getElementById(tablediv).getElementsByTagName("table")[0];
-	var scores = t.getElementsByClassName("qscore");
-	var sum = 0;
-	for (i = 0; i < scores.length; i++)
-	{
-		sum += eval(scores[i].innerHTML);
-	}
-	t.getElementsByClassName("tscore")[0].innerHTML = sum;
-}
-
-function update_notes(tablediv){
-	var t =  document.getElementById(tablediv).getElementsByTagName("table")[0];
-	var scores = t.getElementsByClassName("qnotes");
-	var notes_text = "Notes: ";
-	for (i = 0; i < scores.length; i++)
-	{
-		if (i == 0)
-			notes_text += " " + scores[i].innerHTML;
-		else
-			notes_text += "; " + scores[i].innerHTML;
-	}
-	t.getElementsByClassName("tnotes")[0].innerHTML = notes_text;
-}
-
-function update_totals()
-{
-	var subs = document.getElementsByClassName("submissions");
-	alert(subs.length);
-	for (var i = 0; i < subs.length; i++)
-	{
-		alert(subs[i].id);
-		update_total_score(subs[i].id);
-		update_notes(subs[i].id);
-	}
-}
-
-function simple(text)
-{
-	alert(text);
-}
-
-</script> 
+print <<ENDHTML;
+</script>
 </head>
 <body onload="update_totals();">
 
 <h1>CS143 - Project 1A Grading Application</h1>
 <h2> Confirm/Add/Delete/Save Test Cases </h2>
+
+<script type="text/javascript" src="../html-css/js/n5-script-functions.js"></script>
+
 ENDHTML
 
 ###################################################
@@ -215,29 +186,22 @@ print qq(<hr/>\n);
 ##	for selected submissions (use log for reference)
 ###################################################
 
-## 3.1 Open log that lists submissions to grade
-open FH, $sids_to_grade_file or die("Unable to open $sids_to_grade_file; contains list of submission SID's to grade: $!");
-
-my @ids = ();
-while (chomp(my $sid = <FH>))
-{
-	push(@ids, $sid);
-}
-close FH;
-
-my %hash = map { $_, 1 } @ids;
-my @unique_sids = keys %hash;
-
+## 3. Display table summarizing test case output 
+##	for selected submissions (use log for reference)
 
 foreach my $sid (@unique_sids)
 {
-       print qq(<br/><input type="button" style="width:4em" onclick="javascript:ShowHideSection('$sid', this);" value="Show" >);
-       print qq(&nbsp;&nbsp;Test Case Results for Student $sid);
-       print qq(<input type="button" onclick="javascript:update_total_score('$sid');" value="Sum Scores" >);
-       print qq(<input type="button" onclick="javascript:update_notes('$sid');" value="Concat Notes" ><br/>);
-       print qq(<div class="submissions" id=$sid style="overflow:hidden;display:none">);
+       print qq(<br/><input type="button" style="width:4em" onclick="javascript:ShowHideSection('$sid', this);" value="Show" >\n);
+       print qq(&nbsp;&nbsp;Test Case Results for Student $sid\n);
+       print qq(<input type="button" onclick="javascript:update_total_score('$sid');" value="Sum Scores" >\n);
+       print qq(<input type="button" onclick="javascript:update_notes('$sid');" value="Concat Notes" >\n);
+       
+       print qq(<div class="submissions" id=$sid style="overflow:hidden;display:none">\n);
+       print qq(<p align=center>Graded File: <a class="link_editable" href="$submissions_directory/$sid/$default_php" target=_blank >$default_php</a>\n);
+       print qq(&nbsp;or&nbsp;<input type="button" value="Choose PHP File to Grade" onclick="ChooseFilePopUp('$pop_up_window','$sid');"/></p>\n);
+       
        print qq(<table width=90% border="1" align="center">);
-       print qq(<tr><th></th><th>QUERY</th><th>Given Solution</th><th>RESULT</th><th>Score</th><th>Notes</th></tr>);
+       print qq(<tr><th></th><th>QUERY</th><th>Sample Solution</th><th>RESULT</th><th>Score</th><th>Notes</th></tr>);
        
        # For each Query
        ###################################################
@@ -248,13 +212,25 @@ foreach my $sid (@unique_sids)
 	       print qq(<td>$temp</td>);
 
 	       # link to student's solution with given input
-	       print qq(<td>@queries[$i]</td>);
+	       print qq(<td>);
+	       print qq(<script type="text/javascript">);
+	       print qq(document.write('<a class="php_editable" href=\"$submissions_directory/$sid/$default_php?expr=' + encodeURIComponent("@queries[$i]") + '\" target=_blank > @queries[$i] </a>'););
+	       print qq(</script>);
+	       print qq(</td>);
 
 	       # expected result (link to sample solution)
-	       print qq(<td>@solutions[$i]</td>);
-
+	       print qq(<td>);
+	       print qq(<script type="text/javascript">);
+	       print qq(document.write('<a href=\"$sample_php?expr=' + encodeURIComponent("@queries[$i]") + '\" target=_blank > @solutions[$i] </a>'););
+	       print qq(</script>);
+	       print qq(</td>);
+	       
 	       # extract student's result for given query
-	       print qq(<td>?????</td>);
+	       print qq(<td>);
+	       print qq(<script type="text/javascript">);
+	       print qq(document.write('<input type=button id=\"$submissions_directory/$sid/$default_php?expr=' + encodeURIComponent("@queries[$i]") + '\" onload="get_result(this);" value="Plug In Result">'););
+	       print qq(</script>);
+	       print qq(</td>);
 
 	       # score based on matching solution and output
 	       $temp = 100 + $temp;
