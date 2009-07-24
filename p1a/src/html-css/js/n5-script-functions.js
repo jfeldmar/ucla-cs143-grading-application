@@ -122,40 +122,41 @@ function close_window(w, fname)
 function update_links(sid, nfile)
 {
 	var rows = document.getElementById(sid).getElementsByTagName('tr');
-	alert(rows.length);
-	alert("for each row between 1 and 4, update php_editable, link_editable, phpresult, and	score(based on the result from the previous two)");
-	var php_links = document.getElementById(sid).getElementsByClassName('php_editable');
-	var filelink =  document.getElementById(sid).getElementsByClassName('link_editable')[0];
-	var result_cells = document.getElementById(sid).getElementsByClassName('phpresult');
-	var loc;
-	for ( var i = 0; i < php_links.length; i++ )
+	var temp;
+	
+	// queries start on the second row and end on the prelast row
+	// therefore start at index 1 and end at index rows.length-2
+		
+	for (var r = 1; r < rows.length - 1; r++)
 	{
-		loc = php_links[i].href;
-		var temp = "\\/" + sid + "\\/.*\\?";
-		var RE = new RegExp(temp, "i");
-		loc = loc.replace(RE, "/" + sid + "/"+ nfile +"?");
-		php_links[i].href = loc;
-	}
-	filelink.href = loc.replace(/\?.*/, "");
-	filelink.innerHTML = nfile;
-	php_links = [];
+		var php_link = rows[r].getElementsByClassName('php_editable')[0];
+		var result_cell = rows[r].getElementsByClassName('phpresult')[0];
 
-	// for each result cell
-	// get current file link from <td> id attribute
-	// replace target file name
-	// get new result using new target
-	// update contents of cell with result
-	// update id of tag to reflect new target
-	for ( var j = 0; j < result_cells.length; j++ )
-	{
-		loc = result_cells[j].id;
-		var temp = "\\/" + sid + "\\/.*\\?";
-		var RE = new RegExp(temp, "i");
-		loc = loc.replace(RE, "/" + sid + "/"+ nfile +"?");
-		var t = get_result(loc);
-		result_cells[j].innerHTML = t;
-		result_cells[j].id = loc;
+		var re_str = "\\/" + sid + "\\/.*\\?";
+		var RE = new RegExp(re_str, "i");
+
+		// update link to student's submission appended with current query (in row r)
+		php_link.href = php_link.href.replace(RE, "/" + sid + "/"+ nfile +"?");
+
+		// get current file link from <td> id attribute
+		// replace target file name
+		// update id of tag to reflect new target
+		// get new result using new href target
+		// update contents of cell with result (using get_result function)
+		temp = result_cell.id.replace(RE, "/" + sid + "/"+ nfile +"?");
+		result_cell.id = temp;
+		result_cell.innerHTML = get_result(temp);
 	}
+	
+	
+	// only edit once (link to graded file)
+	var filelink =  document.getElementById(sid).getElementsByClassName('link_editable')[0];
+	// the end of the link is sid/php_filename.php
+	// replace php_filename.php with nfile (the new file to be graded)
+	var re_str = sid + "\\/.*";
+	var RE = new RegExp(re_str, "i");
+	filelink.href = filelink.href.replace(RE, sid + "/" +nfile);
+	filelink.innerHTML = nfile;
 }
 
 // on update of file to grade, the results column must be updated
