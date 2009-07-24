@@ -137,8 +137,6 @@ foreach my $query (@qfiles)
 print qq(</SELECT>);
 print qq(</p>\n);
 
-#print qq(<BR/><BR/><input type=button onclick="alert('hi')" value="Test"/>\n);
-
 print qq(<input type=hidden id="savetype" name="savetype" value=""/>\n);
 print qq(<BR/><BR/><input type=button onClick="choosesubmit('load')" value="Save Test Cases"/>\n);
 print qq(<BR/><BR/><input type=button onClick="choosesubmit('save')" value="Save Test Cases as Default Test Cases"/>\n);

@@ -11,6 +11,7 @@ use CGI;
 use CGI::Carp qw ( fatalsToBrowser );
 use File::Basename;
 use File::Path;
+use URI::Escape;
 
 $CGI::POST_MAX = 1024 * 1000 * 10; #max 10 MB
 $CGI::DISABLE_UPLOADS = 0;
@@ -18,7 +19,7 @@ my $query = new CGI;
 my $test_cases_dir = "../test_cases";
 my $query_directory = "../test_cases/queries";
 my $solutions_directory = "../test_cases/solutions";
-my $default_data_tarfile = "../default-data/test-cases2.tar";
+my $default_data_tarfile = "../default-data/test-cases.tar";
 my $sids_to_grade_file = "../logs/SIDstoGrade.csv";
 
 my $default_php = "calculator.php";
@@ -173,7 +174,7 @@ foreach my $i (0..$#queries)
 	print QFILE "@queries[$i]";
 	close QFILE;
 	
-	open SFILE, ">$solutions_directory/solution$index.txt" or die("Can't open $query_directory/solution$#.txt for writing: $!");
+	open SFILE, ">$solutions_directory/query$index.txt" or die("Can't open $query_directory/solution$#.txt for writing: $!");
 	print SFILE "@solutions[$i]";
 	close SFILE;
 }
@@ -217,6 +218,7 @@ foreach my $sid (@unique_sids)
        print qq(<table width=90% border="1" align="center">);
        print qq(<tr><th></th><th>QUERY</th><th>Sample Solution</th><th>RESULT</th><th>Score</th><th>Notes</th></tr>\n);
        
+       my $escape_str = "";
        # For each Query
        ###################################################
        foreach my $i (0..$#queries)
@@ -227,23 +229,21 @@ foreach my $sid (@unique_sids)
 
 	       # link to student's solution with given input
 	       print qq(<td>\n);
-	       print qq(<script type="text/javascript">\n);
-	       print qq(document.write('<a class="php_editable" href=\"$submissions_directory/$sid/$default_php?expr=' + encodeURIComponent("@queries[$i]") + '\" target=_blank > @queries[$i] </a>');\n);
-	       print qq(</script>\n);
+	       $escape_str =  CGI::escape(@queries[$i]);
+	       print qq(<a class="php_editable" href=\"$submissions_directory/$sid/$default_php?expr=$escape_str" target=_blank > @queries[$i] </a>\n);
 	       print qq(</td>\n);
 
 	       # expected result (link to sample solution)
 	       print qq(<td>\n);
-	       print qq(<script type="text/javascript">\n);
-	       print qq(document.write('<a href=\"$sample_php?expr=' + encodeURIComponent("@queries[$i]") + '\" target=_blank > @solutions[$i] </a>');\n);
-	       print qq(</script>\n);
+	       $escape_str = CGI::escape(@queries[$i]);
+	       print qq(<a href="$sample_php?expr=$escape_str" target=_blank > @solutions[$i] </a>\n);
 	       print qq(</td>\n);
 	       
 	       # extract student's result for given query
-	       print qq(<td>\n);
-
+	       $escape_str = CGI::escape(@queries[$i]);
+	       print qq(<td class="phpresult" id="$submissions_directory/$sid/$default_php?expr=$escape_str">\n);
 	       print qq(<script type="text/javascript">\n);
-	       print qq( document.write(get_result("$submissions_directory/$sid/$default_php?expr="+encodeURIComponent("@queries[$i]"), $sid$i));\n);
+	       print qq( document.write(get_result("$submissions_directory/$sid/$default_php?expr=$escape_str"));\n);
 	       print qq(</script>\n);
 
 	       print qq(</td>\n);

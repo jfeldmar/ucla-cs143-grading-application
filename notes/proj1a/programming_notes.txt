@@ -3,3 +3,5 @@ Execute perl from command line:
 		perl -e 'command here'
 		
 Back up to remote server script:
+
+apache2 access and error log location: /var/log/apache2

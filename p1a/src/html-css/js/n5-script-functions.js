@@ -118,10 +118,15 @@ function close_window(w, fname)
 
 // given a student's SID and a new file name to grade, update all the links
 // in the student's table to point to the correct file
+// also update results and points columns
 function update_links(sid, nfile)
 {
+	var rows = document.getElementById(sid).getElementsByTagName('tr');
+	alert(rows.length);
+	alert("for each row between 1 and 4, update php_editable, link_editable, phpresult, and	score(based on the result from the previous two)");
 	var php_links = document.getElementById(sid).getElementsByClassName('php_editable');
 	var filelink =  document.getElementById(sid).getElementsByClassName('link_editable')[0];
+	var result_cells = document.getElementById(sid).getElementsByClassName('phpresult');
 	var loc;
 	for ( var i = 0; i < php_links.length; i++ )
 	{
@@ -134,12 +139,29 @@ function update_links(sid, nfile)
 	filelink.href = loc.replace(/\?.*/, "");
 	filelink.innerHTML = nfile;
 	php_links = [];
+
+	// for each result cell
+	// get current file link from <td> id attribute
+	// replace target file name
+	// get new result using new target
+	// update contents of cell with result
+	// update id of tag to reflect new target
+	for ( var j = 0; j < result_cells.length; j++ )
+	{
+		loc = result_cells[j].id;
+		var temp = "\\/" + sid + "\\/.*\\?";
+		var RE = new RegExp(temp, "i");
+		loc = loc.replace(RE, "/" + sid + "/"+ nfile +"?");
+		var t = get_result(loc);
+		result_cells[j].innerHTML = t;
+		result_cells[j].id = loc;
+	}
 }
 
 // on update of file to grade, the results column must be updated
 // this function uses AJAX to access the new file's result for given query,
 // extracts the resulting value, and plugs it in the correct location in the student's table
-function get_result(link, qsid)
+function get_result(link)
 {
 	var xhr; 
 	var err = "Error";
@@ -170,7 +192,7 @@ function get_result(link, qsid)
 	   var tag = document.getElementById('result');
 	   if ( tag != null && is_numeric(tag.innerHTML) ){	// if value exists
 		   var rv = tag.innerHTML;
-		   return_string = "<div id="+qsid+" onmouseover=\"Tip('Answer Correct')\" onmouseout=\"UnTip()\">" + rv + "</div>";
+		   return_string = "<div onmouseover=\"Tip('Answer Correct')\" onmouseout=\"UnTip()\">" + rv + "</div>";
 		   // remove the temporary div tag
 		   document.body.removeChild(tempDIV);
 		   
@@ -180,7 +202,7 @@ function get_result(link, qsid)
 	   else{	// => no 'result' id found
 		   // remove the temporary div tag
 		   document.body.removeChild(tempDIV);
-		   return_string = "<div id="+qsid+" onmouseover=\"Tip('Unable to find \\'result\\' tag')\" onmouseout=\"UnTip()\">Error</div>";
+		   return_string = "<div onmouseover=\"Tip('Unable to find \\'result\\' tag')\" onmouseout=\"UnTip()\">Error</div>";
 		   // return error value with a bubble message
 		   return return_string;
 		   }
@@ -188,7 +210,7 @@ function get_result(link, qsid)
        }
        else {
 		   // return error value with a bubble message
-		   return_string = "<div id="+qsid+" onmouseover=\"Tip('Unable to open "+link+"')\" onmouseout=\"UnTip()\">Error</div>";
+		   return_string = "<div onmouseover=\"Tip('Unable to open "+link+"')\" onmouseout=\"UnTip()\">Error</div>";
 		   return return_string;
 		   }
 
@@ -230,4 +252,10 @@ function hide_all(hide)
 			tbl[j].value = 'Show';
 		}
 	}
+}
+
+// given expected query result and the submission's result
+// recommend score between 0 and 1 where 1 is 100% correct
+function recommend_score(expected, received)
+{
 }
