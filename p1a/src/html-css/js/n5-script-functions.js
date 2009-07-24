@@ -7,7 +7,7 @@ function ShowHideSection(section, button) {
 function editCell (cell, type, sid) {
 	var input;
 	if (type == "number")
-		input = prompt("Please enter your text", "100");
+		input = prompt("Please enter your text", "1");
 	else
 		input = prompt("Please enter your text", "Correct");
 	
@@ -116,21 +116,23 @@ function close_window(w, fname)
 	update_links(cur_sid, fname);
 }
 
-// given a student's SID and a new file name to grade, update all the links
+// given a student's SID and a new php-file-name to grade, update all the links
 // in the student's table to point to the correct file
 // also update results and points columns
 function update_links(sid, nfile)
 {
+	// get the rows of the table for the given student (in div tag with id=SID)
 	var rows = document.getElementById(sid).getElementsByTagName('tr');
 	var temp;
 	
 	// queries start on the second row and end on the prelast row
 	// therefore start at index 1 and end at index rows.length-2
-		
 	for (var r = 1; r < rows.length - 1; r++)
 	{
 		var php_link = rows[r].getElementsByClassName('php_editable')[0];
 		var result_cell = rows[r].getElementsByClassName('phpresult')[0];
+		var sample_cell = rows[r].getElementsByClassName('sampleresult')[0];
+		var score_cell = rows[r].getElementsByClassName('qscore')[0];
 
 		var re_str = "\\/" + sid + "\\/.*\\?";
 		var RE = new RegExp(re_str, "i");
@@ -146,6 +148,10 @@ function update_links(sid, nfile)
 		temp = result_cell.id.replace(RE, "/" + sid + "/"+ nfile +"?");
 		result_cell.id = temp;
 		result_cell.innerHTML = get_result(temp);
+		
+		// update score/score total
+		// note: the result in the result_cell is inside a <div> tag
+		score_cell.innerHTML = recommend_score(sample_cell.innerHTML, result_cell.getElementsByTagName('div')[0].innerHTML);
 	}
 	
 	
@@ -157,6 +163,9 @@ function update_links(sid, nfile)
 	var RE = new RegExp(re_str, "i");
 	filelink.href = filelink.href.replace(RE, sid + "/" +nfile);
 	filelink.innerHTML = nfile;
+	
+	//update total score
+	update_total_score(sid);
 }
 
 // on update of file to grade, the results column must be updated
@@ -259,4 +268,11 @@ function hide_all(hide)
 // recommend score between 0 and 1 where 1 is 100% correct
 function recommend_score(expected, received)
 {
+	if (is_numeric(expected) && is_numeric(received))
+	{
+		if (parseFloat(expected) == parseFloat(received))
+			return "1";
+		else
+			return "0.5";
+	}else { return "0"; }
 }

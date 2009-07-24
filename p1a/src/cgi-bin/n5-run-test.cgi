@@ -11,7 +11,6 @@ use CGI;
 use CGI::Carp qw ( fatalsToBrowser );
 use File::Basename;
 use File::Path;
-use URI::Escape;
 
 $CGI::POST_MAX = 1024 * 1000 * 10; #max 10 MB
 $CGI::DISABLE_UPLOADS = 0;
@@ -236,7 +235,7 @@ foreach my $sid (@unique_sids)
 	       # expected result (link to sample solution)
 	       print qq(<td>\n);
 	       $escape_str = CGI::escape(@queries[$i]);
-	       print qq(<a href="$sample_php?expr=$escape_str" target=_blank > @solutions[$i] </a>\n);
+	       print qq(<a class="sampleresult" href="$sample_php?expr=$escape_str" target=_blank > @solutions[$i] </a>\n);
 	       print qq(</td>\n);
 	       
 	       # extract student's result for given query
