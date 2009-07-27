@@ -195,6 +195,13 @@ print qq(<hr/>\n);
 ## 3. Display table summarizing test case output 
 ##	for selected submissions (use log for reference)
 
+print qq(<form action="n6-downloadCSV.cgi" method="POST" onsubmit="submit_csv(this);">);
+print qq(<input type=hidden id ="csv_data" name="csv_data" value=""/></p>\n);
+print qq(<input type=hidden id ="csv_size" name="csv_size" value="3"/></p>\n);
+print qq(<p><input type=submit value="Download CSV"/></p>\n);
+print qq(</form>);
+
+
 print qq(<p><input type=button value="Show All" onclick="show_all('Show');"/>&nbsp;\n);
 print qq(<input type=button value="Hide All" onclick="hide_all('Hide');"/></p>\n);
 

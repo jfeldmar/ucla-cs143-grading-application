@@ -276,3 +276,22 @@ function recommend_score(expected, received)
 			return "0.5";
 	}else { return "0"; }
 }
+
+function submit_csv(myform)
+{
+	var csv = new Array();
+
+	var subs = document.getElementsByClassName("submissions");
+	for (var i = 0; i < subs.length; i++)
+	{
+		csv[i] = new Array(3);
+		csv[i][0] = subs[i].id;
+		
+		// enclose text in quotes in order to escape commas
+		csv[i][1] = '\"' + subs[i].getElementsByClassName('tscore')[0].innerHTML + '\"';
+		csv[i][2] = '\"' + subs[i].getElementsByClassName('tnotes')[0].innerHTML + '\"';
+	}
+
+	csv = escape(csv);
+	document.getElementById('csv_data').value = csv;
+}
