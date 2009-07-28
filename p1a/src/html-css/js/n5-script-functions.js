@@ -7,24 +7,29 @@ function ShowHideSection(section, button) {
 function editCell (cell, type, sid) {
 	var input;
 	if (type == "number")
-		input = prompt("Please enter your text", "1");
+		input = prompt("Please enter your text", cell.innerHTML);
 	else
-		input = prompt("Please enter your text", "Correct");
+		input = prompt("Please enter your text", cell.innerHTML);
 	
 	if (input != null){
-		if (type == "number")
-		{
-			if (!is_numeric(input))
-				alert("Error: Please enter a number greater than 0");
-			else{
-				cell.innerHTML = input;
-				update_total_score(sid);
-			}
-		}else if (type == "text"){
-			cell.innerHTML = input;
-			update_notes(sid);
+		var pattern = /"/g;
+		if (pattern.test(input)){
+			alert("Quotes are not valid for this field");
 		}else{
-			alert("Error: Invalid editCell Input (not number or text)");
+			if (type == "number")
+			{
+				if (!is_numeric(input))
+					alert("Error: Please enter a number greater than 0");
+				else{
+					cell.innerHTML = input;
+					update_total_score(sid);
+				}
+			}else if (type == "text"){
+				cell.innerHTML = input;
+				update_notes(sid);
+			}else{
+				alert("Error: Invalid editCell Input (not number or text)");
+			}
 		}
 	}
 }
@@ -67,6 +72,20 @@ function update_totals()
 		update_notes(subs[i].id);
 	}
 }
+
+function load_totals(nfile)
+{
+	var subs = document.getElementsByClassName("submissions");
+	
+	
+	for (var i = 0; i < subs.length; i++)
+	{
+		update_links(subs[i].id, nfile);
+//		update_total_score(subs[i].id);
+//		update_notes(subs[i].id);
+	}
+}
+
 
 // global javascript variables
 // store the list of files in the pop-up window and the sid of the current student

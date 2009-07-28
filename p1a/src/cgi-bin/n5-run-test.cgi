@@ -87,7 +87,7 @@ print <<ENDHTML;
 </script>
 </head>
 
-<body onload="update_totals();">
+<body onload="load_totals('$default_php');">
 
 <h1>CS143 - Project 1A Grading Application</h1>
 <h2> Confirm/Add/Delete/Save Test Cases </h2>
@@ -198,7 +198,7 @@ print qq(<hr/>\n);
 print qq(<form action="n6-downloadCSV.cgi" method="POST" onsubmit="submit_csv(this);">);
 print qq(<input type=hidden id ="csv_data" name="csv_data" value=""/></p>\n);
 print qq(<input type=hidden id ="csv_size" name="csv_size" value="3"/></p>\n);
-print qq(<p><input type=submit value="Download CSV"/></p>\n);
+print qq(<p align=center><input type=submit value="DOWNLOAD CSV"/></p>\n);
 print qq(</form>);
 
 
@@ -255,11 +255,10 @@ foreach my $sid (@unique_sids)
 	       print qq(</td>\n);
 
 	       # score based on matching solution and output
-	       $temp = 100 + $temp;
-	       print qq(<td class="qscore" onClick="editCell(this, 'number', $sid);">$temp</td>\n);
+	       print qq(<td class="qscore" onClick="editCell(this, 'number', $sid);">0</td>\n);
 
 	       # comments based on score
-	       print qq(<td class="qnotes" onClick="editCell(this, 'text', $sid);">Correct?</td>\n);
+	       print qq(<td class="qnotes" onClick="editCell(this, 'text', $sid);">query$i:</td>\n);
 	       print qq(</tr>\n);
        }
        ###################################################
