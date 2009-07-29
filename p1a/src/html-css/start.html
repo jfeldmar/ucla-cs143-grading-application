@@ -1,6 +1,7 @@
 <html>
 <head>
 <title>CS143 - Project 1A Grading Application</title>
+<link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />
 
 <script type="text/javascript">
 function confirm_clear_data() {
@@ -14,10 +15,12 @@ function confirm_clear_data() {
 </head>
 <body>
 <h1>CS143 - Project 1A Grading Application</h1>
-<h2> WELCOME!!!</h2>
+<h2 align=center> WELCOME!!!</h2>
 
-<p>
-<input type="button" name="start" value="Click to Begin" onclick="confirm_clear_data()">
+<br/>
+<br/>
+<p align=center>
+<a class=button style="width:200" href='#' name="start" onclick="confirm_clear_data()"><span>Click to Begin</span></a>
 <form name="continue" action="../cgi-bin/n1_initialize.cgi" method=POST/>
 </p>
 

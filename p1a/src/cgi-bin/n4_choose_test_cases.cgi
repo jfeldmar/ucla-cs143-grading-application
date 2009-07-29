@@ -41,11 +41,21 @@ function addSelection()
 }
 function deleteSelection()
 {
-	var sel = document.getElementById("tests").options.selectedIndex;
-	document.getElementById("tests").options[sel] = null;
-	document.getElementById("tests").options.selectedIndex = sel;
-	
+	var opts = document.getElementById("tests").options;
+	for (var i = opts.length-1; i >= 0; i--)
+	{
+		if (opts[i].selected)
+		{
+			document.getElementById("tests").removeChild(opts[i]);
+		}
+	}	
 }
+function select(opt)
+{
+	var sel = document.getElementById("tests").options.selectedIndex;
+	document.getElementById("tests").options[sel].className = "selected";
+}
+
 function choosesubmit(state)
 {
 	if (state == 'load')
@@ -67,15 +77,14 @@ function selectAll()
 	for (var i = 0; i < opts.length; i++)
 	{
 		opts[i].selected = true;
-	}
-	
+	}	
 }
 </script>
 </head>
 <body>
 
 <h1>CS143 - Project 1A Grading Application</h1>
-<h2> Confirm/Add/Delete/Save Test Cases </h2>
+<h2 align=center> Confirm/Add/Delete/Save Test Cases </h2>
 ENDHTML
 
 ###################################################
@@ -114,8 +123,8 @@ my @sfiles = grep { $_ ne '.' && $_ ne '..' } readdir SDIR;
 
 print qq(\n<form id="myform" method=GET action="../cgi-bin/n5-run-test.cgi">\n);
 print qq(<p align=center>);
-print qq(<a href="javascript:addSelection();">Add Item</a>\n);
-print qq(<BR/><a href="javascript:deleteSelection();">Delete Item</a>\n);
+print qq(<a class=button style="width:100" href="#" onClick="javascript:addSelection();"><span>Add Item</span></a>\n);
+print qq(<BR/><a class=button style="width:100" href="#" onClick="javascript:deleteSelection();"><span>Delete Item</span></a>\n);
 print qq(</p>);
 
 print qq(<p align=center>\n);
@@ -131,14 +140,14 @@ foreach my $query (@qfiles)
 	chomp(my $s = <SFILE>);
 	close SFILE;
 	
-	print qq(\n<OPTION VALUE="$q,$s" >$q (SOLN: $s)</OPTION>\n);
+	print qq(\n<OPTION onclick="select(this);" VALUE="$q,$s" >$q (SOLN: $s)</OPTION>\n);
 }
 
 print qq(</SELECT>);
 print qq(</p>\n);
 
 print qq(<input type=hidden id="savetype" name="savetype" value=""/>\n);
-print qq(<BR/><BR/><input type=button onClick="choosesubmit('load')" value="Save Test Cases"/>\n);
-print qq(<BR/><BR/><input type=button onClick="choosesubmit('save')" value="Save Test Cases as Default Test Cases"/>\n);
+print qq(<BR/><BR/><a class=button style="width:200" href="#" onClick="choosesubmit('load')" /><span>Save Test Cases</span></a>\n);
+print qq(<BR/><BR/><a class=button style="width:300" href="#" onClick="choosesubmit('save')" /><span>Save Test Cases as Default Test Cases</span></a>\n);
 print qq(</form>\n);
 print qq(</body></html>);

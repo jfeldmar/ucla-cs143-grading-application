@@ -195,31 +195,41 @@ print qq(<hr/>\n);
 ## 3. Display table summarizing test case output 
 ##	for selected submissions (use log for reference)
 
-print qq(<form action="n6-downloadCSV.cgi" method="POST" onsubmit="submit_csv(this);">);
+print qq(<form action="n6-downloadCSV.cgi" method="POST" name=getcsv onsubmit="submit_csv(this);">);
 print qq(<input type=hidden id ="csv_data" name="csv_data" value=""/></p>\n);
 print qq(<input type=hidden id ="csv_size" name="csv_size" value="3"/></p>\n);
-print qq(<p align=center><input type=submit value="DOWNLOAD CSV"/></p>\n);
+print qq(<div align=center><a class="button" style="width:200" href="javascript:document.getcsv.submit()"><span>DOWNLOAD CSV</span></a></div>\n);
+#print qq(<p align=center><input type=submit value="DOWNLOAD CSV"/></p>\n);
 print qq(</form>);
 
 
-print qq(<p><input type=button value="Show All" onclick="show_all('Show');"/>&nbsp;\n);
-print qq(<input type=button value="Hide All" onclick="hide_all('Hide');"/></p>\n);
+print qq(<div align=center><a class="button"  style="width:75" href="javascript:show_all('<span>Show</span>');"/><span>Show All</span></a>\n);
+print qq(<a class="button"  style="width:75" href="javascript:hide_all('<span>Hide</span>');"/><span>Hide All</span></a></div>\n);
+print qq(<p align=center>*****************************************************************</p>);
+#print qq(<p><input type=button value="Show All" onclick="show_all('Show');"/>&nbsp;\n);
+#print qq(<input type=button value="Hide All" onclick="hide_all('Hide');"/></p>\n);
 
 foreach my $sid (@unique_sids)
 {
-	## separator for each submission's code
-	print qq(\n\n\n<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->\n);
-	print qq(<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^sid:$sid^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->\n);
-	print qq(<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->\n\n\n);
+       ## separator for each submission's code
+       print qq(\n\n\n<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->\n);
+       print qq(<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^sid:$sid^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->\n);
+       print qq(<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->\n\n\n);
 
-       print qq(<br/><input type="button" class="$sid" style="width:4em" onclick="javascript:ShowHideSection('$sid', this);" value='Show'>\n);
+       print qq(<p>);
+       print qq(<a class="button ShowHideButton" name="$sid" href="#"  style="width:60" onclick="javascript:ShowHideSection($sid, this);"><span>Show</span></a>\n);
+#       print qq(<br/><input type="button" class="$sid" style="width:4em" onclick="javascript:ShowHideSection('$sid', this);" value='Show'>\n);
+
        print qq(&nbsp;&nbsp;Test Case Results for Student $sid\n);
-       print qq(<input type="button" onclick="javascript:update_total_score('$sid');" value="Sum Scores" >\n);
-       print qq(<input type="button" onclick="javascript:update_notes('$sid');" value="Concat Notes" >\n);
-       
+       print qq(<a class=button href="#"  style="width:110" onclick="javascript:update_total_score('$sid');" ><span>Sum Scores</span></a>\n);
+       print qq(<a class=button href="#"  style="width:105" onclick="javascript:update_notes('$sid');" ><span>Concat Notes</span></a></p>\n);
+#       print qq(<input type="button" onclick="javascript:update_total_score('$sid');" value="Sum Scores" >\n);
+#       print qq(<input type="button" onclick="javascript:update_notes('$sid');" value="Concat Notes" >\n);
+
        print qq(<div class="submissions" id=$sid style="overflow:hidden;display:none">\n);
+
        print qq(<p align=center>Graded File: <a class="link_editable" href="$submissions_directory/$sid/$default_php" target=_blank >$default_php</a>\n);
-       print qq(&nbsp;or&nbsp;<input type="button" value="Choose PHP File to Grade" onclick="ChooseFilePopUp('$pop_up_window','$sid');"/></p>\n);
+       print qq(&nbsp;or&nbsp;<a class=button style="width:200" href="#" onclick="ChooseFilePopUp('$pop_up_window','$sid');"/><span>Choose PHP File to Grade</span></a></p>\n);
        
        print qq(<table width=90% border="1" align="center">);
        print qq(<tr><th></th><th>QUERY</th><th>Sample Solution</th><th>RESULT</th><th>Score</th><th>Notes</th></tr>\n);
@@ -272,5 +282,9 @@ foreach my $sid (@unique_sids)
        print qq(</table>\n);
        print qq(</div>\n);
 }
+print qq(<p align=center>*****************************************************************</p>);
+
+print qq(<div align=center><a class="button"  style="width:75" href="javascript:show_all('<span>Show</span>');"/><span>Show All</span></a>\n);
+print qq(<a class="button"  style="width:75" href="javascript:hide_all('<span>Hide</span>');"/><span>Hide All</span></a></div>\n);
 
 print qq(</body></html>);

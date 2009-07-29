@@ -28,6 +28,8 @@ print <<ENDHTML;
 <html>
 <head>
 <title>CS143 - Project 1A Grading Application</title>
+<link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />
+
 </head>
 <body>
 <h1>CS143 - Project 1A Grading Application</h1>
@@ -73,24 +75,27 @@ print "Done.</p>";
 #####################################################
 
 print <<ENDHTML;
-
-<form method="POST" action="../cgi-bin/n2_process-submissions.cgi" enctype="multipart/form-data" />
-<p>Please upload the submission zip file:
+<div align=center>
+<form name=fileupload method="POST" action="../cgi-bin/n2_process-submissions.cgi" enctype="multipart/form-data" />
+<p>Please upload the submission zip file:<br/>
 
 	 <input type="file" name="student-submissions" size="50"/>
 </p>
-<p>Please specify webhost  (ex: /var/www/):
 
+<!--//<p>Please specify webhost  (ex: /var/www/):
 	<input type="text" name="webhost-location" size="50"/>
-</p>
-<p>(Optional)Please upload sample solution:<br/>
+</p>//-->
+<p>(Optional)Please upload sample PHP solution:<br/>
 	<p>
-	calculator.php:	 <input type="file" name="calculator.php" size="50"/>
+	<input type="file" name="calculator.php" size="50"/>
 	 </p>
 </p>
 
-<p align=center><input type="submit" value="Send"/></p>
+<p align=center>
+<a class=button style="width:200" href="#" onclick="fileupload.submit()"/><span>Send</span></a>
+</p>
 </form>
+</div>
 </body>
 </html>
 

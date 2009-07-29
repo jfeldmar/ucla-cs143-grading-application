@@ -1,7 +1,7 @@
-function ShowHideSection(section, button) {
+function ShowHideSection(section, secbutton) {
   var tbl = document.getElementById(section);
-  tbl.style.display = (button.value == 'Hide') ? 'none' : 'block';
-  button.value = (button.value == 'Hide') ? 'Show' : 'Hide';
+  tbl.style.display = (secbutton.innerHTML == '<span>Hide</span>') ? 'none' : 'block';
+  secbutton.innerHTML = (secbutton.innerHTML == '<span>Hide</span>') ? '<span>Show</span>' : '<span>Hide</span>';
 }
 
 function editCell (cell, type, sid) {
@@ -51,14 +51,14 @@ function update_total_score(tablediv){
 
 function update_notes(tablediv){
 	var t =  document.getElementById(tablediv).getElementsByTagName("table")[0];
-	var scores = t.getElementsByClassName("qnotes");
+	var notes = t.getElementsByClassName("qnotes");
 	var notes_text = "Notes: ";
-	for (i = 0; i < scores.length; i++)
+	for (i = 0; i < notes.length; i++)
 	{
 		if (i == 0)
-			notes_text += " " + scores[i].innerHTML;
+			notes_text += " " + notes[i].innerHTML;
 		else
-			notes_text += "; " + scores[i].innerHTML;
+			notes_text += "; " + notes[i].innerHTML;
 	}
 	t.getElementsByClassName("tnotes")[0].innerHTML = notes_text;
 }
@@ -183,8 +183,11 @@ function update_links(sid, nfile)
 	filelink.href = filelink.href.replace(RE, sid + "/" +nfile);
 	filelink.innerHTML = nfile;
 	
-	//update total score
+//updates score/notes totals for all submissions=>	update_totals();
+
+	//update total score for current student
 	update_total_score(sid);
+	update_notes(sid);
 }
 
 // on update of file to grade, the results column must be updated
@@ -251,15 +254,15 @@ function get_result(link)
 //	the submission is shown, and button value changed to 'Hide'
 function show_all(show)
 {
-	var tbl = document.getElementsByTagName('input');
+	var buttons = document.getElementsByClassName('ShowHideButton');
 
-	for (var j in tbl)
+	for (var j in buttons)
 	{
-		if (tbl[j].value == show)
+		if (buttons[j].innerHTML == show)
 		{
-			var section = document.getElementById(tbl[j].className);
+			var section = document.getElementById(buttons[j].name);
 			section.style.display = 'block';
-			tbl[j].value = 'Hide';
+			buttons[j].innerHTML = '<span>Hide</span>';
 		}
 	}
 }
@@ -270,15 +273,15 @@ function show_all(show)
 //	the submission is hidden, and button value changed to 'Show'
 function hide_all(hide)
 {
-	var tbl = document.getElementsByTagName('input');
+	var buttons = document.getElementsByClassName('ShowHideButton');
 
-	for (var j in tbl)
+	for (var j in buttons)
 	{
-		if (tbl[j].value == hide)
+		if (buttons[j].innerHTML == hide)
 		{
-			var section = document.getElementById(tbl[j].className);
+			var section = document.getElementById(buttons[j].name);
 			section.style.display = 'none';
-			tbl[j].value = 'Show';
+			buttons[j].innerHTML = '<span>Show</span>';
 		}
 	}
 }

@@ -23,7 +23,7 @@ print <<ENDHTML;
 <html>
 <head>
 <title>CS143 - Project 1A Grading Application</title>
-	s<link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />
+	<link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />
 </head>
 <body>
 <script type="text/javascript" src="../html-css/js/wz_tooltip.js"></script>
@@ -98,13 +98,15 @@ else
 	open FILE, $submissions_csv_file or die("Can't open $submissions_csv_file file: $!");
 	my $total_rows = 0;
 	
-	print qq(<a href="javascript:checkAll()" >Select All</a><br/>);
-	print qq(<a href="javascript:uncheckAll()" >Deselect All</a>);
+	print qq(<p align=center><a class=button href="#" style="width:90" onclick="javascript:checkAll()" ><span>Select All</span></a></br>);
+	print qq(<a class=button href="#" style="width:92" onclick="javascript:uncheckAll()" ><span>Deselect All</span></a></p>);
 
-	print qq(<form method="POST" action="../cgi-bin/n4_choose_test_cases.cgi">);
+	print qq(<form name=selectSID method="POST" action="../cgi-bin/n4_choose_test_cases.cgi">);
 	
-	print "<table border=1>";
-	print qq(<tr><th></th><th>SID</th><th>Name</th><th>Source Files</th><th>Editable Source Files</th></tr>);
+	print "<div align=center><font size=2>(some students have multiple submissions)</font></div>";
+	
+	print "<div align=center><table>";
+	print qq(<tr><th></th><th>SID</th><th>Name</th><th>Source Files</th><th>Source Files</th></tr>);
 
 	while(my $line = <FILE>)
 	{
@@ -198,12 +200,14 @@ else
 	}	
 	close FILE;
 	
-	print "</table>";
+	print "</table></div>";
 
-	print qq(<a href="javascript:checkAll()" >Select All</a><br/>);
-	print qq(<a href="javascript:uncheckAll()" >Deselect All</a><br/>);
+	print qq(<p align=center><a class=button href="#" style="width:90" onclick="javascript:checkAll()" ><span>Select All</span></a></br>);
+	print qq(<a class=button href="#" style="width:92" onclick="javascript:uncheckAll()" ><span>Deselect All</span></a></p>);
+#	print qq(<a href="javascript:checkAll()" >Select All</a><br/>);
+#	print qq(<a href="javascript:uncheckAll()" >Deselect All</a><br/>);
 	
-	print qq(<p align=center><input type=submit value="Next (select test cases)"></p>);
+	print qq(<p align=center><a class=button style="width:150pt" href="#" onclick="document.selectSID.submit()" ><span>Next (select test cases)</span></a></p>);
 	print "</form>";
 	
 	# generate list of students to grade (using user input)

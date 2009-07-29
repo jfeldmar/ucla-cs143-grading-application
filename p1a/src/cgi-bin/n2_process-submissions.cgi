@@ -30,9 +30,11 @@ print <<ENDHTML;
 <html>
 <head>
 <title>CS143 - Project 1A Grading Application</title>
+<link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />
+
 </head>
 <body>
-<h3 align=left><a href="n1_initialize.cgi">BACK (all files from this run will be deleted)</a></h3>
+<h3 align=left><a class=button style="width:300" href="#" onclick="window.location='n1_initialize.cgi'"><span>BACK (all files from this run will be deleted)</span></a></h3>
 <h1>CS143 - Project 1A Grading Application</h1>
 <h2> Processing Uploaded Files...</h2>
 ENDHTML
@@ -89,7 +91,7 @@ close UPLOADFILE;
 ###################################################
 
 my $filesize = -s "$upload_dir/$zip_filename";
-print "<p>Size of zipfile: " . $filesize . "</p>"; 
+print "<p><b>Size of zipfile: " . $filesize . "</b></p>"; 
 print "<p>uploaded zip file.</p>";
 
 #
@@ -135,7 +137,7 @@ if ( $sampleCalcFile )
 	#
 
 	my $filesize = -s "$upload_dir/$php_filename";
-	print "<p>Size of PHP file: " . $filesize . "</p>"; 
+	print "<p><b>Size of PHP file: " . $filesize . "</b></p>"; 
 	print "<p>uploaded PHP Sample Calculator Solution file.</p>";
 	
 	#
@@ -146,6 +148,6 @@ if ( $sampleCalcFile )
 
 }
 
-print '<p align=right><a href="n3_error_process_uploads.cgi" >Continue</a></p>';
+print '<p><a class=button style="width:100; float:right;" href="#" onclick="window.location=\'n3_error_process_uploads.cgi\'" ><span>Continue...</span></a></p>';
 print "</html>";
 
