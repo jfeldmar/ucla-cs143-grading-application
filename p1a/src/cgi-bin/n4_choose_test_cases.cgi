@@ -140,7 +140,7 @@ foreach my $query (@qfiles)
 	chomp(my $s = <SFILE>);
 	close SFILE;
 	
-	print qq(\n<OPTION onclick="select(this);" VALUE="$q,$s" >$q (SOLN: $s)</OPTION>\n);
+	print qq(\n<OPTION class="options" onclick="select(this);" VALUE="$q,$s" >$q (SOLN: $s)</OPTION>\n);
 }
 
 print qq(</SELECT>);
