@@ -195,10 +195,10 @@ print qq(<hr/>\n);
 ## 3. Display table summarizing test case output 
 ##	for selected submissions (use log for reference)
 
-print qq(<form action="n6-downloadCSV.cgi" method="POST" name=getcsv onsubmit="submit_csv(this);">);
+print qq(<form action="n6-downloadCSV.cgi" method="POST" name=getcsv >);
 print qq(<input type=hidden id ="csv_data" name="csv_data" value=""/></p>\n);
 print qq(<input type=hidden id ="csv_size" name="csv_size" value="3"/></p>\n);
-print qq(<div align=center><a class="button" style="width:200" href="javascript:document.getcsv.submit()"><span>DOWNLOAD CSV</span></a></div>\n);
+print qq(<div align=center><a class="button" style="width:200" href="javascript:submit_csv(this);"><span>DOWNLOAD CSV</span></a></div>\n);
 #print qq(<p align=center><input type=submit value="DOWNLOAD CSV"/></p>\n);
 print qq(</form>);
 

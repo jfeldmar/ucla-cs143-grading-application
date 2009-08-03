@@ -316,4 +316,5 @@ function submit_csv(myform)
 
 	csv = escape(csv);
 	document.getElementById('csv_data').value = csv;
+	document.getcsv.submit();
 }
