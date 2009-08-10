@@ -34,7 +34,14 @@ function editCell (cell, type, sid) {
 	}
 }
 
-function is_numeric(input){
+
+function is_numeric(input)
+{
+   return (input - 0) == input && input.length > 0;
+}
+
+// true only for positive numbers
+function is_numericOLD(input){
 	return !isNaN(input) && (input >= 0);
 }
 
@@ -292,7 +299,7 @@ function recommend_score(expected, received)
 {
 	if (is_numeric(expected) && is_numeric(received))
 	{
-		if (parseFloat(expected) == parseFloat(received))
+		if (parseFloat(expected) - parseFloat(received) < 0.001)
 			return "1";
 		else
 			return "0.5";

@@ -28,6 +28,8 @@ TO-DO:
 - in n3, create option to display only the latest submitted files (by default),
 if display all, show a "date/time submitted" column
 	(how? read all SIDs in csv into array, take out duplicate from array)
+- code doesn't detect if button on calculator works (see submission 703511311)
+- score not 100% for repeating decimal results (implement workaround)
 
 DONE:
 - in n5, implement inline editable cell for "Notes" and "Result"

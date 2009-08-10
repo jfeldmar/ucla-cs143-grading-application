@@ -195,18 +195,10 @@ print qq(<hr/>\n);
 ## 3. Display table summarizing test case output 
 ##	for selected submissions (use log for reference)
 
-<<<<<<< .mine
-print qq(<form action="n6-downloadCSV.cgi" method="POST" name=getcsv>);
-=======
 print qq(<form action="n6-downloadCSV.cgi" method="POST" name=getcsv >);
->>>>>>> .r25
 print qq(<input type=hidden id ="csv_data" name="csv_data" value=""/></p>\n);
 print qq(<input type=hidden id ="csv_size" name="csv_size" value="3"/></p>\n);
-<<<<<<< .mine
 print qq(<div align=center><a class="button" style="width:200" href="javascript:javascript:submit_csv(this);"><span>DOWNLOAD CSV</span></a></div>\n);
-=======
-print qq(<div align=center><a class="button" style="width:200" href="javascript:submit_csv(this);"><span>DOWNLOAD CSV</span></a></div>\n);
->>>>>>> .r25
 #print qq(<p align=center><input type=submit value="DOWNLOAD CSV"/></p>\n);
 print qq(</form>);
 
@@ -225,7 +217,7 @@ foreach my $sid (@unique_sids)
        print qq(<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->\n\n\n);
 
        print qq(<p>);
-       print qq(<a class="button ShowHideButton" name="$sid" href="#"  style="width:60" onclick="javascript:ShowHideSection($sid, this);"><span>Show</span></a>\n);
+       print qq(<a class="button ShowHideButton" name="$sid" href="#"  style="width:60" onclick="javascript:ShowHideSection('$sid', this);"><span>Show</span></a>\n);
 #       print qq(<br/><input type="button" class="$sid" style="width:4em" onclick="javascript:ShowHideSection('$sid', this);" value='Show'>\n);
 
        print qq(&nbsp;&nbsp;Test Case Results for Student $sid\n);
@@ -234,7 +226,7 @@ foreach my $sid (@unique_sids)
 #       print qq(<input type="button" onclick="javascript:update_total_score('$sid');" value="Sum Scores" >\n);
 #       print qq(<input type="button" onclick="javascript:update_notes('$sid');" value="Concat Notes" >\n);
 
-       print qq(<div class="submissions" id=$sid style="overflow:hidden;display:none">\n);
+       print qq(<div class="submissions" id="$sid" style="overflow:hidden;display:none">\n);
 
        print qq(<p align=center>Graded File: <a class="link_editable" href="$submissions_directory/$sid/$default_php" target=_blank >$default_php</a>\n);
        print qq(&nbsp;or&nbsp;<a class=button style="width:200" href="#" onclick="ChooseFilePopUp('$pop_up_window','$sid');"/><span>Choose PHP File to Grade</span></a></p>\n);
@@ -273,10 +265,10 @@ foreach my $sid (@unique_sids)
 	       print qq(</td>\n);
 
 	       # score based on matching solution and output
-	       print qq(<td class="qscore" onClick="editCell(this, 'number', $sid);">0</td>\n);
+	       print qq(<td class="qscore" onClick="editCell(this, 'number', '$sid');">0</td>\n);
 
 	       # comments based on score
-	       print qq(<td class="qnotes" onClick="editCell(this, 'text', $sid);">query$i:</td>\n);
+	       print qq(<td class="qnotes" onClick="editCell(this, 'text', '$sid');">query$i:</td>\n);
 	       print qq(</tr>\n);
        }
        ###################################################

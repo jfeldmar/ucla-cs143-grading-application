@@ -25,3 +25,4 @@ Project 1C:
 
 Project 2:
       requires different approach
+	http://oak.cs.ucla.edu/cs143/project/project2.html
