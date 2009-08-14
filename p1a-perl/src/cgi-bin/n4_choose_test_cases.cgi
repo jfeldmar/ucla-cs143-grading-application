@@ -17,6 +17,7 @@ my $query = new CGI;
 my $sids_to_grade_file = "../logs/SIDstoGrade.csv";
 my $query_directory = "../test_cases/queries";
 my $solutions_directory = "../test_cases/solutions";
+my $descriptions_directory = "../test_cases/descriptions";
 
 print "Content-type: text/html\n\n";
 print <<ENDHTML;
@@ -33,9 +34,13 @@ function addSelection()
 	if (optn.text != false){
 		var soltn = prompt("Confirm or edit solution", eval(optn.text));
 		if (soltn != null){
-			optn.value = optn.text + "," + soltn;
-			optn.text = optn.text + " (SOLN: " + soltn +")";
-			document.getElementById("tests").options.add(optn);
+			var descr = prompt("Enter test case description <br/>(no commas)", "testing order of operations");
+			if (descr.indexOf(",") >= 0) {alert("Commas Not Allowed in Description");}
+			else if (descr != false){
+				optn.value = optn.text + "," + soltn + "," + descr.replace('"', '\"');
+				optn.text = optn.text + " (SOLN: " + soltn + ", DESCR: " + descr.replace('"', '\"') + ")";
+				document.getElementById("tests").options.add(optn);
+			}
 		}
 	}
 }
@@ -121,14 +126,20 @@ my @qfiles = grep { $_ ne '.' && $_ ne '..' } readdir QDIR;
 opendir SDIR, "$solutions_directory" or die("Can't open solutions directory $solutions_directory: $!");
 my @sfiles = grep { $_ ne '.' && $_ ne '..' } readdir SDIR;
 
+opendir DDIR, "$descriptions_directory" or die("Can't open descriptions directory $descriptions_directory: $!");
+my @dfiles = grep { $_ ne '.' && $_ ne '..' } readdir DDIR;
+
 print qq(\n<form id="myform" method=GET action="../cgi-bin/n5-run-test.cgi">\n);
 print qq(<p align=center>);
 print qq(<a class=button style="width:100" href="#" onClick="javascript:addSelection();"><span>Add Item</span></a>\n);
 print qq(<BR/><a class=button style="width:100" href="#" onClick="javascript:deleteSelection();"><span>Delete Item</span></a>\n);
 print qq(</p>);
 
-print qq(<p align=center>\n);
+print qq(<table style=none align=center border=0><tr><th>Query</th></tr><tr><td>\n);
 print qq(<SELECT id="tests" name="tests" MULTIPLE SIZE=10>\n);
+
+my @soltns = ();
+my @descr = ();
 
 foreach my $query (@qfiles)
 {
@@ -138,13 +149,23 @@ foreach my $query (@qfiles)
 	
 	open SFILE, "$solutions_directory/$query" or next;
 	chomp(my $s = <SFILE>);
+	push(@soltns, $s);
 	close SFILE;
 	
-	print qq(\n<OPTION class="options" onclick="select(this);" VALUE="$q,$s" >$q (SOLN: $s)</OPTION>\n);
+	open FILE, "$descriptions_directory/$query" or next;
+	chomp(my $d = <FILE>);
+	push(@descr, $d);
+	close FILE;
+	
+	print qq(\n<OPTION class="options" onclick="select(this);" VALUE="$q,$s,$d" >$q (SOLN: $s, DESCR: $d)</OPTION>\n);
+
 }
 
 print qq(</SELECT>);
-print qq(</p>\n);
+
+
+print qq(</td></tr>);
+print qq(</table>\n);
 
 print qq(<input type=hidden id="savetype" name="savetype" value=""/>\n);
 print qq(<BR/><BR/><a class=button style="width:200" href="#" onClick="choosesubmit('load')" /><span>Save Test Cases</span></a>\n);

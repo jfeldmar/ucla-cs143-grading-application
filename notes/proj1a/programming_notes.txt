@@ -5,3 +5,6 @@ Execute perl from command line:
 Back up to remote server script:
 
 apache2 access and error log location: /var/log/apache2
+empty file: cat /dev/null > filename1
+
+unlock keyboard mode: ctrl+alt

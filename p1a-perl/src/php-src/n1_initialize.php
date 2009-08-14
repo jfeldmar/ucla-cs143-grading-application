@@ -1,9 +1,6 @@
-#!/usr/bin/perl -w
+<?php
 
 ###################################################
-#0.!!!!	TEST FOR EXISTENCE OF TEXT::CSV MODULE, if doesn't exist
-#		perl -MCPAN -e shell
-#		install Text::CSV
 #1. This script deletes and recreates directories that 
 #   may have files from previous grading runs in them
 #   The directory names are:
@@ -13,18 +10,11 @@
 # VERBOSE MODE: will list all files and directories as they are deleted
 ###################################################
 
-use strict;
-use File::Path;
-use File::Copy;
-use CGI;
-use CGI::Carp qw ( fatalsToBrowser );
-my $query = new CGI;
-my $verbose = 0;
-my @clear_dirs = ( "../file-uploads", "../submissions", "../temp", "../logs", "../grades", "../test_cases");
+$verbose = 0;
+$clear_dirs = array( "../file-uploads", "../submissions", "../temp", "../logs", "../grades", "../test_cases");
 
-print $query->header ( );
+?>
 
-print <<ENDHTML;
 <html>
 <head>
 <title>CS143 - Project 1A Grading Application</title>
@@ -34,39 +24,40 @@ print <<ENDHTML;
 <body>
 <h1>CS143 - Project 1A Grading Application</h1>
 <h2> WELCOME!!!</h2>
-ENDHTML
+
+
+<?php
 
 #empty: file-uploads, submissions, temp, logs, grades, test-cases
-print "<p>Deleting/recreating directories... </p>";
+echo "<p>Deleting/recreating directories... </p>";
 
-foreach my $dir (@clear_dirs)
+foreach ($clear_dirs as $dir)
 {
 	#Delete directory and all contents if it exists
-	if (-d $dir){
-		if ($verbose) { print "<p>";}
-		rmtree($dir,$verbose, 0 ) or die("Cannot remove contents of $dir directory: $!");
-		if ($verbose) { print "</p>";}
+	if (file_exists($dir)){
+		if ($verbose) { echo "<p>";}
+		!system("rm -rf $dir") or die("Cannot remove contents of $dir directory: $!");
+		if ($verbose) { echo "</p>";}
 		if(!$verbose) {
-			print 'Deleted '.$dir.', <br />';
+			echo 'Deleted '.$dir.', <br />';
 		}
 	}
 
 	#Recreate empty directory
-	##!system("mkdir $dir") or die("Cannot $dir directory: $!");
-	mkdir($dir) or die "Cannot create $dir directory: $!";
+	mkdir($dir) or die("Cannot create $dir directory: $!");
 	if ($verbose){
-		print "Created directory $dir";
+		echo "Created directory $dir";
 	}
 } 
-print "Done.</p>";
+echo "Done.</p>";
 
 #
-#Copy saved test cases into the test_cases directory
+#Copy saved test cases from the default-data into the test_cases directory
 #####################################################
 
-print "<p>Generating default test-cases...</p>";
-!system("tar -C ../test_cases/ -xf ../default-data/test-cases.tar ") or die("Unable to Copy Default Test Cases: $!");;
-print "Done.</p>";
+echo "<p>Generating default test-cases...</p>";
+!system("tar -C ../test_cases/ -xf ../default-data/test-cases.tar ") or die("Unable to Copy Default Test Cases: $!");
+echo "Done.</p>";
 
 #
 #HTML Form to upload sumissions compressed file
@@ -74,7 +65,8 @@ print "Done.</p>";
 #(optional)Upload sample solution of Calculator
 #####################################################
 
-print <<ENDHTML;
+?>
+
 <div align=center>
 <form name=fileupload method="POST" action="../cgi-bin/n2_process-submissions.cgi" enctype="multipart/form-data" />
 <p>Please upload the submission zip file:<br/>
@@ -98,5 +90,3 @@ print <<ENDHTML;
 </div>
 </body>
 </html>
-
-ENDHTML

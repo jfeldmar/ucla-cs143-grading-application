@@ -18,6 +18,7 @@ my $query = new CGI;
 my $test_cases_dir = "../test_cases";
 my $query_directory = "../test_cases/queries";
 my $solutions_directory = "../test_cases/solutions";
+my $descriptions_directory = "../test_cases/descriptions";
 my $default_data_tarfile = "../default-data/test-cases.tar";
 my $sids_to_grade_file = "../logs/SIDstoGrade.csv";
 
@@ -113,6 +114,7 @@ my $savetype = $query->param("savetype");
 my @formdata = $query->param("tests");
 my @queries =();
 my @solutions =();
+my @descriptions =();
 
 if ($savetype eq "save"){
 	print qq(<p>Loading new Test Cases and saving them as Default Test Cases (for future runs)...</p>\n);
@@ -126,7 +128,7 @@ elsif ($savetype eq "load"){
 
 print qq(<p align=center>);
 print qq(<table border = 1>\n);
-print qq(<tr><th></th><th>Test Input</th><th>Solution</th></tr>);
+print qq(<tr><th></th><th>Test Input</th><th>Solution</th><th>Description</th></tr>);
 
 #Display test case table
 my $count = 1;
@@ -136,12 +138,14 @@ foreach (@formdata){
 	#save test cases and solutions into 2 different arrays
 	push(@queries, @t[0]);
 	push(@solutions, @t[1]);
+	push(@descriptions, @t[2]);
 	
 	#print test case/solution pairs in table
 	print qq(<tr>\n);
 	print qq(<td>$count</td>\n);
 	print qq(<td>@t[0]</td>\n);
 	print qq(<td>@t[1]</td>\n);
+	print qq(<td>@t[2]</td>\n);
 	print qq(</tr>\n);
 	$count++;
 }
@@ -154,7 +158,7 @@ print qq(<p align=center>To edit Test Cases, click the "Back" button or <a href=
 ##	(if save option is "save", also copy to default-data directory
 ###################################################
 
-# remove current test cases
+# remove current test cases and their containing directories
 if (-d $query_directory){
 	rmtree($query_directory, 0, 0) or die("Unable to delete contents of $query_directory directory: $!");
 }
@@ -165,7 +169,12 @@ if (-d $solutions_directory){
 }
 mkdir($solutions_directory) or die ("Unable to create $solutions_directory directory: $!");
 
-# create query/solution files for new test cases
+if (-d $descriptions_directory){
+	rmtree($descriptions_directory, 0, 0) or die("Unable to delete contents of $descriptions_directory directory: $!");
+}
+mkdir($descriptions_directory) or die ("Unable to create $descriptions_directory directory: $!");
+
+# create query/solution/description files for new test cases
 foreach my $i (0..$#queries)
 {
 	my $index = $i + 1;
@@ -173,15 +182,19 @@ foreach my $i (0..$#queries)
 	print QFILE "@queries[$i]";
 	close QFILE;
 	
-	open SFILE, ">$solutions_directory/query$index.txt" or die("Can't open $query_directory/solution$#.txt for writing: $!");
+	open SFILE, ">$solutions_directory/query$index.txt" or die("Can't open $solutions_directory/query$#.txt for writing: $!");
 	print SFILE "@solutions[$i]";
 	close SFILE;
+
+	open DFILE, ">$descriptions_directory/query$index.txt" or die("Can't open $descriptions_directory/query$#.txt for writing: $!");
+	print DFILE "@descriptions[$i]";
+	close DFILE;
 }
 
 #save to default-data directory if option selected
 if ($savetype eq "save"){
 	print "<p align=center>Saving as default test-cases...";
-	!system("tar  -c -f $default_data_tarfile -C $test_cases_dir queries solutions") or die("Unable to Save Default Test Cases: $!");
+	!system("tar  -c -f $default_data_tarfile -C $test_cases_dir queries solutions descriptions") or die("Unable to Save Default Test Cases: $!");
 	print "Done.</p>";
 }	
 print qq(<hr/>\n);
@@ -195,18 +208,10 @@ print qq(<hr/>\n);
 ## 3. Display table summarizing test case output 
 ##	for selected submissions (use log for reference)
 
-<<<<<<< .mine
-print qq(<form action="n6-downloadCSV.cgi" method="POST" name=getcsv>);
-=======
 print qq(<form action="n6-downloadCSV.cgi" method="POST" name=getcsv >);
->>>>>>> .r25
 print qq(<input type=hidden id ="csv_data" name="csv_data" value=""/></p>\n);
 print qq(<input type=hidden id ="csv_size" name="csv_size" value="3"/></p>\n);
-<<<<<<< .mine
 print qq(<div align=center><a class="button" style="width:200" href="javascript:javascript:submit_csv(this);"><span>DOWNLOAD CSV</span></a></div>\n);
-=======
-print qq(<div align=center><a class="button" style="width:200" href="javascript:submit_csv(this);"><span>DOWNLOAD CSV</span></a></div>\n);
->>>>>>> .r25
 #print qq(<p align=center><input type=submit value="DOWNLOAD CSV"/></p>\n);
 print qq(</form>);
 
@@ -225,7 +230,7 @@ foreach my $sid (@unique_sids)
        print qq(<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->\n\n\n);
 
        print qq(<p>);
-       print qq(<a class="button ShowHideButton" name="$sid" href="#"  style="width:60" onclick="javascript:ShowHideSection($sid, this);"><span>Show</span></a>\n);
+       print qq(<a class="button ShowHideButton" name="$sid" href="#"  style="width:60" onclick="javascript:ShowHideSection('$sid', this);"><span>Show</span></a>\n);
 #       print qq(<br/><input type="button" class="$sid" style="width:4em" onclick="javascript:ShowHideSection('$sid', this);" value='Show'>\n);
 
        print qq(&nbsp;&nbsp;Test Case Results for Student $sid\n);
@@ -234,7 +239,7 @@ foreach my $sid (@unique_sids)
 #       print qq(<input type="button" onclick="javascript:update_total_score('$sid');" value="Sum Scores" >\n);
 #       print qq(<input type="button" onclick="javascript:update_notes('$sid');" value="Concat Notes" >\n);
 
-       print qq(<div class="submissions" id=$sid style="overflow:hidden;display:none">\n);
+       print qq(<div class="submissions" id="$sid" style="overflow:hidden;display:none">\n);
 
        print qq(<p align=center>Graded File: <a class="link_editable" href="$submissions_directory/$sid/$default_php" target=_blank >$default_php</a>\n);
        print qq(&nbsp;or&nbsp;<a class=button style="width:200" href="#" onclick="ChooseFilePopUp('$pop_up_window','$sid');"/><span>Choose PHP File to Grade</span></a></p>\n);
@@ -273,10 +278,10 @@ foreach my $sid (@unique_sids)
 	       print qq(</td>\n);
 
 	       # score based on matching solution and output
-	       print qq(<td class="qscore" onClick="editCell(this, 'number', $sid);">0</td>\n);
+	       print qq(<td class="qscore" onClick="editCell(this, 'number', '$sid');">0</td>\n);
 
 	       # comments based on score
-	       print qq(<td class="qnotes" onClick="editCell(this, 'text', $sid);">query$i:</td>\n);
+	       print qq(<td class="qnotes" onClick="editCell(this, 'text', '$sid');">query$i:</td>\n);
 	       print qq(</tr>\n);
        }
        ###################################################

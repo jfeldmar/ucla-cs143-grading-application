@@ -6,6 +6,8 @@
 ## display/link to all students' submissions
 ###################################################
 use strict;
+	my $submitted_php_extension = "php";
+	my $submitted_txt_extension = "txt";
 
 	my $safe_filename_characters = "a-zA-Z0-9_.-";
 	my $upload_dir = "../file-uploads";
@@ -97,16 +99,22 @@ else
 	my $csv_submissions = Text::CSV->new();
 	open FILE, $submissions_csv_file or die("Can't open $submissions_csv_file file: $!");
 	my $total_rows = 0;
-	
-	print qq(<p align=center><a class=button href="#" style="width:90" onclick="javascript:checkAll()" ><span>Select All</span></a></br>);
-	print qq(<a class=button href="#" style="width:92" onclick="javascript:uncheckAll()" ><span>Deselect All</span></a></p>);
 
 	print qq(<form name=selectSID method="POST" action="../cgi-bin/n4_choose_test_cases.cgi">);
+
+	# form submit button
+	print qq(<p align=center><a class=button style="width:150pt" href="#" onclick="document.selectSID.submit()" ><span>Next (select test cases)</span></a></p>);
 	
+	# select all button
+	print qq(<p align=center><a class=button href="#" style="width:90" onclick="javascript:checkAll()" ><span>Select All</span></a></br>);
+	# deselect all button
+	print qq(<a class=button href="#" style="width:92" onclick="javascript:uncheckAll()" ><span>Deselect All</span></a></p>);
+	
+	# note to user
 	print "<div align=center><font size=2>(some students have multiple submissions)</font></div>";
 	
 	print "<div align=center><table>";
-	print qq(<tr><th></th><th>SID</th><th>Name</th><th>Source Files</th><th>Source Files</th></tr>);
+	print qq(<tr><th></th><th>SID</th><th>Name</th><th>Source Files</th><th>Interact with Code</th></tr>);
 
 	while(my $line = <FILE>)
 	{
@@ -127,10 +135,10 @@ else
 
 		## 2.1 create for each student's submitted files a new (editable_src) directory in the temporary directory
 		##	to allow for easier preview and editing of submitted source code
-		if (-d "$temp_directory/$editable_src/$sid"){
-			rmtree("$temp_directory/$editable_src/$sid",0, 0 ) or die("Cannot remove contents of $temp_directory/$editable_src/$sid directory: $!");		
-		}
-		mkdir("$temp_directory/$editable_src/$sid") or die "Cannot create $temp_directory/$editable_src/$sid directory: $!";
+#		if (-d "$temp_directory/$editable_src/$sid"){
+#			rmtree("$temp_directory/$editable_src/$sid",0, 0 ) or die("Cannot remove contents of $temp_directory/$editable_src/$sid directory: $!");		
+#		}
+#		mkdir("$temp_directory/$editable_src/$sid") or die "Cannot create $temp_directory/$editable_src/$sid directory: $!";
 	
 
 		# list links to submitted files
@@ -138,7 +146,7 @@ else
 		foreach my $submitted_file (@files){
 			#print only files, not directories
 			unless (-d "$submissions_directory/$sid/$submitted_file"){
-			     if ($submitted_file =~ m/.php/){
+			     if ($submitted_file =~ m/.$submitted_php_extension$/){
 			     	     my $error;
 			     	     my $tooltip;
 				     if ( find_attribute("$submissions_directory/$sid/$submitted_file", "name", "expr") ){
@@ -156,7 +164,7 @@ else
 				     }else{
 					  print qq(<img src="$html_images_dir/greenCheck.gif" $tooltip/> <BR/>);
 				     }
-			     }else{
+			     }elsif ($submitted_file =~ m/.$submitted_txt_extension$/){
 				     print qq(<a href="$submissions_directory/$sid/$submitted_file" target="_blank" >$submitted_file</a> \n);
 				     print " </BR>";
 			     }
@@ -179,15 +187,15 @@ else
 				##	to allow for easier preview and editing of submitted source code
 				open CFILE, ">$temp_directory/$editable_src/$sid/$submitted_file" or die "unable to create file $submissions_directory/$sid/$editable_src/$submitted_file: $!";
 				# reformat text to display php code literally (without execution)
-				if ($submitted_file =~ m/.php/){
+				if ($submitted_file =~ m/.$submitted_php_extension$/){
 					$source = encode_entities($source);
 					$source = "<pre>".$source."<pre>";
 				}
 				print CFILE $source;
 				close CFILE;
-				if ($submitted_file =~ m/.php/){
+				if ($submitted_file =~ m/.$submitted_php_extension$/){
 					print qq(<a href="$temp_directory/$editable_src/$sid/$submitted_file" target="_blank">Source: $submitted_file</a><BR/> \n);
-				}else{
+				}elsif ($submitted_file =~ m/.$submitted_txt_extension$/){
 					print qq(<a href="$temp_directory/$editable_src/$sid/$submitted_file" target="_blank">$submitted_file</a><BR/> \n);
 				}
 			}
