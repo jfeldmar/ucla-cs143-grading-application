@@ -32,7 +32,10 @@ for (my $i = 0; $i <= $#fields; $i++)
 	for (my $j = 0; $j < $size; $j++)
 	{
 		$fields[$i] =~ s/"/""/g;
-		$fileholder .= "\"$fields[$i]\",";
+		$fileholder .= "\"$fields[$i]\"";
+		if ( $j != $size-1){
+			$fileholder .= ",";
+		}	
 #		print "\"$fields[$i]\",";
 		$i++;
 	}

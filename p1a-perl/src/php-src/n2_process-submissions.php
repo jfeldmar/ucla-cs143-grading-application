@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+<?php
 
 ###################################################
 #  This script processes the form submitted in n1_initialize.cgi
@@ -7,26 +7,14 @@
 #3. Extract compressed tar file into submissions directory
 ###################################################
 
-use strict;
-use CGI;
-use CGI::Carp qw ( fatalsToBrowser );
-use File::Basename;
 
-$CGI::POST_MAX = 1024 * 1000 * 50; #max 50 MB
-$CGI::DISABLE_UPLOADS = 0;
-my $query = new CGI;
+$safe_filename_characters = "a-zA-Z0-9_.-";
+$upload_dir = "../file-uploads";
+$zip_filename = "project1A-Submissions.tar";
+$php_filename = "sampleCalculator.php";
 
-my $safe_filename_characters = "a-zA-Z0-9_.-";
-my $upload_dir = "../file-uploads";
-my $zip_filename = "project1A-Submissions.tar";
-my $php_filename = "sampleCalculator.php";
+?>
 
-#
-#HTML
-###################################################
-
-print "Content-type: text/html\n\n";
-print <<ENDHTML;
 <html>
 <head>
 <title>CS143 - Project 1A Grading Application</title>
@@ -37,21 +25,21 @@ print <<ENDHTML;
 <h3 align=left><a class=button style="width:300" href="#" onclick="window.location='n1_initialize.cgi'"><span>BACK (all files from this run will be deleted)</span></a></h3>
 <h1>CS143 - Project 1A Grading Application</h1>
 <h2> Processing Uploaded Files...</h2>
-ENDHTML
 
+
+<?php
 #
 #Load form parameters
 ###################################################
 
-my $zipfile = $query->param("student-submissions") or die("No File Selected");
-my $webhostdir = $query->param("webhost-location");
-my $sampleCalcFile = $query->param("calculator.php");
+$zipfile = $_POST["student-submissions"] or die("No File Selected");
+$webhostdir = $_POST["webhost-location"];
+$sampleCalcFile = $_POST["calculator.php"];
 
 if ( !$zipfile )
 {
- print $query->header ( );
- print "There was a problem uploading your submissions zip file (try a smaller file).";
- exit;
+ echo "There was a problem uploading your submissions zip file (try a smaller file).";
+ exit();
 }
 
 
@@ -76,12 +64,12 @@ my $upload_filehandle = $query->upload("student-submissions") or die "Cannot ope
 open ( UPLOADFILE, ">$upload_dir/$zip_filename" ) or die "$!";
 binmode UPLOADFILE;
 
-print "<p>Opened Zip File...</p>";
+echo "<p>Opened Zip File...</p>";
 
-print "<p>uploading zip file...</p>";
+echo "<p>uploading zip file...</p>";
 while ( <$upload_filehandle> )
 {
-	print UPLOADFILE;
+	echo UPLOADFILE;
 } 
 
 close UPLOADFILE; 
@@ -91,8 +79,8 @@ close UPLOADFILE;
 ###################################################
 
 my $filesize = -s "$upload_dir/$zip_filename";
-print "<p><b>Size of zipfile: " . $filesize . "</b></p>"; 
-print "<p>uploaded zip file.</p>";
+echo "<p><b>Size of zipfile: " . $filesize . "</b></p>"; 
+echo "<p>uploaded zip file.</p>";
 
 #
 #Upload sample PHP Calculator Solution
@@ -100,7 +88,7 @@ print "<p>uploaded zip file.</p>";
 
 if ( $sampleCalcFile )
 {
-	print "<p>Processing Sample Calculator PHP file upload...</p>";
+	echo "<p>Processing Sample Calculator PHP file upload...</p>";
 	
 	#
 	#Check for correct file extension (*.tar)
@@ -122,12 +110,12 @@ if ( $sampleCalcFile )
 	open ( UPLOADFILE, "+>$upload_dir/$php_filename" ) or die "$!";
 	binmode UPLOADFILE;
 
-	print "<p>Opened PHP File...</p>";
+	echo "<p>Opened PHP File...</p>";
 
-	print "<p>uploading PHP file...</p>";
+	echo "<p>uploading PHP file...</p>";
 	while ( <$upload_filehandle> )
 	{
-		print UPLOADFILE;
+		echo UPLOADFILE;
 	} 
 
 	close UPLOADFILE; 
@@ -137,8 +125,8 @@ if ( $sampleCalcFile )
 	#
 
 	my $filesize = -s "$upload_dir/$php_filename";
-	print "<p><b>Size of PHP file: " . $filesize . "</b></p>"; 
-	print "<p>uploaded PHP Sample Calculator Solution file.</p>";
+	echo "<p><b>Size of PHP file: " . $filesize . "</b></p>"; 
+	echo "<p>uploaded PHP Sample Calculator Solution file.</p>";
 	
 	#
 	# 3. extract into submissions directory
@@ -148,6 +136,7 @@ if ( $sampleCalcFile )
 
 }
 
-print '<p><a class=button style="width:100; float:right;" href="#" onclick="window.location=\'n3_error_process_uploads.cgi\'" ><span>Continue...</span></a></p>';
-print "</html>";
+echo '<p><a class=button style="width:100; float:right;" href="#" onclick="window.location=\'n3_error_process_uploads.cgi\'" ><span>Continue...</span></a></p>';
+echo "</html>";
 
+?>

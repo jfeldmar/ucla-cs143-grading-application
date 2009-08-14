@@ -209,18 +209,15 @@ print qq(<hr/>\n);
 ##	for selected submissions (use log for reference)
 
 print qq(<form action="n6-downloadCSV.cgi" method="POST" name=getcsv >);
-print qq(<input type=hidden id ="csv_data" name="csv_data" value=""/></p>\n);
-print qq(<input type=hidden id ="csv_size" name="csv_size" value="3"/></p>\n);
+print qq(<input type=hidden id = "csv_data" name="csv_data" value=""/></p>\n);
+print qq(<input type=hidden id ="csv_size" name="csv_size" value="4"/></p>\n);
 print qq(<div align=center><a class="button" style="width:200" href="javascript:javascript:submit_csv(this);"><span>DOWNLOAD CSV</span></a></div>\n);
-#print qq(<p align=center><input type=submit value="DOWNLOAD CSV"/></p>\n);
 print qq(</form>);
 
 
 print qq(<div align=center><a class="button"  style="width:75" href="javascript:show_all('<span>Show</span>');"/><span>Show All</span></a>\n);
 print qq(<a class="button"  style="width:75" href="javascript:hide_all('<span>Hide</span>');"/><span>Hide All</span></a></div>\n);
 print qq(<p align=center>*****************************************************************</p>);
-#print qq(<p><input type=button value="Show All" onclick="show_all('Show');"/>&nbsp;\n);
-#print qq(<input type=button value="Hide All" onclick="hide_all('Hide');"/></p>\n);
 
 foreach my $sid (@unique_sids)
 {
@@ -235,7 +232,8 @@ foreach my $sid (@unique_sids)
 
        print qq(&nbsp;&nbsp;Test Case Results for Student $sid\n);
        print qq(<a class=button href="#"  style="width:110" onclick="javascript:update_total_score('$sid');" ><span>Sum Scores</span></a>\n);
-       print qq(<a class=button href="#"  style="width:105" onclick="javascript:update_notes('$sid');" ><span>Concat Notes</span></a></p>\n);
+#       print qq(<a class=button href="#"  style="width:105" onclick="javascript:update_notes('$sid');" ><span>Concat Notes</span></a></p>\n);
+
 #       print qq(<input type="button" onclick="javascript:update_total_score('$sid');" value="Sum Scores" >\n);
 #       print qq(<input type="button" onclick="javascript:update_notes('$sid');" value="Concat Notes" >\n);
 
@@ -258,39 +256,40 @@ foreach my $sid (@unique_sids)
 
 	       # link to student's solution with given input
 	       print qq(<td>\n);
-	       $escape_str =  CGI::escape(@queries[$i]);
+	       $escape_str =  CGI::escape("@queries[$i]");
 	       print qq(<a class="php_editable" href=\"$submissions_directory/$sid/$default_php?expr=$escape_str" target=_blank > @queries[$i] </a>\n);
 	       print qq(</td>\n);
 
 	       # expected result (link to sample solution)
 	       print qq(<td>\n);
-	       $escape_str = CGI::escape(@queries[$i]);
+	       $escape_str = CGI::escape("@queries[$i]");
 	       print qq(<a class="sampleresult" href="$sample_php?expr=$escape_str" target=_blank > @solutions[$i] </a>\n);
 	       print qq(</td>\n);
 	       
 	       # extract student's result for given query
-	       $escape_str = CGI::escape(@queries[$i]);
+	       $escape_str = CGI::escape("@queries[$i]");
 	       print qq(<td class="phpresult" id="$submissions_directory/$sid/$default_php?expr=$escape_str">\n);
 	       print qq(<script type="text/javascript">\n);
 	       print qq( document.write(get_result("$submissions_directory/$sid/$default_php?expr=$escape_str"));\n);
 	       print qq(</script>\n);
-
 	       print qq(</td>\n);
 
 	       # score based on matching solution and output
 	       print qq(<td class="qscore" onClick="editCell(this, 'number', '$sid');">0</td>\n);
 
 	       # comments based on score
-	       print qq(<td class="qnotes" onClick="editCell(this, 'text', '$sid');">query$i:</td>\n);
+#	       print qq(<td class="qnotes" onClick="editCell(this, 'text', '$sid');">@descriptions[$i]</td>\n);
+	       print qq(<td class="qnotes">@descriptions[$i]</td>\n);
 	       print qq(</tr>\n);
        }
        ###################################################
        
-       print qq(<tr>\n);
-       print qq(<td colspan=4>Total Score</td>\n);
-       print qq(<td class="tscore">($#queries + 1) * 100</td>\n);
-       print qq(<td class="tnotes">Notes:</td>\n);
+       print qq(<span><tr>\n);
+       print qq(<td colspan=4 style="font-weight:bold" >Total Score</td>\n);
+       print qq(<td class="tscore" style="font-weight:bold" ></td>\n);
+       print qq(<td class="num_correct_score" style="font-weight:bold" ></td>\n);
        print qq(</tr>\n);
+       print qq(<tr><td colspan=6 class="tnotes" onClick="editCell(this, 'text', '$sid');">Notes:</td></tr></span>\n);
 
        print qq(</table>\n);
        print qq(</div>\n);

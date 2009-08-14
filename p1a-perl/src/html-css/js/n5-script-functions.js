@@ -5,11 +5,7 @@ function ShowHideSection(section, secbutton) {
 }
 
 function editCell (cell, type, sid) {
-	var input;
-	if (type == "number")
-		input = prompt("Please enter your text", cell.innerHTML);
-	else
-		input = prompt("Please enter your text", cell.innerHTML);
+	var input = prompt("Please enter your text", cell.innerHTML);
 	
 	if (input != null){
 		var pattern = /"/g;
@@ -26,7 +22,7 @@ function editCell (cell, type, sid) {
 				}
 			}else if (type == "text"){
 				cell.innerHTML = input;
-				update_notes(sid);
+				//update_notes(sid);
 			}else{
 				alert("Error: Invalid editCell Input (not number or text)");
 			}
@@ -49,11 +45,17 @@ function update_total_score(tablediv){
 	var t =  document.getElementById(tablediv).getElementsByTagName("table")[0];
 	var scores = t.getElementsByClassName("qscore");
 	var sum = 0;
+	var num_correct = 0;
 	for (i = 0; i < scores.length; i++)
 	{
-		sum += eval(scores[i].innerHTML);
+		var temp = eval(scores[i].innerHTML);
+		sum += temp;
+		if (temp == 1)
+			num_correct++;
 	}
 	t.getElementsByClassName("tscore")[0].innerHTML = sum;
+	t.getElementsByClassName("num_correct_score")[0].innerHTML = num_correct + "/" + scores.length + " correct";
+
 }
 
 function update_notes(tablediv){
@@ -64,7 +66,22 @@ function update_notes(tablediv){
 	{
 		if (i == 0)
 			notes_text += " " + notes[i].innerHTML;
-		else
+		else if (notes[i].innerHTML != "")
+			notes_text += "; " + notes[i].innerHTML;
+	}
+	t.getElementsByClassName("tnotes")[0].innerHTML = notes_text;
+}
+
+
+function onload_update_notes(tablediv){
+	var t =  document.getElementById(tablediv).getElementsByTagName("table")[0];
+	var notes = t.getElementsByClassName("qnotes");
+	var notes_text = "Notes: ";
+	for (i = 0; i < notes.length; i++)
+	{
+		if (i == 0)
+			notes_text += " " + notes[i].innerHTML;
+		else if (notes[i].innerHTML != "")
 			notes_text += "; " + notes[i].innerHTML;
 	}
 	t.getElementsByClassName("tnotes")[0].innerHTML = notes_text;
@@ -76,7 +93,7 @@ function update_totals()
 	for (var i = 0; i < subs.length; i++)
 	{
 		update_total_score(subs[i].id);
-		update_notes(subs[i].id);
+		//update_notes(subs[i].id);
 	}
 }
 
@@ -88,8 +105,8 @@ function load_totals(nfile)
 	for (var i = 0; i < subs.length; i++)
 	{
 		update_links(subs[i].id, nfile);
+		update_notes(subs[i].id);
 //		update_total_score(subs[i].id);
-//		update_notes(subs[i].id);
 	}
 }
 
@@ -153,12 +170,13 @@ function update_links(sid, nfile)
 	
 	// queries start on the second row and end on the prelast row
 	// therefore start at index 1 and end at index rows.length-2
-	for (var r = 1; r < rows.length - 1; r++)
+	for (var r = 1; r < rows.length - 2; r++)
 	{
 		var php_link = rows[r].getElementsByClassName('php_editable')[0];
 		var result_cell = rows[r].getElementsByClassName('phpresult')[0];
 		var sample_cell = rows[r].getElementsByClassName('sampleresult')[0];
 		var score_cell = rows[r].getElementsByClassName('qscore')[0];
+		var notes_cell = rows[r].getElementsByClassName('qnotes')[0];
 
 		var re_str = "\\/" + sid + "\\/.*\\?";
 		var RE = new RegExp(re_str, "i");
@@ -178,6 +196,12 @@ function update_links(sid, nfile)
 		// update score/score total
 		// note: the result in the result_cell is inside a <div> tag
 		score_cell.innerHTML = recommend_score(sample_cell.innerHTML, result_cell.getElementsByTagName('div')[0].innerHTML);
+		
+		// if query passed, don't include query description
+		if (score_cell.innerHTML == "1")
+		{
+			notes_cell.innerHTML = "";
+		}
 	}
 	
 	
@@ -194,7 +218,7 @@ function update_links(sid, nfile)
 
 	//update total score for current student
 	update_total_score(sid);
-	update_notes(sid);
+	//update_notes(sid);
 }
 
 // on update of file to grade, the results column must be updated
@@ -309,16 +333,23 @@ function recommend_score(expected, received)
 function submit_csv(myform)
 {
 	var csv = new Array();
-
 	var subs = document.getElementsByClassName("submissions");
+	
+	csv[0] = new Array(4);
+	csv[0][0] = "SID";
+	csv[0][1] = "Total Score";
+	csv[0][2] = "Fraction Correct";
+	csv[0][3] = "Notes";
+		
 	for (var i = 0; i < subs.length; i++)
 	{
-		csv[i] = new Array(3);
-		csv[i][0] = subs[i].id;
+		csv[i+1] = new Array(4);
+		csv[i+1][0] = subs[i].id;
 		
 		// enclose text in quotes in order to escape commas
-		csv[i][1] = '\"' + subs[i].getElementsByClassName('tscore')[0].innerHTML + '\"';
-		csv[i][2] = '\"' + subs[i].getElementsByClassName('tnotes')[0].innerHTML + '\"';
+		csv[i+1][1] = '\"' + subs[i].getElementsByClassName('tscore')[0].innerHTML + '\"';
+		csv[i+1][2] = '\"' + subs[i].getElementsByClassName('num_correct_score')[0].innerHTML + '\"';
+		csv[i+1][3] = '\"' + subs[i].getElementsByClassName('tnotes')[0].innerHTML + '\"';		
 	}
 
 	csv = escape(csv);

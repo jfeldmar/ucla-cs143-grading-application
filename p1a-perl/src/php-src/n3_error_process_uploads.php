@@ -183,16 +183,18 @@ else
 				chomp(my @lines = <SUBFILE>);
 				my $source = join("\n", @lines);
 				close SUBFILE;
+				
 				## 3.2 copy each student's submitted files into a new (editable_src) subdirectory
 				##	to allow for easier preview and editing of submitted source code
-				open CFILE, ">$temp_directory/$editable_src/$sid/$submitted_file" or die "unable to create file $submissions_directory/$sid/$editable_src/$submitted_file: $!";
-				# reformat text to display php code literally (without execution)
-				if ($submitted_file =~ m/.$submitted_php_extension$/){
-					$source = encode_entities($source);
-					$source = "<pre>".$source."<pre>";
-				}
-				print CFILE $source;
-				close CFILE;
+#				open CFILE, ">$temp_directory/$editable_src/$sid/$submitted_file" or die "unable to create file $submissions_directory/$sid/$editable_src/$submitted_file: $!";
+#				# reformat text to display php code literally (without execution)
+#				if ($submitted_file =~ m/.$submitted_php_extension$/){
+#					$source = encode_entities($source);
+#					$source = "<pre>".$source."<pre>";
+#				}
+#				print CFILE $source;
+#				close CFILE;
+				
 				if ($submitted_file =~ m/.$submitted_php_extension$/){
 					print qq(<a href="$temp_directory/$editable_src/$sid/$submitted_file" target="_blank">Source: $submitted_file</a><BR/> \n);
 				}elsif ($submitted_file =~ m/.$submitted_txt_extension$/){
