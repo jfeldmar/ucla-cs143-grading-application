@@ -100,7 +100,7 @@ else
 	open FILE, $submissions_csv_file or die("Can't open $submissions_csv_file file: $!");
 	my $total_rows = 0;
 
-	print qq(<form name=selectSID method="POST" action="../cgi-bin/n4_choose_test_cases.cgi">);
+	print qq(<form name=selectSID method="POST" action="../php-src/n4_choose_test_cases.php">);
 
 	# form submit button
 	print qq(<p align=center><a class=button style="width:150pt" href="#" onclick="document.selectSID.submit()" ><span>Next (select test cases)</span></a></p>);
@@ -186,14 +186,14 @@ else
 				
 				## 3.2 copy each student's submitted files into a new (editable_src) subdirectory
 				##	to allow for easier preview and editing of submitted source code
-#				open CFILE, ">$temp_directory/$editable_src/$sid/$submitted_file" or die "unable to create file $submissions_directory/$sid/$editable_src/$submitted_file: $!";
-#				# reformat text to display php code literally (without execution)
-#				if ($submitted_file =~ m/.$submitted_php_extension$/){
-#					$source = encode_entities($source);
-#					$source = "<pre>".$source."<pre>";
-#				}
-#				print CFILE $source;
-#				close CFILE;
+	#			open CFILE, ">$temp_directory/$editable_src/$sid/$submitted_file" or die "unable to create file $submissions_directory/$sid/$editable_src/$submitted_file: $!";
+	#			# reformat text to display php code literally (without execution)
+	#			if ($submitted_file =~ m/.$submitted_php_extension$/){
+	#				$source = encode_entities($source);
+	#				$source = "<pre>".$source."<pre>";
+	#			}
+	#			print CFILE $source;
+	#			close CFILE;
 				
 				if ($submitted_file =~ m/.$submitted_php_extension$/){
 					print qq(<a href="$temp_directory/$editable_src/$sid/$submitted_file" target="_blank">Source: $submitted_file</a><BR/> \n);

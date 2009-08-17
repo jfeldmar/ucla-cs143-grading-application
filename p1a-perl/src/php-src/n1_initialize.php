@@ -36,7 +36,7 @@ foreach ($clear_dirs as $dir)
 	#Delete directory and all contents if it exists
 	if (file_exists($dir)){
 		if ($verbose) { echo "<p>";}
-		!system("rm -rf $dir") or die("Cannot remove contents of $dir directory: $!");
+		!system("rm -rf $dir") or die("Cannot remove contents of $dir directory");
 		if ($verbose) { echo "</p>";}
 		if(!$verbose) {
 			echo 'Deleted '.$dir.', <br />';
@@ -44,7 +44,7 @@ foreach ($clear_dirs as $dir)
 	}
 
 	#Recreate empty directory
-	mkdir($dir) or die("Cannot create $dir directory: $!");
+	mkdir($dir) or die("Cannot create $dir directory");
 	if ($verbose){
 		echo "Created directory $dir";
 	}
@@ -56,7 +56,7 @@ echo "Done.</p>";
 #####################################################
 
 echo "<p>Generating default test-cases...</p>";
-!system("tar -C ../test_cases/ -xf ../default-data/test-cases.tar ") or die("Unable to Copy Default Test Cases: $!");
+!system("tar -C ../test_cases/ -xf ../default-data/test-cases.tar ") or die("Unable to Copy Default Test Cases");
 echo "Done.</p>";
 
 #
@@ -68,8 +68,8 @@ echo "Done.</p>";
 ?>
 
 <div align=center>
-<form name=fileupload method="POST" action="../cgi-bin/n2_process-submissions.cgi" enctype="multipart/form-data" />
-<p>Please upload the submission zip file:<br/>
+<form name=fileupload method="POST" action="../php-src/n2_process-submissions.php" enctype="multipart/form-data" />
+<p>Please upload the submission tar file:<br/>
 
 	 <input type="file" name="student-submissions" size="50"/>
 </p>
@@ -79,7 +79,7 @@ echo "Done.</p>";
 </p>//-->
 <p>(Optional)Please upload sample PHP solution:<br/>
 	<p>
-	<input type="file" name="calculator.php" size="50"/>
+	<input type="file" name="php-calculator" size="50"/>
 	 </p>
 </p>
 

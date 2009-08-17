@@ -129,7 +129,7 @@ my @sfiles = grep { $_ ne '.' && $_ ne '..' } readdir SDIR;
 opendir DDIR, "$descriptions_directory" or die("Can't open descriptions directory $descriptions_directory: $!");
 my @dfiles = grep { $_ ne '.' && $_ ne '..' } readdir DDIR;
 
-print qq(\n<form id="myform" method=GET action="../cgi-bin/n5-run-test.cgi">\n);
+print qq(\n<form id="myform" method=GET action="../php-src/n5-run-test.php">\n);
 print qq(<p align=center>);
 print qq(<a class=button style="width:100" href="#" onClick="javascript:addSelection();"><span>Add Item</span></a>\n);
 print qq(<BR/><a class=button style="width:100" href="#" onClick="javascript:deleteSelection();"><span>Delete Item</span></a>\n);

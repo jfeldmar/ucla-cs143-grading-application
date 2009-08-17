@@ -1,12 +1,13 @@
-<html>
-<head><title>Example</title></head>
-<body>
-<h1><?php echo "Hello World"; ?></h1>
-<?php
-$txt = "This is my first PHP script";
-/* This line creates the variable $txt and gives it the initial value. Variables in PHP are represented by a dollar sign followed by the name of the variable. The variable name is case-sensitive. */
+print qq(</td>\n<td valign=top align=center style="line-height:1.3em">);
+foreach (@soltns)
+{
+	print qq($_<br/>);
+}
+print qq(</td>\n);
 
-echo $txt;
-?>
-</body>
-</html> 
+
+print qq(<td valign=top align=center style="line-height:1.3em">);
+foreach (@descr)
+{
+	print qq($_<br/>);
+}
