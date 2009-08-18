@@ -106,7 +106,7 @@ while($line = fgetcsv($FILE, 0, ','))
     $name = $line[1];
     #begin table row/checkbox
     echo "<tr id=$sid> \n";		#prints id=SID for <tr> tag "id"
-    echo "\t <td><input type=checkbox name='check' value=$sid></td> \n";
+    echo "\t <td><input type=checkbox name='check[]' value=$sid></td> \n";
     echo "\t <td>$sid</td> \n";		#prints SID
     echo "\t <td>$name</td> \n";		#prints Name
 
@@ -133,7 +133,7 @@ while($line = fgetcsv($FILE, 0, ','))
 
     foreach ($files as $submitted_file){
 	    #print only files, not directories
-	    if ( file_exists("$submissions_directory/$sid/$submitted_file") ){
+	    if ( !is_dir("$submissions_directory/$sid/$submitted_file") ){
 		 if (preg_match("/.$submitted_php_extension$/", $submitted_file)){
 			 $error;
 			 $tooltip;
@@ -165,7 +165,7 @@ while($line = fgetcsv($FILE, 0, ','))
     echo "\t <td> \n";
     foreach ($files as $submitted_file){
 	    #print only files, not directories
-	    if( file_exists("$submissions_directory/$sid/$submitted_file")){
+	    if( !is_dir("$submissions_directory/$sid/$submitted_file")){
 		    $SUBFILE = fopen( "$submissions_directory/$sid/$submitted_file", 'r') or die("Can't open $submitted_file for $sid:$name");
 		    $lines = fread($SUBFILE, filesize("$submissions_directory/$sid/$submitted_file"));
 		    fclose($SUBFILE);

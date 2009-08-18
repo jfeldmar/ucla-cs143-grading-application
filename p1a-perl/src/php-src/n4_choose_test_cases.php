@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+<?php
 
 ###################################################
 ## save form data from previous page (i.e. SIDs for submissions to grade) into a log
@@ -6,21 +6,14 @@
 ## functionality: add/remove/save as default test cases
 ###################################################
 
-use strict;
-use CGI;
-use CGI::Carp qw ( fatalsToBrowser );
-use File::Basename;
+$sids_to_grade_file = "../logs/SIDstoGrade.csv";
+$query_directory = "../test_cases/queries";
+$solutions_directory = "../test_cases/solutions";
+$descriptions_directory = "../test_cases/descriptions";
 
-$CGI::POST_MAX = 1024 * 1000 * 10; #max 10 MB
-$CGI::DISABLE_UPLOADS = 0;
-my $query = new CGI;
-my $sids_to_grade_file = "../logs/SIDstoGrade.csv";
-my $query_directory = "../test_cases/queries";
-my $solutions_directory = "../test_cases/solutions";
-my $descriptions_directory = "../test_cases/descriptions";
+echo header('Content-type: text/html');
+?>
 
-print "Content-type: text/html\n\n";
-print <<ENDHTML;
 <html>
 <head>
 <title>CS143 - Project 1A Grading Application</title>
@@ -90,7 +83,8 @@ function selectAll()
 
 <h1>CS143 - Project 1A Grading Application</h1>
 <h2 align=center> Confirm/Add/Delete/Save Test Cases </h2>
-ENDHTML
+
+<?php
 
 ###################################################
 ## Choose test cases
@@ -101,74 +95,96 @@ ENDHTML
 
 ## 0. Save list of submissions to grade from previous form******************
 ###################################################
-my @selected = $query->param("check") or warn("No File Selected");
 
-open FH, ">$sids_to_grade_file" or die("Unable to open/create $sids_to_grade_file file: $!");
-foreach (@selected){
-	print FH "$_\n";
+$FH = fopen("$sids_to_grade_file", 'w') or die("Unable to open/create $sids_to_grade_file file");
+foreach ($_POST['check'] as $check)
+{
+	fwrite($FH, "$check\n");
 }
-close FH;
-
+fclose($FH);
 
 
 ## 1. Load Default test cases
 ###################################################
 
 ## 1.1 Check that queries and solutions directories exists
-unless ( -d $query_directory and -d $solutions_directory){
-	print qq(<p class=error>ERROR: Unable to locate test case directories: $query_directory	AND/OR	$solutions_directory director</p>);
+if (!file_exists($query_directory) or !file_exists($solutions_directory)){
+	echo "<p class=error>ERROR: Unable to locate test case directories: $query_directory	AND/OR	$solutions_directory director</p>";
 }
 
-## 1.2 Read default queries and solutions
-opendir QDIR, "$query_directory" or die("Can't open query directory $query_directory: $!");
-my @qfiles = grep { $_ ne '.' && $_ ne '..' } readdir QDIR;
 
-opendir SDIR, "$solutions_directory" or die("Can't open solutions directory $solutions_directory: $!");
-my @sfiles = grep { $_ ne '.' && $_ ne '..' } readdir SDIR;
+## 1.2 Read default queries, solutions, and descriptions
+$qfiles = array();
+$sfiles = array();
+$dfiles = array();
 
-opendir DDIR, "$descriptions_directory" or die("Can't open descriptions directory $descriptions_directory: $!");
-my @dfiles = grep { $_ ne '.' && $_ ne '..' } readdir DDIR;
+$QDIR = opendir("$query_directory") or die("Can't open query directory $query_directory");
+    while ( $f = readdir($QDIR))
+    {
+    	if ($f != "." && $f != "..")
+		array_push($qfiles, $f);
+    }
+closedir($QDIR);
 
-print qq(\n<form id="myform" method=GET action="../php-src/n5-run-test.php">\n);
-print qq(<p align=center>);
-print qq(<a class=button style="width:100" href="#" onClick="javascript:addSelection();"><span>Add Item</span></a>\n);
-print qq(<BR/><a class=button style="width:100" href="#" onClick="javascript:deleteSelection();"><span>Delete Item</span></a>\n);
-print qq(</p>);
+$SDIR = opendir("$solutions_directory") or die("Can't open solutions directory $solutions_directory");
+    while ( $f = readdir($SDIR))
+    {
+    	if ($f != "." && $f != "..")
+		array_push($sfiles, $f);
+    }
+closedir($SDIR);
 
-print qq(<table style=none align=center border=0><tr><th>Query</th></tr><tr><td>\n);
-print qq(<SELECT id="tests" name="tests" MULTIPLE SIZE=10>\n);
+$DDIR =opendir("$descriptions_directory") or die("Can't open descriptions directory $descriptions_directory");
+    while ( $f = readdir($DDIR))
+    {
+    	if ($f != "." && $f != "..")
+		array_push($dfiles, $f);
+    }
+closedir($DDIR);
+?>
 
-my @soltns = ();
-my @descr = ();
+<FORM id="myform" method=GET action="../php-src/n5-run-test.php">
+<p align=center>
+<a class=button style="width:100" href="#" onClick="javascript:addSelection();"><span>Add Item</span></a>
+<BR/><a class=button style="width:100" href="#" onClick="javascript:deleteSelection();"><span>Delete Item</span></a>
+</p>
 
-foreach my $query (@qfiles)
+<TABLE style=none align=center border=0><tr><th>Query</th></tr><tr><td>
+
+<SELECT id="tests" name="tests" MULTIPLE SIZE=10>
+
+<?php
+
+$soltns = array();
+$descr = array();
+
+foreach ($qfiles as $query)
 {
-	open QFILE, "$query_directory/$query" or next;
-	chomp(my $q = <QFILE>);
-	close QFILE;
+	$QFILE = fopen("$query_directory/$query", 'r') or next;
+	$q = fread($QFILE, filesize("$query_directory/$query"));
+	fclose($QFILE);
 	
-	open SFILE, "$solutions_directory/$query" or next;
-	chomp(my $s = <SFILE>);
-	push(@soltns, $s);
-	close SFILE;
+	$SFILE = fopen("$solutions_directory/$query", 'r') or next;
+	$s = fread($SFILE, filesize("$solutions_directory/$query"));
+	fclose($SFILE);
+
+	$DFILE = fopen("$descriptions_directory/$query", 'r') or next;
+	$d = fread($DFILE, filesize("$descriptions_directory/$query"));
+	fclose($DFILE);
 	
-	open FILE, "$descriptions_directory/$query" or next;
-	chomp(my $d = <FILE>);
-	push(@descr, $d);
-	close FILE;
-	
-	print qq(\n<OPTION class="options" onclick="select(this);" VALUE="$q,$s,$d" >$q (SOLN: $s, DESCR: $d)</OPTION>\n);
+	echo "\n<OPTION class='options' onclick='select(this);' VALUE=\"$q,$s,$d\" >$q (SOLN: $s, DESCR: $d)</OPTION>\n";
 
 }
 
-print qq(</SELECT>);
+?>
 
+</SELECT>
 
-print qq(</td></tr>);
-print qq(</table>\n);
+</td></tr>
+</TABLE>
 
-print qq(<input type=hidden id="savetype" name="savetype" value=""/>\n);
-print qq(<BR/><BR/><a class=button style="width:200" href="#" onClick="choosesubmit('load')" /><span>Save Test Cases</span></a>\n);
-print qq(<BR/><BR/><a class=button style="width:300" href="#" onClick="choosesubmit('save')" /><span>Save Test Cases as Default Test Cases</span></a>\n);
-print qq(</form>\n);
-print qq(</body></html>);
+<input type=hidden id="savetype" name="savetype" value=""/>
+<BR/><BR/><a class=button style="width:200" href="#" onClick="choosesubmit('load')" /><span>Save Test Cases</span></a>
+<BR/><BR/><a class=button style="width:300" href="#" onClick="choosesubmit('save')" /><span>Save Test Cases as Default Test Cases</span></a>
+</FORM>
+</body></html>
