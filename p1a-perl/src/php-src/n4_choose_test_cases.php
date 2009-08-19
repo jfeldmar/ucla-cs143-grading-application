@@ -77,9 +77,17 @@ function selectAll()
 		opts[i].selected = true;
 	}	
 }
+function deselectAll()
+{
+	var opts = document.getElementById("tests").options;
+	for (var i = 0; i < opts.length; i++)
+	{
+		opts[i].selected = false;
+	}	
+}
 </script>
 </head>
-<body>
+<body onload="javascript:deselectAll()">
 
 <h1>CS143 - Project 1A Grading Application</h1>
 <h2 align=center> Confirm/Add/Delete/Save Test Cases </h2>
@@ -96,7 +104,7 @@ function selectAll()
 ## 0. Save list of submissions to grade from previous form******************
 ###################################################
 
-$FH = fopen("$sids_to_grade_file", 'w') or die("Unable to open/create $sids_to_grade_file file");
+$FH = fopen("$sids_to_grade_file", 'w+') or die("Unable to open/create $sids_to_grade_file file");
 foreach ($_POST['check'] as $check)
 {
 	fwrite($FH, "$check\n");
@@ -143,7 +151,7 @@ $DDIR =opendir("$descriptions_directory") or die("Can't open descriptions direct
 closedir($DDIR);
 ?>
 
-<FORM id="myform" method=GET action="../php-src/n5-run-test.php">
+<FORM id="myform" method=POST action="../php-src/n5-run-test.php">
 <p align=center>
 <a class=button style="width:100" href="#" onClick="javascript:addSelection();"><span>Add Item</span></a>
 <BR/><a class=button style="width:100" href="#" onClick="javascript:deleteSelection();"><span>Delete Item</span></a>
@@ -151,7 +159,7 @@ closedir($DDIR);
 
 <TABLE style=none align=center border=0><tr><th>Query</th></tr><tr><td>
 
-<SELECT id="tests" name="tests" MULTIPLE SIZE=10>
+<SELECT id="tests" name="tests[]" MULTIPLE SIZE=10>
 
 <?php
 

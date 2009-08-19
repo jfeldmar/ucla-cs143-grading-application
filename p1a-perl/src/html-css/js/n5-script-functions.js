@@ -344,7 +344,7 @@ function submit_csv(myform)
 	for (var i = 0; i < subs.length; i++)
 	{
 		csv[i+1] = new Array(4);
-		csv[i+1][0] = subs[i].id;
+		csv[i+1][0] = '\"' + subs[i].id + '\"';
 		
 		// enclose text in quotes in order to escape commas
 		csv[i+1][1] = '\"' + subs[i].getElementsByClassName('tscore')[0].innerHTML + '\"';
