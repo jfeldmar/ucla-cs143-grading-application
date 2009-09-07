@@ -2,7 +2,7 @@
 
 ###################################################
 ## generate a CSV (comma separated value) file for user to download
-## saves SID, total score, and total notes
+## saves SID, total score, fraction correct, and total notes
 ###################################################
 
 # Uncomment lines and change Content-Type to print file to screen

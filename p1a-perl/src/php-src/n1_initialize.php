@@ -6,19 +6,30 @@
 #   The directory names are:
 #	 "../file-uploads", "../submissions", "../temp", "../logs", "../grades", "../test_cases"
 #2. Generates HTML Form to accept 
-#         compressed submissions file, web server location, and sample solution
+#         compressed submissions file, and sample solution
 # VERBOSE MODE: will list all files and directories as they are deleted
 ###################################################
 
-$verbose = 0;
-$clear_dirs = array( "../file-uploads", "../submissions", "../temp", "../logs", "../grades", "../test_cases");
+#**********GLOBAL VARIABLES***********
+	$verbose = 0;
+	$clear_dirs = array( "../file-uploads", "../submissions", "../temp", "../logs", "../grades", "../test_cases");
+
+	$test_cases_dir = "../test_cases/";
+	$default_test_cases_tar_file = "../default-data/test-cases.tar";
+	$form_action_script_n2 = "../php-src/n2_process-submissions.php";
+
+	$submission_tarfile_field_name = "student-submissions";
+	$sample_solution_field_name = "php-calculator";
+
+	$CSS_file = "../html-css/styleSheet.css";
+#*************************************
 
 ?>
 
 <html>
 <head>
 <title>CS143 - Project 1A Grading Application</title>
-<link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />
+<link rel="stylesheet" type="text/css" href="<?php echo $CSS_file; ?>" />
 
 </head>
 <body>
@@ -28,7 +39,10 @@ $clear_dirs = array( "../file-uploads", "../submissions", "../temp", "../logs", 
 
 <?php
 
-#empty: file-uploads, submissions, temp, logs, grades, test-cases
+#
+# 1. empty: file-uploads, submissions, temp, logs, grades, test-cases
+#####################################################
+
 echo "<p>Deleting/recreating directories... </p>";
 
 foreach ($clear_dirs as $dir)
@@ -56,30 +70,27 @@ echo "Done.</p>";
 #####################################################
 
 echo "<p>Generating default test-cases...</p>";
-!system("tar -C ../test_cases/ -xf ../default-data/test-cases.tar ") or die("Unable to Copy Default Test Cases");
+!system("tar -C $test_cases_dir -xf $default_test_cases_tar_file ") or die("Unable to Copy Default Test Cases");
 echo "Done.</p>";
 
 #
-#HTML Form to upload sumissions compressed file
-#(optional)Specify location of webhost directory to display submissions
-#(optional)Upload sample solution of Calculator
+#2. HTML Form to upload sumissions compressed file
+#  (optional)Upload sample solution of Calculator
 #####################################################
 
 ?>
 
 <div align=center>
-<form name=fileupload method="POST" action="../php-src/n2_process-submissions.php" enctype="multipart/form-data" />
-<p>Please upload the submission tar file:<br/>
+<form name=fileupload method="POST" action="<?php echo $form_action_script_n2; ?>" enctype="multipart/form-data" />
 
-	 <input type="file" name="student-submissions" size="50"/>
+<p>Please upload the submission <b>tar</b> file:<br/>
+
+	 <input type="file" name="<?php echo $submission_tarfile_field_name; ?>" size="50"/>
 </p>
 
-<!--//<p>Please specify webhost  (ex: /var/www/):
-	<input type="text" name="webhost-location" size="50"/>
-</p>//-->
 <p>(Optional)Please upload sample PHP solution:<br/>
 	<p>
-	<input type="file" name="php-calculator" size="50"/>
+	<input type="file" name="<?php echo $sample_solution_field_name; ?>" size="50"/>
 	 </p>
 </p>
 

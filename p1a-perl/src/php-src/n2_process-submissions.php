@@ -4,24 +4,34 @@
 #  This script processes the form submitted in n1_initialize.php
 #1. Uploads compressed tar file of submissions to $upload_dir/$tar_filename
 #2. Uploads sample PHP calculator solution to $upload_dir/$php_filename
-#3. Extract compressed tar file into submissions directory
+#3. Extract compressed submissions tar file into submissions directory
 ###################################################
 
-$safe_filename_characters = "a-zA-Z0-9_.-";
-$upload_dir = "../file-uploads";
-$tar_filename = "project1A-Submissions.tar";
-$php_filename = "sampleCalculator.php";
+#**********GLOBAL VARIABLES***********
+	$safe_filename_characters = "a-zA-Z0-9_.-";
+	$upload_dir = "../file-uploads";
+	$submissions_dir = "../submissions/";
+	$php_filename = "sampleCalculator.php";
+
+
+	$submission_tarfile_field_name = "student-submissions";
+	$sample_solution_field_name = "php-calculator";
+
+	$tar_filename = $_FILES[$submission_tarfile_field_name]['name'];	#"project1A-Submissions.tar"
+	$CSS_file = "../html-css/styleSheet.css";
+	$BACK_button_link = "n1_initialize.php";
+
+	$form_action_script_n3 = "../php-src/n3_error_process_uploads.php";
+#*************************************
 
 #
 #Load form parameters
 ###################################################
 
-#$webhostdir = $_POST('webhost-location');
-
-if ( !is_uploaded_file($_FILES['student-submissions']['tmp_name']) )
+if ( !is_uploaded_file($_FILES[$submission_tarfile_field_name]['tmp_name']) )
 {
 	echo header('Content-type: text/html');
-	echo "There was a problem uploading your submissions tar file (try again or with a smaller file).";
+	echo "There was a problem uploading your submissions tar file  (try again or with a smaller file).";	
 	exit;
 }
 
@@ -33,11 +43,11 @@ if ( !is_uploaded_file($_FILES['student-submissions']['tmp_name']) )
 <html>
 <head>
 <title>CS143 - Project 1A Grading Application</title>
-<link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />
+<link rel="stylesheet" type="text/css" href="<?php echo $CSS_file; ?>" />
 
 </head>
 <body>
-<h3 align=left><a class=button style="width:300" href="#" onclick="window.location='n1_initialize.php'"><span>BACK (all files from this run will be deleted)</span></a></h3>
+<h3 align=left><a class=button style="width:300" href="#" onclick="window.location='<?php echo $BACK_button_link; ?>'"><span>BACK (all files from this run will be deleted)</span></a></h3>
 <h1>CS143 - Project 1A Grading Application</h1>
 <h2> Processing Uploaded Files...</h2>
 
@@ -46,7 +56,7 @@ if ( !is_uploaded_file($_FILES['student-submissions']['tmp_name']) )
 #Check for correct file extension (*.tar)
 ###################################################
 
-$tar_path_parts = pathinfo( $_FILES['student-submissions']['name']);
+$tar_path_parts = pathinfo( $_FILES[$submission_tarfile_field_name]['name']);
 
 if (strtolower($tar_path_parts['extension']) != "tar")
 {
@@ -54,16 +64,16 @@ if (strtolower($tar_path_parts['extension']) != "tar")
 }
 
 #
-#Upload .tar file (submissions for Project 1A)
+#Upload .tar file (submissions for Project 1A) into upload directory
 ###################################################
 
 
-if (move_uploaded_file($_FILES['student-submissions']['tmp_name'], "$upload_dir/$tar_filename"))
+if (move_uploaded_file($_FILES[$submission_tarfile_field_name]['tmp_name'], "$upload_dir/$tar_filename"))
 {
 	echo "<p>Opened TAR File...</p>";
 	echo "<p>uploading TAR file...</p>";
 }
-else { die("Cannot open/upload " . $_FILES['student-submissions']['name']);}
+else { die("Cannot open/upload " . $_FILES[$submission_tarfile_field_name]['name']);}
 
 
 #Print file size and upload status
@@ -75,7 +85,7 @@ echo "<p>uploaded tar file.</p>";
 #Upload sample PHP Calculator Solution
 ###################################################
 
-if ( is_uploaded_file($_FILES['php-calculator']['tmp_name']))
+if ( is_uploaded_file($_FILES[$sample_solution_field_name]['tmp_name']))
 {
 	echo '<p>----------------------------------------------</p>';
 
@@ -84,7 +94,7 @@ if ( is_uploaded_file($_FILES['php-calculator']['tmp_name']))
 	#
 	#Check for correct file extension (*.tar)
 	#
-	$php_parts_info = pathinfo( $_FILES['php-calculator']['name']);
+	$php_parts_info = pathinfo( $_FILES[$sample_solution_field_name]['name']);
 
 	if (strtolower($php_parts_info['extension']) != "php")
 	{
@@ -95,12 +105,12 @@ if ( is_uploaded_file($_FILES['php-calculator']['tmp_name']))
 	#Upload .php file (sample calculator solution)
 	#
 
-	if (move_uploaded_file($_FILES['php-calculator']['tmp_name'], "$upload_dir/$php_filename"))
+	if (move_uploaded_file($_FILES[$sample_solution_field_name]['tmp_name'], "$upload_dir/$php_filename"))
 	{
 		echo "<p>Opened PHP File...</p>";
 		echo "<p>uploading PHP file...</p>";
 	}
-	else { die("Cannot open/upload " . $_FILES['php-calculator']['name']);}
+	else { die("Cannot open/upload " . $_FILES[$sample_solution_field_name]['name']);}
 
 	#Print file size and upload status
 
@@ -110,11 +120,15 @@ if ( is_uploaded_file($_FILES['php-calculator']['tmp_name']))
 	#
 	# 3. extract into submissions directory
 	#
-	!system("tar -C ../submissions/ -xf $upload_dir/$tar_filename") or die("Unable to Extract compressed submissions $upload_dir/$tar_filename into ../submissions/");
+	!system("tar -C $submissions_dir -xf $upload_dir/$tar_filename") or die("Unable to Extract compressed submissions $upload_dir/$tar_filename into $submissions_dir");
 }
 ?>
 
-<p><a class=button style="width:100; float:right;" href="#" onclick="window.location='n3_error_process_uploads.php'" ><span>Continue...</span></a></p>
+<!-- Submit/Continue Button -->
+<p>
+	<a class=button style="width:100; float:right;" href="#" onclick="window.location='<?php echo $form_action_script_n3; ?>'" >
+	<span>Continue...</span></a>
+</p>
 </body>
 </html>
 

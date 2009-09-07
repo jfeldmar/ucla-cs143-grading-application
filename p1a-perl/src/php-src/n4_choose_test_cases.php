@@ -1,15 +1,23 @@
 <?php
 
 ###################################################
-## save form data from previous page (i.e. SIDs for submissions to grade) into a log
-## load default test cases and allow user to edit them
-## functionality: add/remove/save as default test cases
+## Choose test cases
+## 0. Save list of submissions to grade from previous form (n3) into file
+## 1. Load Default test cases
+## 2. Javascript interface to add/delete/save test cases
+## 2.1 Save options:
+##	- load: use test case for this run of the grading program only
+##	- save: use test case for this run and save as "new" default test cases
 ###################################################
 
-$sids_to_grade_file = "../logs/SIDstoGrade.csv";
-$query_directory = "../test_cases/queries";
-$solutions_directory = "../test_cases/solutions";
-$descriptions_directory = "../test_cases/descriptions";
+#**********GLOBAL VARIABLES***********
+	$CSS_file = "../html-css/styleSheet.css";
+
+	$sids_to_grade_file = "../logs/SIDstoGrade.csv";
+	$query_directory = "../test_cases/queries";
+	$solutions_directory = "../test_cases/solutions";
+	$descriptions_directory = "../test_cases/descriptions";
+#*************************************
 
 echo header('Content-type: text/html');
 ?>
@@ -17,9 +25,11 @@ echo header('Content-type: text/html');
 <html>
 <head>
 <title>CS143 - Project 1A Grading Application</title>
-<link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />
+<link rel="stylesheet" type="text/css" href="<?php echo $CSS_file; ?>" />
 
 <script type="text/javascript">
+
+// add Selected test case to list
 function addSelection()
 {
 	var optn = document.createElement("OPTION");
@@ -37,6 +47,8 @@ function addSelection()
 		}
 	}
 }
+
+// remove Selected test case from list
 function deleteSelection()
 {
 	var opts = document.getElementById("tests").options;
@@ -48,12 +60,15 @@ function deleteSelection()
 		}
 	}	
 }
+
+// highlight selected (clicked on) option
 function select(opt)
 {
 	var sel = document.getElementById("tests").options.selectedIndex;
 	document.getElementById("tests").options[sel].className = "selected";
 }
 
+// submit selected testcase in selected mode (load or save)
 function choosesubmit(state)
 {
 	if (state == 'load')
@@ -69,6 +84,8 @@ function choosesubmit(state)
 	selectAll();
 	document.getElementById("myform").submit();
 }
+
+// select all test cases
 function selectAll()
 {
 	var opts = document.getElementById("tests").options;
@@ -77,6 +94,8 @@ function selectAll()
 		opts[i].selected = true;
 	}	
 }
+
+// deselect all test cases
 function deselectAll()
 {
 	var opts = document.getElementById("tests").options;
@@ -86,7 +105,9 @@ function deselectAll()
 	}	
 }
 </script>
+
 </head>
+
 <body onload="javascript:deselectAll()">
 
 <h1>CS143 - Project 1A Grading Application</h1>
@@ -94,14 +115,7 @@ function deselectAll()
 
 <?php
 
-###################################################
-## Choose test cases
-## 0. Save list of submissions to grade from previous form******************
-## 1. Load Default test cases
-## 2. Javascript interface to add/delete/save test cases
-###################################################
-
-## 0. Save list of submissions to grade from previous form******************
+## 0. Save list of submissions to grade from previous form into file
 ###################################################
 
 $FH = fopen("$sids_to_grade_file", 'w+') or die("Unable to open/create $sids_to_grade_file file");
@@ -153,12 +167,13 @@ closedir($DDIR);
 
 <FORM id="myform" method=POST action="../php-src/n5-run-test.php">
 <p align=center>
+
+<!-- Links to edit test cases list-->
 <a class=button style="width:100" href="#" onClick="javascript:addSelection();"><span>Add Item</span></a>
 <BR/><a class=button style="width:100" href="#" onClick="javascript:deleteSelection();"><span>Delete Item</span></a>
 </p>
 
 <TABLE style=none align=center border=0><tr><th>Query</th></tr><tr><td>
-
 <SELECT id="tests" name="tests[]" MULTIPLE SIZE=10>
 
 <?php
@@ -166,6 +181,7 @@ closedir($DDIR);
 $soltns = array();
 $descr = array();
 
+// foreach query: display query, solution, and description
 foreach ($qfiles as $query)
 {
 	$QFILE = fopen("$query_directory/$query", 'r') or next;
@@ -181,16 +197,15 @@ foreach ($qfiles as $query)
 	fclose($DFILE);
 	
 	echo "\n<OPTION class='options' onclick='select(this);' VALUE=\"$q,$s,$d\" >$q (SOLN: $s, DESCR: $d)</OPTION>\n";
-
 }
 
 ?>
 
 </SELECT>
-
 </td></tr>
 </TABLE>
 
+<!-- Submit page with LOAD or SAVE option-->
 <input type=hidden id="savetype" name="savetype" value=""/>
 <BR/><BR/><a class=button style="width:200" href="#" onClick="choosesubmit('load')" /><span>Save Test Cases</span></a>
 <BR/><BR/><a class=button style="width:300" href="#" onClick="choosesubmit('save')" /><span>Save Test Cases as Default Test Cases</span></a>

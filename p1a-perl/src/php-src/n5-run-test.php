@@ -6,25 +6,33 @@
 ## functionality: add/remove/save as default test cases
 ###################################################
 
-$test_cases_dir = "../test_cases";
-$query_directory = "../test_cases/queries";
-$solutions_directory = "../test_cases/solutions";
-$descriptions_directory = "../test_cases/descriptions";
-$default_data_tarfile = "../default-data/test-cases.tar";
-$sids_to_grade_file = "../logs/SIDstoGrade.csv";
+#**********GLOBAL VARIABLES***********
+	$CSS_file = "../html-css/styleSheet.css";
 
-$default_php = "calculator.php";
-$sample_php = "../file-uploads/sampleCalculator.php";
-$submissions_directory = "../submissions";
-$temp_directory = "../temp";
-$pop_up_window = "../html-css/choosefile-popup.html";
+	$test_cases_dir = "../test_cases";
+	$query_directory = "../test_cases/queries";
+	$solutions_directory = "../test_cases/solutions";
+	$descriptions_directory = "../test_cases/descriptions";
+	$default_data_tarfile = "../default-data/test-cases.tar";
+	$sids_to_grade_file = "../logs/SIDstoGrade.csv";
+
+	$default_php = "calculator.php";
+	$sample_php = "../file-uploads/sampleCalculator.php";
+	$submissions_directory = "../submissions";
+	$temp_directory = "../temp";
+	$pop_up_window = "../html-css/choosefile-popup.html";
+	
+	$download_csv_file_link = "n6-downloadCSV.php";
+	$csv_values_per_submission = "4";
+#*************************************
 
 echo header('Content-type: text/html');
 ?>
 
 <html><head>
 <title>CS143 - Project 1A Grading Application</title>
-<link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />
+	<link rel="stylesheet" type="text/css" href="<?php echo $CSS_file; ?>" />
+
 <script type="text/javascript">
 
 <?php
@@ -95,7 +103,7 @@ foreach ($unique_sids as $sid)
 ## 2. Store test cases in test_cases directory
 ##	(if save option is "save", also copy to default-data directory
 ## 3. Display table summarizing test case output 
-##	for selected submissions (use log for reference)
+##	for selected submissions
 ###################################################
 
 
@@ -103,6 +111,8 @@ foreach ($unique_sids as $sid)
 ###################################################
 $savetype = $_POST['savetype'];
 $formdata = array();
+
+# store test cases in local array
 foreach ($_POST['tests'] as $tests)
 {
 	array_push($formdata, $tests);
@@ -121,10 +131,10 @@ else if (!strcmp($savetype,"load")){
 	die("Invalid Test Case save option");
 }
 ?>
+
 <p align=center>
 <table border = 1>
 <tr><th></th><th>Test Input</th><th>Solution</th><th>Description</th></tr>
-
 
 <?php
 #Display test case table
@@ -203,22 +213,28 @@ echo "<hr/>\n";
 ##	for selected submissions (use log for reference)
 ###################################################
 
-## 3. Display table summarizing test case output 
-##	for selected submissions (use log for reference)
 ?>
 
-<form action="n6-downloadCSV.php" method="POST" name=getcsv >
+<!-- Link/Form to download CSV containing final grades -->
+<form action="$download_csv_file_link" method="POST" name=getcsv >
 <input type=hidden id = "csv_data" name="csv_data" value=""/></p>
-<input type=hidden id ="csv_size" name="csv_size" value="4"/></p>
+<input type=hidden id ="csv_size" name="csv_size" value="<?php echo $csv_values_per_submission;?>"/></p>
 <div align=center><a class="button" style="width:200" href="javascript:javascript:submit_csv(this);"><span>DOWNLOAD CSV</span></a></div>
 </form>
 
+<!-- Table Containing Submissions Data -->
+<div align=center>
 
-<div align=center><a class="button"  style="width:75" href="javascript:show_all('<span>Show</span>');"/><span>Show All</span></a>
+<!-- Show All / Hide All Buttons -->
+<a class="button"  style="width:75" href="javascript:show_all('<span>Show</span>');"/><span>Show All</span></a>
 <a class="button"  style="width:75" href="javascript:hide_all('<span>Hide</span>');"/><span>Hide All</span></a></div>
+
 <p align=center>*****************************************************************</p>
 
 <?php
+
+#Display Data for each Submission (sid directory)
+###################################################
 foreach ($unique_sids as $sid)
 {
        ## separator for each submission's code
@@ -226,10 +242,12 @@ foreach ($unique_sids as $sid)
        echo "<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^sid:$sid^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->\n";
        echo "<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->\n\n\n";
 
+	## Show/Hide Button
        echo "<p>";
        echo "<a class=\"button ShowHideButton\" name=\"$sid\" href=\"#\"  style=\"width:60\" onclick=\"javascript:ShowHideSection('$sid', this);\"><span>Show</span></a>\n";
 #       echo "<br/><input type=\"button\" class=\"$sid\" style=\"width:4em\" onclick=\"javascript:ShowHideSection('$sid', this);\" value='Show'>\n";
 
+	## "Sum Score" Button (for current student only)
        echo "&nbsp;&nbsp;Test Case Results for Student $sid\n";
        echo "<a class=button href=\"#\"  style=\"width:110\" onclick=\"javascript:update_total_score('$sid');\" ><span>Sum Scores</span></a>\n";
 #       echo "<a class=button href=\"#\"  style=\"width:105\" onclick=\"javascript:update_notes('$sid');\" ><span>Concat Notes</span></a></p>\n";
@@ -239,16 +257,24 @@ foreach ($unique_sids as $sid)
 
        echo "<div class=\"submissions\" id=\"$sid\" style=\"overflow:hidden;display:none\">\n";
 
+	## Name of/ Link to file being graded now
        echo "<p align=center>Graded File: <a class=\"link_editable\" href=$submissions_directory/$sid/$default_php target=_blank > $default_php </a>\n";
+        ## Button to change file being graded
        echo "&nbsp;or&nbsp;<a class=button style=\"width:200\" href=\"#\" onclick=\"ChooseFilePopUp('$pop_up_window','$sid');\"/><span>Choose PHP File to Grade</span></a></p>\n";
-       
+
+	## Query Table (Student's solution, Sample Solution, Result, Score, Notes)       
        echo "<table width=90% border=\"1\" align=\"center\">";
        echo "<tr><th></th><th>QUERY</th><th>Sample Solution</th><th>RESULT</th><th>Score</th><th>Notes</th></tr>\n";
- 
-      
+       
        $escape_str = "";
 
-       # For each Query
+       # For each Query Print:
+       #	- link to student's solution with given input
+       #	- expected result (link to sample solution)
+       #	- extracted student's result for current query
+       #	- score based on matching solution and output
+       #	- comment based on score (displayed only if answer incorrect)
+       #		(describes type of test case)
        ###################################################
        for ($i = 0; $i < count($queries); $i++)
        {
@@ -268,7 +294,7 @@ foreach ($unique_sids as $sid)
 	       echo "<a class=\"sampleresult\" href=\"$sample_php?expr=$escape_str\" target=_blank > $solutions[$i] </a>\n";
 	       echo "</td>\n";
 	       
-	       # extract student's result for given query
+	       # extract student's result for current query
 	       $escape_str = urlencode("$queries[$i]");
 	       echo "<td class=\"phpresult\" id=\"$submissions_directory/$sid/$default_php?expr=$escape_str\">\n";
 	       echo "<script type=\"text/javascript\">\n";
@@ -279,7 +305,7 @@ foreach ($unique_sids as $sid)
 	       # score based on matching solution and output
 	       echo "<td class=\"qscore\" onClick=\"editCell(this, 'number', '$sid');\">0</td>\n";
 
-	       # comments based on score
+	       # comment based on score (displays test case description if solution wrong)
 #	       echo "<td class=\"qnotes\" onClick=\"editCell(this, 'text', '$sid');\">$descriptions[$i]</td>\n";
 	       echo "<td class=\"qnotes\">$descriptions[$i]</td>\n";
 	       echo "</tr>\n";
@@ -291,6 +317,9 @@ foreach ($unique_sids as $sid)
        echo "<td class=\"tscore\" style=\"font-weight:bold\" ></td>\n";
        echo "<td class=\"num_correct_score\" style=\"font-weight:bold\" ></td>\n";
        echo "</tr>\n";
+       
+       ## Master NOTES: Combines notes from all queries for current student
+       ## and is editable by user
        echo "<tr><td colspan=6 class=\"tnotes\" onClick=\"editCell(this, 'text', '$sid');\">Notes:</td></tr></span>\n";
 
        echo "</table>\n";
@@ -301,6 +330,7 @@ foreach ($unique_sids as $sid)
 
 <p align=center>*****************************************************************</p>
 
+<!-- Show All / Hide All Buttons -->
 <div align=center><a class="button"  style="width:75" href="javascript:show_all('<span>Show</span>'"/><span>Show All</span></a>
 <a class="button"  style="width:75" href="javascript:hide_all('<span>Hide</span>');"/><span>Hide All</span></a></div>
 

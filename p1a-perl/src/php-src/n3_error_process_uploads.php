@@ -1,22 +1,46 @@
 <?php
 
 ###################################################
-## extract provided zip file, confirm correct file hierarchy
-## upload/link to sample calculator solution, confirm functionality
-## display/link to all students' submissions
+# 1. Display Link To Sample Solution Calculator and Sample Input
+#
+# 2. Read submission CSV file 
+#	which summarized all submissions
+# 3. Display Submissions in Table format with Columns
+#	- SID (Student ID)
+#	- Student Name
+#	- Link to submitted *.php and README files
+#	- Link to source of submitted files
+# 3.1 Detect presence of correct attribute name/value pair in *.php file
+#	and display checkmark if found, and X otherwise
+#
+# NOTE: User must select which submissions will be graded in the following step
 ###################################################
+
+#**********GLOBAL VARIABLES***********
+	$CSS_file = "../html-css/styleSheet.css";
+
 	$submitted_php_extension = "php";
 	$submitted_txt_extension = "txt";
+	
+	#input field expected attribute and valued
+	$attr = "name";
+	$value = "expr";
 
 	$safe_filename_characters = "a-zA-Z0-9_.-";
+	$simple_test_case = "2+3";
 	$upload_dir = "../file-uploads";
 	$zip_filename = "project1A-Submissions.tar";
 	$php_filename = "sampleCalculator.php";
+	$form_action_script_n4 = "../php-src/n4_choose_test_cases.php";
+	
 	$submissions_directory = "../submissions";
 	$temp_directory = "../temp";
 	$html_images_dir = "../html-css/images/";
 	$editable_src = "editable_src";
+
 	$submissions_csv_file = "../submissions/submission.csv";
+		
+#*************************************
 
 
 echo header('Content-type: text/html');
@@ -25,45 +49,40 @@ echo header('Content-type: text/html');
 <html>
 <head>
 <title>CS143 - Project 1A Grading Application</title>
-	<link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />
+	<link rel="stylesheet" type="text/css" href="<?php echo $CSS_file; ?>" />
 </head>
 <body>
 <script type="text/javascript" src="../html-css/js/wz_tooltip.js"></script>
 <script type="text/javascript" src="../html-css/js/checkAll.js"></script>
 <h1>CS143 - Project 1A Grading Application</h1>
 
-
 <?php
 
-# If sample Calculator PHP solution was uploaded by user
-# Display a link to it
+# (If sample Calculator PHP solution was uploaded by user)
+
+###################################################
+#1. Display Link To Sample Solution Calculator and Sample Input
+###################################################
+
 if (file_exists("$upload_dir/$php_filename"))
 {
 	###################################################
-	## Sample Submission Testing
-	## 1. Result has correct name tag
-	## 2. Link to simple test case
+	## Test Sample Submission
+	## - Result has correct name tag?
+	## - Link to simple test case
 	###################################################
 
 	echo "<p>Please Test:&nbsp;&nbsp;&nbsp;";
 	echo "<a href=\"$upload_dir/$php_filename\" target=_blank>Your Sample Submission</a> * \n";
-	echo "<a href=\"$upload_dir/$php_filename?expr=2%2B3\" target=_blank>Simple Test Case: 2+3</a>\n";
+	echo "<a href=\"$upload_dir/$php_filename?expr=", urlencode($simple_test_case), "\" target=_blank>Simple Test Case: $simple_test_case</a>\n";
 
-	if (find_attribute("$upload_dir/$php_filename", "name", "expr")){
+	if (find_attribute("$upload_dir/$php_filename", $attr, $value)){
 	     echo "&nbsp;<img src=\"$html_images_dir/greenCheck.gif\" onmouseover=\"Tip(\OK:\" onmouseout=\"UnTip()\"/> </p>\n";
 	}else{
 	     echo "&nbsp;<img src=\"$html_images_dir/redX.gif\" class=error
 	     onmouseover=\"Tip('ERROR: Attribute name=expr NOT found; unable to process file\')\" onmouseout=\"UnTip()\" /></p>\n";
 	}
 }
-
-###################################################
-## Tar file of submissions
-## 1. Display files generated (missing files, missing ID tag,etc.)
-## 2. copy each student's submitted files into a new subdirectory
-##	to allow for easier preview and editing of submitted source code
-## 3. Allow user to generate list of programs to grade
-###################################################
 
 /*
 # delete editable_src directory in temporary directory (clean up)
@@ -73,12 +92,15 @@ if (-d "$temp_directory/$editable_src"){
 mkdir("$temp_directory/$editable_src") or die "Cannot create $temp_directory/$editable_src directory";
 */
 
-# 1. Display files generated (missing files, missing ID tag,etc.)
+###################################################
+# 2. Read submission CSV file 
+#	(which summarized all submissions)
+###################################################
 
 # import submissions.csv
-$FILE = fopen($submissions_csv_file, 'r') or die("Can't open $submissions_csv_file file");
+$FILE = fopen($submissions_csv_file, 'r') or die("Can't open $submissions_csv_file file (make sure uploaded file heirarchy is correct)");
 
-echo '<form name=selectSID method="POST" action="../php-src/n4_choose_test_cases.php">';
+echo "<form name=selectSID method=\"POST\" action=\"$form_action_script_n4\">";
 echo "\n";
 
 # form submit button
@@ -99,15 +121,25 @@ echo "<div align=center><table>\n";
 echo '<tr><th></th><th>SID</th><th>Name</th><th>Source Files</th><th>Interact with Code</th></tr>';
 
 
+###################################################
+# 3. Display Submissions in Table format with Columns
+#	- SID (Student ID)
+#	- Student Name
+#	- Link to submitted *.php and README files
+#	- Link to source of submitted files
+#
+# 3.1 Detect presence of correct attribute name/value pair in *.php file
+#	and display checkmark if found, and X otherwise
+###################################################
+
 while($line = fgetcsv($FILE, 0, ','))
 {
-    //@fields = $csv_submissions->fields();
     $sid = $line[0];
     $name = $line[1];
     #begin table row/checkbox
-    echo "<tr id=$sid> \n";		#prints id=SID for <tr> tag "id"
+    echo "<tr id=$sid> \n";			#prints id=SID for <tr> tag "id"
     echo "\t <td><input type=checkbox name='check[]' value=$sid></td> \n";
-    echo "\t <td>$sid</td> \n";		#prints SID
+    echo "\t <td>$sid</td> \n";			#prints SID
     echo "\t <td>$name</td> \n";		#prints Name
 
     #print link to file source (add red X if no attribute found)
@@ -120,7 +152,7 @@ while($line = fgetcsv($FILE, 0, ','))
     }
     closedir($DIR);
     
-    ## 2.1 create for each student's submitted files a new (editable_src) directory in the temporary directory
+    ## create for each student's submitted files a new (editable_src) directory in the temporary directory
     ##	to allow for easier preview and editing of submitted source code
 #		if (-d "$temp_directory/$editable_src/$sid"){
 #			rmtree("$temp_directory/$editable_src/$sid",0, 0 ) or die("Cannot remove contents of $temp_directory/$editable_src/$sid directory");		
@@ -137,6 +169,9 @@ while($line = fgetcsv($FILE, 0, ','))
 		 if (preg_match("/.$submitted_php_extension$/", $submitted_file)){
 			 $error;
 			 $tooltip;
+
+			 # check if expected attribute name/value exists in file
+			 # depending on result - display correct mouseover message
 			 if ( find_attribute("$submissions_directory/$sid/$submitted_file", "name", "expr") ){
 			    $error = 0;
 			    $tooltip = 'onmouseover="Tip(\'OK: Attribute name=expr found\')" onmouseout="UnTip()"';
@@ -152,6 +187,7 @@ while($line = fgetcsv($FILE, 0, ','))
 			 }else{
 			      echo "<img src=\"$html_images_dir/greenCheck.gif\" $tooltip/> <BR/>";
 			 }
+		 # display README (and other *.txt) file(s)
 		 }else if (preg_match("/.$submitted_txt_extension$/", $submitted_file)){
 			 echo "<a href=\"$submissions_directory/$sid/$submitted_file\" target=\"_blank\" >$submitted_file</a> \n";
 			 echo " </BR>";
@@ -160,6 +196,7 @@ while($line = fgetcsv($FILE, 0, ','))
     }
     echo "\t </td> \n";
 
+    # PRINT CODE SOURCE
     #print link to Calculator solution (add red X if no attribute found)
     # add green check if required attribute value found
     echo "\t <td> \n";
@@ -211,6 +248,9 @@ fclose($FILE);
 
 <?php
 
+# Given a source HTML file and attribute name/value pair
+# find_attribute(...) detects if the name/value attribute exists in the document
+# if the pair exists, returns 1, else returns 0
 function find_attribute($source_file, $attr, $value){
 	$doc = new DomDocument();
 	@$doc->loadHtmlFile("$source_file");
