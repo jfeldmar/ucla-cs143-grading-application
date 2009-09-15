@@ -1,1 +1,93 @@
-SID, SCORE, NOTES
+SID, SCORE-create, SCORE-load, NOTES
+503401785,1,1,2,passed
+; passed
+203615429,1,0,1,passed
+; "ERROR 2 (HY000) at line 44: File './data/MovieGenre.del' not found (Errcode: 2)\n"
+303596543,0,0,0,"ERROR 1005 (HY000) at line 41: Can't create table './CS143/MovieGenre.frm' (errno: 150)\n"
+; ERROR: create.sql script failed203462520,1,1,2,passed
+; passed
+503039399,1,1,2,passed
+; passed
+903549582,1,0,1,passed
+; "ERROR 2 (HY000) at line 1: File '/root/data/movie.del' not found (Errcode: 2)\n"
+503355401,1,1,2,passed
+; passed
+903384091,1,1,2,passed
+; passed
+403539665,1,1,2,passed
+; passed
+503539698,1,0,1,passed
+; "ERROR 2 (HY000) at line 1: File '/home/cs143/data/movie.del' not found (Errcode: 2)\n"
+703406150,1,1,2,passed
+; passed
+703449121,1,1,2,passed
+; passed
+303450164,1,1,2,passed
+; passed
+003260716,1,1,2,passed
+; passed
+603444869,1,1,2,passed
+; passed
+503481206,1,1,2,passed
+; passed
+803507035,1,1,2,passed
+; passed
+603401718,1,1,2,passed
+; passed
+603672658,1,1,2,passed
+; passed
+303466099,1,1,2,passed
+; passed
+003498073,0,0,0,'ERROR 1227 (42000) at line 138: Access denied; you need the SUPER privilege for this operation\n'
+; ERROR: create.sql script failed603445374,1,1,2,passed
+; passed
+703511311,1,1,2,passed
+; passed
+003471455,1,0,1,passed
+; "ERROR 2 (HY000) at line 1: File '/root/data/movie.del' not found (Errcode: 2)\n"
+203313177,1,1,2,passed
+; passed
+703464017,1,1,2,passed
+; passed
+903463696,1,1,2,passed
+; passed
+103645097,1,1,2,passed
+; passed
+403361577,1,1,2,passed
+; passed
+603470655,1,1,2,passed
+; passed
+003357346,1,1,2,passed
+; passed
+603395114,0,0,0,"ERROR 1064 (42000) at line 34: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'REFERENCES Movie(id)\n\t) ENGINE = InnoDB' at line 4\n"
+; ERROR: create.sql script failed003477754,1,1,2,passed
+; passed
+003512936,1,1,2,passed
+; passed
+603366734,1,0,1,passed
+; "ERROR 2 (HY000) at line 1: File 'movie.del' not found (Errcode: 2)\n"
+503463561,1,1,2,passed
+; passed
+503361181,1,1,2,passed
+; passed
+703477208,1,1,2,passed
+; passed
+903382600,1,1,2,passed
+; passed
+003602244,1,1,2,passed
+; passed
+302793163,1,0,1,passed
+; "ERROR 2 (HY000) at line 1: File '/root/data/movie.del' not found (Errcode: 2)\n"
+003484434,1,1,2,passed
+; passed
+603586321,1,1,2,passed
+; passed
+703373258,1,1,2,passed
+; passed
+503638523,1,0,1,passed
+; "ERROR 1045 (28000) at line 1: Access denied for user 'cs144'@'localhost' (using password: NO)\n"
+903397574,0,0,0,"ERROR 1064 (42000) at line 17: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'REFERENCES Movie(id)) ENGINE = InnoDB' at line 1\n"
+; ERROR: create.sql script failed203467103,1,1,2,passed
+; passed
+003116583,1,0,1,passed
+; "ERROR 1146 (42S02) at line 1: Table 'CS143.Movie' doesn't exist\n"

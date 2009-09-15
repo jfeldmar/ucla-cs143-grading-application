@@ -1,1 +1,1 @@
-drop database CS143;
+drop database if exists CS143;
