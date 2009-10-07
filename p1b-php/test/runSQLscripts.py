@@ -2,12 +2,13 @@
 
 import os, sys, subprocess, getopt, re;
 from subprocess import Popen, PIPE, STDOUT;
+from helper_UDfunctions import *;
 
 USAGE = """UCLA-CS143 - Project 1B Grading Script
 
-runSQLscripts.py: Executes 'create' and 'load' scripts and records results.
+run-Create-Load-SQLscripts.py: Executes 'create' and 'load' scripts and records results.
 
-USAGE: runSQLscripts.py -submissions <submission_dir> -db <mysql_DB> -user <mysql_user>
+USAGE: run-Create-Load-SQLscripts.py -submissions <submission_dir> -db <mysql_DB> -user <mysql_user>
 	-h, --help
 		Displays input options
 	-submissions <enter-location-here>
@@ -18,7 +19,7 @@ USAGE: runSQLscripts.py -submissions <submission_dir> -db <mysql_DB> -user <mysq
 		(Optional) Specify database user in mysql
 	-default
 		Show default global variable values
-		
+
 """
 
 ################ Global Variables ####################
@@ -29,6 +30,15 @@ submission_dir = "../submissions/b/"
 results_dir = "results"
 dir_file = results_dir +"/directories.txt"
 result_file = results_dir +"/results.txt"
+
+graders_query1_output = "scripts/out_q1.txt"
+graders_query2_output = "scripts/out_q2.txt"
+
+query1_file = "query1.sql"
+query2_file = "query2.sql"
+students_query_file = "myquery.sql"
+students_all_queries_file = "queries.sql"
+num_queries = 3
 
 test_DB = "CS143"
 user = "cs144"
@@ -114,11 +124,28 @@ outputDirFile = open(dir_file, 'w')
 sep = "\n"
 dirs = sep.join(onlydirs)
 outputDirFile.write(dirs)
+outputDirFile.flush()
 outputDirFile.close()
 
 #create output file for script results
 resultsFile = open(result_file, 'w')
 resultsFile.write("SID, SCORE-create, SCORE-load, TOTAL-SCORE, NOTES")
+
+# read GRADER's results for correct query1/query2 run
+f1 = open(graders_query1_output, 'r')
+f1.readline()			# skip first line which lists field names
+right_records_set_q1 = set(f1.read().splitlines())
+
+f2 = open(graders_query2_output, 'r')
+f2.readline()			# skip first line which lists field names
+right_records_set_q2 = list(f2.read().splitlines())
+
+print "===Expected Query 1 Output==="
+for i in right_records_set_q1:
+	print i
+print "===Expected Query 2 Output==="
+for i in right_records_set_q2:
+	print i
 
 # for each submission write to file output of running
 # create.sql, load.sql, queries.sql, violate.sql
@@ -138,6 +165,9 @@ resultsFile.write("SID, SCORE-create, SCORE-load, TOTAL-SCORE, NOTES")
 sids = list(onlydirs)
 create_script_results = []
 load_script_results = []
+query1_script_results = []
+query2_script_results = []
+query3_script_results = []
 #violate_script_results = []
 
 cmd_drop_DB = "mysql -u %s < %s"	% (user, drop_DB_script)
@@ -164,15 +194,15 @@ for sid in sids:
 		create_script_results.append([sid, "0", "ERROR: unable to create database"])
 		print "Error: Unable to create database ", test_DB," for SID: ", d
 		next
+		
 	print "Database ", test_DB, " created"
-
 	print "---------"
 	
 	##################### RUN CREATE SCRIPT #####################
 	try:
 	    print "Running: ", create_script, "..."
 
-	    process = subprocess.Popen(cmd_create, shell=True, stdout=PIPE, stderr=PIPE, bufsize=-1)
+	    process = subprocess.Popen(cmd_create, shell=True, stdout=PIPE, stderr=PIPE, bufsize=0)
 	    (stdout, stderr) = process.communicate()
 	    retcode = process.returncode
 
@@ -185,15 +215,16 @@ for sid in sids:
 	    	    create_failed = 1
 		    if retcode < 0:
         		print >>sys.stderr, "ERROR: Child was terminated by signal", -retcode
-			print >>sys.stderr, " when executing command: ", cmd_create
-			print 'stderr: ', repr(stderr)
 			create_script_results.append([sid, "0", "ERROR: child process terminted by signal"])
 		    else:
 	        	print >>sys.stderr, "ERROR: returncode: ", retcode
-			print >>sys.stderr, " when executing command: ", cmd_create
-			print 'stderr: ', repr(stderr)
 			create_script_results.append([sid, "0", repr(stderr)])
+
+		    print >>sys.stderr, " when executing command: ", cmd_create
+		    print 'stderr: ', repr(stderr)
+
 	except OSError, e:
+	    create_failed = 1
 	    print >>sys.stderr, "ERROR: Execution failed:", e
 	    
 	print "---------"
@@ -201,14 +232,19 @@ for sid in sids:
 	##################### RUN LOAD SCRIPT #####################
 	# if create script failed => error in load script
 	if (create_failed):
-		print "Load Script not Executed because Create Script FAILED"
+		load_failed = 0
+		print "Load  Script not Executed because Create Script FAILED"
+		print "Query Script not Executed because Create Script FAILED"
 		load_script_results.append([sid, "0", "ERROR: " + create_script + " script failed"])
+		query1_script_results.append([sid, "0", "ERROR: " + create_script + " script failed"])
+		query2_script_results.append([sid, "0", "ERROR: " + create_script + " script failed"])
+		query3_script_results.append([sid, "0", "ERROR: " + create_script + " script failed"])
 	else:
 	# run load script and store results
 		try:
 		    print "Running: ", load_script, "..."
 		    
-		    process = subprocess.Popen(cmd_load, shell=True, stdout=PIPE, stderr=PIPE, bufsize=-1)
+		    process = subprocess.Popen(cmd_load, shell=True, stdout=PIPE, stderr=PIPE, bufsize=0)
 		    (stdout, stderr) = process.communicate()
 		    retcode = process.returncode
 
@@ -221,52 +257,116 @@ for sid in sids:
 	    		    load_failed = 1
 			    if retcode < 0:
         			print >>sys.stderr, "ERROR: Child was terminated by signal", -retcode
-				print >>sys.stderr, " when executing command: ", cmd_load
-				print 'stderr: ', repr(stderr)
 				load_script_results.append([sid, "0", "ERROR: child process terminted by signal"])
 			    else:
 	        		print >>sys.stderr, "ERROR: returncode: ", retcode
-				print >>sys.stderr, " when executing command: ", cmd_load
-				print 'stderr: ', repr(stderr)
 				load_script_results.append([sid, "0", repr(stderr)])
+
+			    print >>sys.stderr, " when executing command: ", cmd_load
+			    print 'stderr: ', repr(stderr)
+		except OSError, e:
+		    load_failed = 1
+		    print >>sys.stderr, "ERROR: Execution failed:", e
+
+	print "---------"
+		
+	##################### RUN QUERY SCRIPT #####################
+	# if load script failed => error in query script
+	if (load_failed):
+		print "Query Script not Executed because Load Script FAILED"
+		query1_script_results.append([sid, "0", "ERROR: " + load_script + " script failed"])
+		query2_script_results.append([sid, "0", "ERROR: " + load_script + " script failed"])
+		query3_script_results.append([sid, "0", "ERROR: " + load_script + " script failed"])
+	elif (not create_failed and not load_failed):
+		# run query script and store results
+
+			#query1_file = "query1.sql"
+			#query2_file = "query2.sql"
+			#students_query_file = "myquery.sql"
+			#students_all_queries_file = "queries.sql"
+			#right_records_set_q1
+
+
+		##############uncomment when queries are separated into different files (one query per file)
+		# get student's query statements
+		#student_q1 = open(query1_file.readlines())
+		#student_q2 = open(query2_file.readlines())
+		#student_q3 = open(query3_file.readlines())
+		
+		try:
+			print "Running: ", students_all_queries_file, "..."
+
+
+			# parse STUDENT's queries file (separate into individual queries)
+			student_queries = extract_queries("../submissions/b/%s/%s" % (sid, students_all_queries_file), num_queries)
+
+			print "Found ", len(student_queries), " queries."
+			if (len(student_queries) == 0):
+				print "Insufficient number of queries, at least 1 query required"
+				sys.exit(2)
+			if (len(student_queries) > num_queries):
+				print "Running first ", num_queries, " queries only."
+
+			print "***"
 		except OSError, e:
 		    print >>sys.stderr, "ERROR: Execution failed:", e
-		
-	#	##################### RUN VIOLATE SCRIPT #####################
-	#	# if load script failed => error in violate script
-	#	if (load_failed):
-	#		print "Violate Script not Executed because Load Script FAILED"
-	#		violate_script_results.append([sid, "0", "ERROR: " + load_script + " script failed"])
-	#	else:
-	#	# run violate script and store results
-	#		try:
-	#		    print "Running: ", violate_script, "..."
-	#		    
-	#		    process = subprocess.Popen(cmd_violate, shell=True, stdout=PIPE, stderr=PIPE, bufsize=-1)
-	#		    (stdout, stderr) = process.communicate()
-	#		    retcode = process.returncode
-	#
-	#		    #returncode 0 if no error, 1 if error, less than 0 if terminated by signal
-	#    		    if retcode == 0:
-	#	    		    violate_failed = 0
-	#			    violate_script_results.append([sid, "1", "passed"])
-	#			    print "Violate Script: Successful."
-	#		    else: 
-	#	    		    violate_failed = 1
-	#			    if retcode < 0:
-	#        			print >>sys.stderr, "ERROR: Child was terminated by signal", -retcode
-	#				print >>sys.stderr, " when executing command: ", cmd_violate
-	#				print 'stderr: ', repr(stderr)
-	#				violate_script_results.append([sid, "0", "ERROR: child process terminted by signal"])
-	#			    else:
-	#	        		print >>sys.stderr, "ERROR: returncode: ", retcode
-	#				print >>sys.stderr, " when executing command: ", cmd_violate
-	#				print 'stderr: ', repr(stderr)
-	#				violate_script_results.append([sid, "0", repr(stderr)])
-	#		except OSError, e:
-	#		    print >>sys.stderr, "ERROR: Execution failed:", e
 
+		try:
+			# run QUERY 1
+			if len(student_queries) > 0:
+				cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[0])
 
+				fail, score, toprint = run_query(cmd, right_records_set_q1, 1)
+				if (not fail):
+					print "Query 1 Score: ", round(100*score), "%"
+				else:
+					print "Query 1 FAILED. Score: 0"
+					toprint
+		except OSError, e:
+		    print >>sys.stderr, "ERROR: Execution failed:", e
+
+		try:
+			# run QUERY 2
+			if len(student_queries) > 1:
+				cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[1])
+
+				fail, score, toprint = run_query(cmd, right_records_set_q2, 2)
+				if (not fail):
+					print "Query 2 Score: ", round(100*score), "%"
+				else:
+					print "Query 2 FAILED. Score: 0"
+					print toprint
+		except OSError, e:
+		    print >>sys.stderr, "ERROR: Execution failed:", e
+
+		try:					
+			# run QUERY 3
+			if len(student_queries) > 2:
+				cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[2])
+				process = subprocess.Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE, bufsize=0)
+				(stdout, stderr) = process.communicate()
+				retcode = process.returncode
+
+				#returncode 0 if no error, 1 if error, less than 0 if terminated by signal
+				try:
+					if retcode == 0:
+					    score = 100
+					    print "Query 3 Score:  100.0 %"
+					else: 
+					    if retcode < 0:
+        					toprint = "Query 3 - ERROR: Child was terminated by signal", -retcode
+					    else:
+						toprint = "Query 3 - ERROR: returncode: ", retcode
+
+					    print "Query 3 Score:  0 %"
+
+					    toprint += " when executing command: ", cmd
+					    toprint += "stderr: " , repr(stderr)
+				except OSError, e:
+					print >>sys.stderr, "ERROR: Execution failed:", e
+		except OSError, e:
+		    print >>sys.stderr, "ERROR: Execution failed:", e
+			
 #write result to files
 for i in range ( min(len(create_script_results),len(load_script_results))):
 	if (create_script_results[i][0] == load_script_results[i][0]):
@@ -276,8 +376,9 @@ for i in range ( min(len(create_script_results),len(load_script_results))):
 		total_score = str( int(c_score) + int(l_score) )
 		c_notes = create_script_results[i][2]
 		l_notes = load_script_results[i][2]
-		resultsFile.write(sid + "," + c_score + "," + l_score + "," + total_score + "," + c_notes + "; " + l_notes)
+		resultsFile.write(sid + "," + c_score + "," + l_score + "," + total_score + "," + c_notes + "; " + l_notes + "\n")
 
+resultsFile.flush()
 resultsFile.close()
 
 
