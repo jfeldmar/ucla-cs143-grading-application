@@ -335,7 +335,8 @@ function submit_csv(myform)
 	var csv = new Array();
 	var subs = document.getElementsByClassName("submissions");
 	
-	csv[0] = new Array(4);
+	var num_entries = document.getElementById('csv_size').value ;
+	csv[0] = new Array( num_entries );
 	csv[0][0] = "SID";
 	csv[0][1] = "Total Score";
 	csv[0][2] = "Fraction Correct";
@@ -343,7 +344,7 @@ function submit_csv(myform)
 		
 	for (var i = 0; i < subs.length; i++)
 	{
-		csv[i+1] = new Array(4);
+		csv[i+1] = new Array( num_entries );
 		csv[i+1][0] = '\"' + subs[i].id + '\"';
 		
 		// enclose text in quotes in order to escape commas

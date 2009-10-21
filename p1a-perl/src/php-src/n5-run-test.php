@@ -41,12 +41,17 @@ echo header('Content-type: text/html');
 ###################################################
 
 ## Open log that lists submissions to grade, create array of unique SIDs
+###################################################
 $FH = fopen($sids_to_grade_file, 'r') or die("Unable to open $sids_to_grade_file; contains list of submission SID's to grade");
-$unique_sids = array_unique(explode( "\n", fread($FH, filesize("$sids_to_grade_file"))));
+$temp_array = explode( "\n", fread($FH, filesize("$sids_to_grade_file")));
 fclose($FH);
+if ( $temp_array == 'FALSE' or count($temp_array) == 0)
+	die("Unable to extract submitted SID's from submissions.csv file");
+$unique_sids = array_unique($temp_array);
 
 $last = array_pop($unique_sids);
 echo "var unique_sids = new Array(" . implode( ",", $unique_sids) . $last . ");\n";
+###################################################
 
 # for each unique sid, create "files-sid" array listing all files submitted
 foreach ($unique_sids as $sid)
@@ -109,19 +114,21 @@ foreach ($unique_sids as $sid)
 
 ## 1. Display save mode and test cases selected
 ###################################################
-$savetype = $_POST['savetype'];
-$formdata = array();
+if ( !isset($_POST['savetype'])){
+	die('Unable to extract savetype variable from previous form');
+}
+if ( !isset($_POST['tests'])){
+	die('Unable to extract test cases from previous form');
+}
 
 # store test cases in local array
-foreach ($_POST['tests'] as $tests)
+$formdata = array();
+foreach ( $_POST['tests'] as $tests )
 {
 	array_push($formdata, $tests);
 }
 
-$queries =array();
-$solutions =array();
-$descriptions =array();
-
+$savetype = $_POST['savetype'];
 if (!strcmp($savetype, "save")){
 	echo "<p>Loading new Test Cases and saving them as Default Test Cases (for future runs)...</p>\n";
 }
@@ -139,6 +146,10 @@ else if (!strcmp($savetype,"load")){
 <?php
 #Display test case table
 $count = 1;
+$queries =array();
+$solutions =array();
+$descriptions =array();
+
 foreach ($formdata as $d){
 	$t = explode(",", $d);
 	
@@ -216,7 +227,7 @@ echo "<hr/>\n";
 ?>
 
 <!-- Link/Form to download CSV containing final grades -->
-<form action="$download_csv_file_link" method="POST" name=getcsv >
+<form action="<?php echo $download_csv_file_link ?>" method="POST" name=getcsv >
 <input type=hidden id = "csv_data" name="csv_data" value=""/></p>
 <input type=hidden id ="csv_size" name="csv_size" value="<?php echo $csv_values_per_submission;?>"/></p>
 <div align=center><a class="button" style="width:200" href="javascript:javascript:submit_csv(this);"><span>DOWNLOAD CSV</span></a></div>
