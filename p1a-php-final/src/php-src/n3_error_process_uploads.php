@@ -39,6 +39,7 @@
 	$editable_src = "editable_src";
 
 	$submissions_csv_file = "../submissions/submission.csv";
+	$sid_name_file = "../logs/sid-name.txt";
 		
 #*************************************
 
@@ -54,7 +55,11 @@ echo header('Content-type: text/html');
 <body>
 <script type="text/javascript" src="../html-css/js/wz_tooltip.js"></script>
 <script type="text/javascript" src="../html-css/js/checkAll.js"></script>
+
 <h1>CS143 - Project 1A Grading Application</h1>
+<p align=center><input type=button value='Restart' onClick="location.href='../html-css/start.html'"/></p>
+
+<h2> === Process Uploaded Data === </h2>
 
 <?php
 
@@ -131,11 +136,13 @@ echo '<tr><th></th><th>SID</th><th>Name</th><th>Source Files</th><th>Interact wi
 # 3.1 Detect presence of correct attribute name/value pair in *.php file
 #	and display checkmark if found, and X otherwise
 ###################################################
+$sid_name_arr = array();
 
 while($line = fgetcsv($FILE, 0, ','))
 {
     $sid = $line[0];
     $name = $line[1];
+    $sid_name_arr[$sid] = $name;
     #begin table row/checkbox
     echo "<tr id=$sid> \n";			#prints id=SID for <tr> tag "id"
     echo "\t <td><input type=checkbox name='check[]' value=$sid></td> \n";
@@ -237,6 +244,8 @@ fclose($FILE);
 
 </table></div>
 
+
+
 <p align=center><a class=button href="#" style="width:90" onclick="javascript:checkAll()" ><span>Select All</span></a></br>
 
 <a class=button href="#" style="width:92" onclick="javascript:uncheckAll()" ><span>Deselect All</span></a></p>
@@ -247,6 +256,11 @@ fclose($FILE);
 </body></html>
 
 <?php
+
+// Save SID, Student Name Pairs to Log file (to be used later to output final results)
+$FP = fopen($sid_name_file, 'w+') or die ("Unable to open log file $sid_name_file to store SID/Student Name pairs");
+fwrite($FP, serialize($sid_name_arr));
+fclose($FP);
 
 # Given a source HTML file and attribute name/value pair
 # find_attribute(...) detects if the name/value attribute exists in the document

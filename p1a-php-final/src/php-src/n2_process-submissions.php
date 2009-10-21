@@ -48,8 +48,11 @@ if ( !is_uploaded_file($_FILES[$submission_tarfile_field_name]['tmp_name']) )
 </head>
 <body>
 <h3 align=left><a class=button style="width:300" href="#" onclick="window.location='<?php echo $BACK_button_link; ?>'"><span>BACK (all files from this run will be deleted)</span></a></h3>
+
 <h1>CS143 - Project 1A Grading Application</h1>
-<h2> Processing Uploaded Files...</h2>
+<p align=center><input type=button value='Restart' onClick="location.href='../html-css/start.html'"/></p>
+
+<h2> === Processing Uploaded Files... ===</h2>
 
 <?php
 #

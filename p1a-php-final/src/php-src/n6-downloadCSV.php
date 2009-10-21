@@ -7,9 +7,8 @@
 
 # Uncomment lines and change Content-Type to print file to screen
 
-$file = urldecode($_POST['csv_data']);
+$fileholder = urldecode($_POST['csv_data']);
 $size = urldecode($_POST['csv_size']);
-$fileholder = "";
 $fields = explode(",", $file);
 
 
@@ -19,19 +18,8 @@ $fields = explode(",", $file);
 
 # Uncomment lines and change Content-Type to print file to screen
 #print("<pre>");
-for ($i = 0; $i < count($fields); $i++)
-{
-	for ($j = 0; $j < $size; $j++)
-	{
-//		$fields[$i] =~ s/"/""/g;
-		$fileholder .= "$fields[$i],";
-#		echo "$fields[$i], ";
-		$i++;
-	}
-	$i--;
-	$fileholder .= "\n";
+#	echo "$fields[$i], ";
 #	echo "\n\r";
-}
 #print("</pre>");
 
 # Write file to log (deletes previously downloaded file)

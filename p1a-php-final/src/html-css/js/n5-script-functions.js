@@ -106,7 +106,7 @@ function load_totals(nfile)
 	{
 		update_links(subs[i].id, nfile);
 		update_notes(subs[i].id);
-//		update_total_score(subs[i].id);
+		update_total_score(subs[i].id); // double check if this is redundant in some cases
 	}
 }
 
@@ -332,28 +332,27 @@ function recommend_score(expected, received)
 
 function submit_csv(myform)
 {
-	var csv = new Array();
 	var subs = document.getElementsByClassName("submissions");
+
+	// format of UCLA Gradebook Tab Separated File
+	// uid<tab>name<tab>score<tab>[comment]
 	
-	var num_entries = document.getElementById('csv_size').value ;
-	csv[0] = new Array( num_entries );
-	csv[0][0] = "SID";
-	csv[0][1] = "Total Score";
-	csv[0][2] = "Fraction Correct";
-	csv[0][3] = "Notes";
+	var num_entries = document.getElementById('csv_size').value;
+	
+	var csv = new Array();
 		
 	for (var i = 0; i < subs.length; i++)
 	{
-		csv[i+1] = new Array( num_entries );
-		csv[i+1][0] = '\"' + subs[i].id + '\"';
+		var sid = subs[i].id;
+		var sname = subs[i].title;//sids-names[sid];
+		var score = subs[i].getElementsByClassName('tscore')[0].innerHTML;
+		var notes = subs[i].getElementsByClassName('num_correct_score')[0].innerHTML +"; "+ subs[i].getElementsByClassName('tnotes')[0].innerHTML;
 		
-		// enclose text in quotes in order to escape commas
-		csv[i+1][1] = '\"' + subs[i].getElementsByClassName('tscore')[0].innerHTML + '\"';
-		csv[i+1][2] = '\"' + subs[i].getElementsByClassName('num_correct_score')[0].innerHTML + '\"';
-		csv[i+1][3] = '\"' + subs[i].getElementsByClassName('tnotes')[0].innerHTML + '\"';		
+		// enclose text in quotes
+		csv[i] = sid + '\t' + '\"' + sname + '\"\t' + score + '\t' + '\"' + notes + '\"';
 	}
 
-	csv = escape(csv);
+	csv = escape(csv.join("\n"));
 	document.getElementById('csv_data').value = csv;
 	document.getcsv.submit();
 }

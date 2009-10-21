@@ -15,6 +15,7 @@
 	$descriptions_directory = "../test_cases/descriptions";
 	$default_data_tarfile = "../default-data/test-cases.tar";
 	$sids_to_grade_file = "../logs/SIDstoGrade.csv";
+	$sid_name_file = "../logs/sid-name.txt";
 
 	$default_php = "calculator.php";
 	$sample_php = "../file-uploads/sampleCalculator.php";
@@ -31,8 +32,9 @@ echo header('Content-type: text/html');
 
 <html><head>
 <title>CS143 - Project 1A Grading Application</title>
-	<link rel="stylesheet" type="text/css" href="<?php echo $CSS_file; ?>" />
+	
 
+	<link rel="stylesheet" type="text/css" href="<?php echo $CSS_file; ?>" />
 <script type="text/javascript">
 
 <?php
@@ -51,6 +53,15 @@ $unique_sids = array_unique($temp_array);
 
 $last = array_pop($unique_sids);
 echo "var unique_sids = new Array(" . implode( ",", $unique_sids) . $last . ");\n";
+
+#load SID-Name Array File into Javascript Array/Hash Table
+$sids_names = unserialize(file_get_contents($sid_name_file));
+echo "var sids-names = Object();\n";
+foreach ($sids_names as $key => $value)
+{
+	echo "sids-names['$key'] = '$value';\n";
+}
+
 ###################################################
 
 # for each unique sid, create "files-sid" array listing all files submitted
@@ -95,7 +106,9 @@ foreach ($unique_sids as $sid)
 <?php echo "<body onload=\"load_totals('".$default_php."');\">"; ?>
 
 <h1>CS143 - Project 1A Grading Application</h1>
-<h2> Confirm/Add/Delete/Save Test Cases </h2>
+<p align=center><input type=button value='Restart' onClick="location.href='../html-css/start.html'"/></p>
+
+<h2> === Load/Save Test Cases & Run Tests === </h2>
 
 <script type="text/javascript" src="../html-css/js/n5-script-functions.js"></script>
 <script type="text/javascript" src="../html-css/js/wz_tooltip.js"></script>
@@ -246,6 +259,7 @@ echo "<hr/>\n";
 
 #Display Data for each Submission (sid directory)
 ###################################################
+
 foreach ($unique_sids as $sid)
 {
        ## separator for each submission's code
@@ -258,15 +272,16 @@ foreach ($unique_sids as $sid)
        echo "<a class=\"button ShowHideButton\" name=\"$sid\" href=\"#\"  style=\"width:60\" onclick=\"javascript:ShowHideSection('$sid', this);\"><span>Show</span></a>\n";
 #       echo "<br/><input type=\"button\" class=\"$sid\" style=\"width:4em\" onclick=\"javascript:ShowHideSection('$sid', this);\" value='Show'>\n";
 
+	
 	## "Sum Score" Button (for current student only)
-       echo "&nbsp;&nbsp;Test Case Results for Student $sid\n";
+       echo "&nbsp;&nbsp;Test Case Results for SID $sid ($sids_names[$sid])\n";
        echo "<a class=button href=\"#\"  style=\"width:110\" onclick=\"javascript:update_total_score('$sid');\" ><span>Sum Scores</span></a>\n";
 #       echo "<a class=button href=\"#\"  style=\"width:105\" onclick=\"javascript:update_notes('$sid');\" ><span>Concat Notes</span></a></p>\n";
 
 #       echo "<input type=\"button\" onclick=\"javascript:update_total_score('$sid');\" value=\"Sum Scores\" >\n";
 #       echo "<input type=\"button\" onclick=\"javascript:update_notes('$sid');\" value=\"Concat Notes\" >\n";
 
-       echo "<div class=\"submissions\" id=\"$sid\" style=\"overflow:hidden;display:none\">\n";
+       echo "<div class=\"submissions\" id=\"$sid\" title=\"$sids_names[$sid]\" style=\"overflow:hidden;display:none\">\n";
 
 	## Name of/ Link to file being graded now
        echo "<p align=center>Graded File: <a class=\"link_editable\" href=$submissions_directory/$sid/$default_php target=_blank > $default_php </a>\n";

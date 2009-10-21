@@ -34,7 +34,9 @@
 </head>
 <body>
 <h1>CS143 - Project 1A Grading Application</h1>
-<h2> WELCOME!!!</h2>
+<p align=center><input type=button value='Restart' onClick="location.href='../html-css/start.html'"/></p>
+
+<h2> === WELCOME!!! ===</h2>
 
 
 <?php

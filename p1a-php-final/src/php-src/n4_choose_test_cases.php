@@ -111,7 +111,9 @@ function deselectAll()
 <body onload="javascript:deselectAll()">
 
 <h1>CS143 - Project 1A Grading Application</h1>
-<h2 align=center> Confirm/Add/Delete/Save Test Cases </h2>
+<p align=center><input type=button value='Restart' onClick="location.href='../html-css/start.html'"/></p>
+
+<h2> === Confirm/Add/Delete/Save Test Cases === </h2>
 
 <?php
 
