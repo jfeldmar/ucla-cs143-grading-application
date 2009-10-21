@@ -1,15 +1,9 @@
-Apache log location: ?
-Execute perl from command line:
-		perl -e 'command here'
-		
 Back up to remote server script:
 
 apache2 access and error log location: /var/log/apache2
 empty file: cat /dev/null > filename1
 
 unlock keyboard mode: ctrl+alt+win
-
-
 
 
 for sid in onlydirs:

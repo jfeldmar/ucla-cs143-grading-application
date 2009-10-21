@@ -1,0 +1,39 @@
+<html>
+<head>
+<title>CS143 - Project 1A Grading Application</title>
+<link rel="stylesheet" type="text/css" href="../html-css/styleSheet.css" />
+
+<script type="text/javascript">
+function confirm_clear_data(mybutton) {
+	var answer = confirm("If you proceed, all grading results from previous grading attempts will be deleted. Are you sure you want to proceed?");
+	if (answer){
+		if (mybutton.name == "start-perl"){
+			window.location = "../cgi-bin/n1_initialize.cgi";
+		}else{
+			window.location = "../php-src/n1_initialize.php";
+		}
+	}
+}
+</script>
+</head>
+<body>
+<h1>CS143 - Project 1A Grading Application</h1>
+<h2 align=center> WELCOME!!!</h2>
+
+<br/>
+<br/>
+<p align=center>
+<a href="../html-css/test_input/various8input.tar">Sample Input (tar file)</a><br/>
+<a href="../html-css/test_input/index-ORIGINAL.php">Sample Calculator PHP Solution</a>
+</p>
+<!-- <p align=center>
+<a class=button style="width:200" href='#' name="start-perl" onclick="confirm_clear_data(this)"><span>Click to Begin Perl Site</span></a>
+</p> -->
+
+<p align=center>
+<a class=button style="width:200" href='#' name="start-php" onclick="confirm_clear_data(this)"><span>Click to Begin PHP Site</span></a>
+</p>
+
+</body>
+</html>
+
