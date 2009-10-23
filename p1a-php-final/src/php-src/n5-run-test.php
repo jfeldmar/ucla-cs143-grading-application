@@ -24,7 +24,7 @@
 	$pop_up_window = "../html-css/choosefile-popup.html";
 	
 	$download_csv_file_link = "n6-downloadCSV.php";
-	$csv_values_per_submission = "4";
+	$download_log_file_link = "n7-downloadLOG.php";
 #*************************************
 
 echo header('Content-type: text/html');
@@ -239,19 +239,26 @@ echo "<hr/>\n";
 
 ?>
 
-<!-- Link/Form to download CSV containing final grades -->
+<!-- Link/Form to download TSV containing final grades -->
 <form action="<?php echo $download_csv_file_link ?>" method="POST" name=getcsv >
-<input type=hidden id = "csv_data" name="csv_data" value=""/></p>
-<input type=hidden id ="csv_size" name="csv_size" value="<?php echo $csv_values_per_submission;?>"/></p>
+<input type=hidden id ="csv_data" name="csv_data" value=""/></p>
 <div align=center><a class="button" style="width:200" href="javascript:javascript:submit_csv(this);"><span>DOWNLOAD CSV</span></a></div>
 </form>
 
+<!-- Link/Form to download HTML containing data on current page (grading information) -->
+<form action="<?php echo $download_log_file_link ?>" method="POST" name=getlog >
+<input type=hidden id ="log_data" name="log_data" value=""/></p>
+<div align=center><a class="button" style="width:200" href="javascript:javascript:submit_log(this);"><span>DOWNLOAD LOG</span></a></div>
+</form>
+
 <!-- Table Containing Submissions Data -->
+<div id="table-data">
 <div align=center>
 
 <!-- Show All / Hide All Buttons -->
 <a class="button"  style="width:75" href="javascript:show_all('<span>Show</span>');"/><span>Show All</span></a>
-<a class="button"  style="width:75" href="javascript:hide_all('<span>Hide</span>');"/><span>Hide All</span></a></div>
+<a class="button"  style="width:75" href="javascript:hide_all('<span>Hide</span>');"/><span>Hide All</span></a>
+</div>
 
 <p align=center>*****************************************************************</p>
 
@@ -359,5 +366,5 @@ foreach ($unique_sids as $sid)
 <!-- Show All / Hide All Buttons -->
 <div align=center><a class="button"  style="width:75" href="javascript:show_all('<span>Show</span>'"/><span>Show All</span></a>
 <a class="button"  style="width:75" href="javascript:hide_all('<span>Hide</span>');"/><span>Hide All</span></a></div>
-
+</div>
 </body></html>
