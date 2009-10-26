@@ -1,13 +1,13 @@
 <?php
 
 ###################################################
-## generate a CSV (comma separated value) file for user to download
+## generate a TSV (comma separated value) file for user to download
 ## saves SID, total score, fraction correct, and total notes
 ###################################################
 
 # Uncomment lines and change Content-Type to print file to screen
 
-$fileholder = urldecode($_POST['csv_data']);
+$fileholder = urldecode($_POST['tsv_data']);
 
 #print("<p>Passed data: $fileholder </p>");
 
