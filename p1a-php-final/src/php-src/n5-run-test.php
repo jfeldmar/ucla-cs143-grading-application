@@ -23,7 +23,7 @@
 	$temp_directory = "../temp";
 	$pop_up_window = "../html-css/choosefile-popup.html";
 	
-	$download_csv_file_link = "n6-downloadCSV.php";
+	$download_tsv_file_link = "n6-downloadTSV.php";
 	$download_log_file_link = "n7-downloadLOG.php";
 #*************************************
 
@@ -240,9 +240,9 @@ echo "<hr/>\n";
 ?>
 
 <!-- Link/Form to download TSV containing final grades -->
-<form action="<?php echo $download_csv_file_link ?>" method="POST" name=getcsv >
-<input type=hidden id ="csv_data" name="csv_data" value=""/></p>
-<div align=center><a class="button" style="width:200" href="javascript:javascript:submit_csv(this);"><span>DOWNLOAD CSV</span></a></div>
+<form action="<?php echo $download_tsv_file_link ?>" method="POST" name=gettsv >
+<input type=hidden id ="tsv_data" name="tsv_data" value=""/></p>
+<div align=center><a class="button" style="width:200" href="javascript:javascript:submit_tsv(this);"><span>DOWNLOAD TSV</span></a></div>
 </form>
 
 <!-- Link/Form to download HTML containing data on current page (grading information) -->
