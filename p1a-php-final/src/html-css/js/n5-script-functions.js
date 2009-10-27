@@ -4,6 +4,19 @@ function ShowHideSection(section, secbutton) {
   secbutton.innerHTML = (secbutton.innerHTML == '<span>Hide</span>') ? '<span>Show</span>' : '<span>Hide</span>';
 }
 
+// this function does not update the scores dynamically - do not use without fixing
+function change_pts (cell) {
+	var old_score = cell.innerHTML;
+	var input = prompt("Please enter maximum points", old_score);
+
+	if (input != null){
+		if (!is_numeric(input)){
+			alert("Error: Please enter a number greater than 0");
+		}else{
+			cell.innerHTML = input;
+		}
+	}
+}
 function editCell (cell, type, sid) {
 	var input = prompt("Please enter your text", cell.innerHTML);
 	
@@ -194,8 +207,10 @@ function update_links(sid, nfile)
 		result_cell.innerHTML = get_result(temp);
 		
 		// update score/score total
+		// get current query max point value
 		// note: the result in the result_cell is inside a <div> tag
-		score_cell.innerHTML = recommend_score(sample_cell.innerHTML, result_cell.getElementsByTagName('div')[0].innerHTML);
+		var max_score = document.getElementById("query_max_score_" + r).innerHTML;
+		score_cell.innerHTML = parseFloat(max_score) * parseFloat(recommend_score(sample_cell.innerHTML, result_cell.getElementsByTagName('div')[0].innerHTML));
 		
 		// if query passed, don't include query description
 		if (score_cell.innerHTML == "1")
@@ -330,29 +345,52 @@ function recommend_score(expected, received)
 	}else { return "0"; }
 }
 
-function submit_csv(myform)
+function submit_tsv(myform)
 {
 	var subs = document.getElementsByClassName("submissions");
 
 	// format of UCLA Gradebook Tab Separated File
 	// uid<tab>name<tab>score<tab>[comment]
-	
-	var num_entries = document.getElementById('csv_size').value;
-	
-	var csv = new Array();
+		
+	var tsv = new Array();
 		
 	for (var i = 0; i < subs.length; i++)
 	{
 		var sid = subs[i].id;
-		var sname = subs[i].title;//sids-names[sid];
+		var sname = subs[i].title;
 		var score = subs[i].getElementsByClassName('tscore')[0].innerHTML;
 		var notes = subs[i].getElementsByClassName('num_correct_score')[0].innerHTML +"; "+ subs[i].getElementsByClassName('tnotes')[0].innerHTML;
 		
 		// enclose text in quotes
-		csv[i] = sid + '\t' + '\"' + sname + '\"\t' + score + '\t' + '\"' + notes + '\"';
+		tsv[i] = sid + '\t' + '\"' + sname + '\"\t' + score + '\t' + '\"' + notes + '\"';
 	}
 
-	csv = escape(csv.join("\n"));
-	document.getElementById('csv_data').value = csv;
-	document.getcsv.submit();
+	tsv = escape(tsv.join("\n"));
+	document.getElementById('tsv_data').value = tsv;
+	document.gettsv.submit();
+}
+
+function submit_log(myform)
+{
+	//show_all('<span>Show</span>');
+	var backup = document.getElementById('table-data').innerHTML;
+	
+	// convert links to text
+	show_all('<span>Show</span>');
+	var alinks = document.getElementById('table-data').getElementsByTagName("A");
+	for (var i in alinks)
+	{
+		alinks[i].href = "#";
+//		var p = alinks[i].parentNode;
+//		var mytext = alinks[i].innerHTML;
+//		p.replaceChild(document.createTextNode(mytext), alinks[i]);
+	}
+	var html = "<html><body onload=\"javascript:alert('NOTE: This is a LOG file only. Links are not functional.')\">" + document.getElementById('table-data').innerHTML + "</body></html>";
+	
+	document.getElementById('table-data').innerHTML = backup;
+
+	html = escape(html);
+	document.getElementById('log_data').value = html;
+	hide_all('<span>Hide</span>');
+	document.getlog.submit();
 }

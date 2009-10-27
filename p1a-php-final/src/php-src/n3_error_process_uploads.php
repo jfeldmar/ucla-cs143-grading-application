@@ -89,13 +89,13 @@ if (file_exists("$upload_dir/$php_filename"))
 	}
 }
 
-/*
+
 # delete editable_src directory in temporary directory (clean up)
-if (-d "$temp_directory/$editable_src"){
-	rmtree("$temp_directory/$editable_src",0, 0 ) or die("Cannot remove contents of $temp_directory/$editable_src directory");		
+if (file_exists("$temp_directory/$editable_src")){
+	!system("rm -rf $temp_directory/$editable_src") or die("Cannot remove contents of $temp_directory/$editable_src directory");		
 }
-mkdir("$temp_directory/$editable_src") or die "Cannot create $temp_directory/$editable_src directory";
-*/
+mkdir("$temp_directory/$editable_src") or die("Cannot create $temp_directory/$editable_src directory");
+
 
 ###################################################
 # 2. Read submission CSV file 
@@ -109,7 +109,7 @@ echo "<form name=selectSID method=\"POST\" action=\"$form_action_script_n4\">";
 echo "\n";
 
 # form submit button
-echo '<p align=center><a class=button style="width:150pt" href="#" onclick="document.selectSID.submit()" ><span>Next (select test cases)</span></a></p>';
+echo '<p align=center><a class=button style="width:150pt" href="#" onclick="javascript:submit_checked(document.selectSID)" ><span>Next (select test cases)</span></a></p>';
 echo "\n";
 
 # select all button
@@ -214,17 +214,21 @@ while($line = fgetcsv($FILE, 0, ','))
 		    $lines = fread($SUBFILE, filesize("$submissions_directory/$sid/$submitted_file"));
 		    fclose($SUBFILE);
 
-		    ## 3.2 copy each student's submitted files into a new (editable_src) subdirectory
+		    ## 3.2 copy each student's submitted files into a new (../temp/editable_src) subdirectory
 		    ##	to allow for easier preview and editing of submitted source code
-#			open CFILE, ">$temp_directory/$editable_src/$sid/$submitted_file" or die "unable to create file $submissions_directory/$sid/$editable_src/$submitted_file";
-#			# reformat text to display php code literally (without execution)
-#			if ($submitted_file =~ m/.$submitted_php_extension$/){
-#				$source = encode_entities($source);
-#				$source = "<pre>".$source."<pre>";
-#			}
-#			echo CFILE $source;
-#			close CFILE;
-
+		    if (!is_dir("$temp_directory/$editable_src/$sid")){
+		    mkdir("$temp_directory/$editable_src/$sid") or die("Unable to create directory $temp_directory/$editable_src/$sid");
+		    }
+		    $CFILE = fopen("$temp_directory/$editable_src/$sid/$submitted_file", 'w') or die("unable to create file $submissions_directory/$sid/$editable_src/$submitted_file");
+		    # reformat text to display php code literally (without execution)
+		    if (preg_match("/.$submitted_php_extension$/", $submitted_file)){
+			    $lines = htmlentities($lines);
+			    $lines = "<pre>".$lines."<pre>";
+		    }
+		    fwrite($CFILE, $lines);
+		    fclose($CFILE);
+			
+		    ##Create link to source code version of the files (in the ../temp/editable_src/ directory
 		    if (preg_match( "/.$submitted_php_extension$/", $submitted_file)){
 			    echo "<a href=\"$temp_directory/$editable_src/$sid/$submitted_file\" target=\"_blank\">Source: $submitted_file</a><BR/> \n";
 		    }else if (preg_match( "/.$submitted_txt_extension$/", $submitted_file)){
@@ -250,7 +254,7 @@ fclose($FILE);
 
 <a class=button href="#" style="width:92" onclick="javascript:uncheckAll()" ><span>Deselect All</span></a></p>
 
-<p align=center><a class=button style="width:150pt" href="#" onclick="document.selectSID.submit()" ><span>Next (select test cases)</span></a></p>
+<p align=center><a class=button style="width:150pt" href="#" onclick="javascript:submit_checked(document.selectSID)" ><span>Next (select test cases)</span></a></p>
 
 </form>
 </body></html>

@@ -25,6 +25,8 @@
 	
 	$download_tsv_file_link = "n6-downloadTSV.php";
 	$download_log_file_link = "n7-downloadLOG.php";
+	
+	$max_pts = 10;
 #*************************************
 
 echo header('Content-type: text/html');
@@ -154,7 +156,7 @@ else if (!strcmp($savetype,"load")){
 
 <p align=center>
 <table border = 1>
-<tr><th></th><th>Test Input</th><th>Solution</th><th>Description</th></tr>
+<tr><th></th><th>Test Input</th><th>Solution</th><th>Description</th><th>Points</th></tr>
 
 <?php
 #Display test case table
@@ -162,8 +164,10 @@ $count = 1;
 $queries =array();
 $solutions =array();
 $descriptions =array();
+$iterator = 0;
 
 foreach ($formdata as $d){
+	$iterator += 1;
 	$t = explode(",", $d);
 	
 	#save test cases and solutions into 2 different arrays
@@ -177,6 +181,9 @@ foreach ($formdata as $d){
 	echo "<td>$t[0]</td>\n";
 	echo "<td>$t[1]</td>\n";
 	echo "<td>$t[2]</td>\n";
+	# do not use the dynamic max_score update here - it is not yet functional
+#	echo "<td id=query_max_score_$iterator onClick=\"change_pts(this);\">$max_pts</td>\n";
+	echo "<td id=query_max_score_$iterator >$max_pts</td>\n";
 	echo "</tr>\n";
 	$count++;
 }
@@ -229,9 +236,12 @@ if (!strcmp($savetype,"save")){
 	echo "Done.</p>";
 }	
 echo "<hr/>\n";
-echo "<p align=center><a href=\"$sample_php\" target=_blank>Your Sample Submission</a> &nbsp;&nbsp;&nbsp;\n";
-echo "(<a href=\"$sample_php?expr=2%2B3\" target=_blank>Simple Test Case: 2+3</a>)</p>\n";
-echo "<hr/>\n";
+
+if (file_exists($sample_php)){
+	echo "<p align=center><a href=\"$sample_php\" target=_blank>Your Sample Submission</a> &nbsp;&nbsp;&nbsp;\n";
+	echo "(<a href=\"$sample_php?expr=2%2B3\" target=_blank>Simple Test Case: 2+3</a>)</p>\n";
+	echo "<hr/>\n";
+}
 
 ## 3. Display table summarizing test case output 
 ##	for selected submissions (use log for reference)
@@ -295,9 +305,9 @@ foreach ($unique_sids as $sid)
         ## Button to change file being graded
        echo "&nbsp;or&nbsp;<a class=button style=\"width:200\" href=\"#\" onclick=\"ChooseFilePopUp('$pop_up_window','$sid');\"/><span>Choose PHP File to Grade</span></a></p>\n";
 
-	## Query Table (Student's solution, Sample Solution, Result, Score, Notes)       
+	## Query Table (Student's solution, Sample Solution, Student Result, Score, Notes)       
        echo "<table width=90% border=\"1\" align=\"center\">";
-       echo "<tr><th></th><th>QUERY</th><th>Sample Solution</th><th>RESULT</th><th>Score</th><th>Notes</th></tr>\n";
+       echo "<tr><th></th><th>QUERY</th><th>Sample Solution</th><th>STUDENT RESULT</th><th>Score</th><th>Notes</th></tr>\n";
        
        $escape_str = "";
 
