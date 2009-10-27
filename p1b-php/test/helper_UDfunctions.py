@@ -24,6 +24,7 @@ def grade(grader_results, student_results, q_num):
 	return score
 
 # SPLIT UP THE QUERIES IN THE STUDENT'S SUBMITTED FILE
+# (use semi-colon as separator)
 def extract_queries(students_all_queries_file, num):
 	all_student_queries = open(students_all_queries_file, 'r').read()
 	all_queries = all_student_queries.split(';')
@@ -39,10 +40,10 @@ def extract_queries(students_all_queries_file, num):
 			processed_queries += 1
 	return queries
 
-# RUN GIVEN STUDENT'S QUERY AND COMPARE RESULTS TO GRADER'S RESULTS
-def run_query(student_query, grader_result, num):
+# RUN GIVEN GRADER'S QUERY ON STUDENT'S DATABASE AND COMPARE RESULTS TO GRADER'S RESULTS
+def run_query(query, grader_result, num):
 	fail_query, score, toprint = (0,0,0)
-	process = subprocess.Popen(student_query, shell=True, stdout=PIPE, stderr=PIPE, bufsize=-1)
+	process = subprocess.Popen(query, shell=True, stdout=PIPE, stderr=PIPE, bufsize=-1)
 	(stdout, stderr) = process.communicate()
 	retcode = process.returncode
 
@@ -56,6 +57,35 @@ def run_query(student_query, grader_result, num):
 	    		student_result.pop(0)
 		    score = grade(grader_result, set(student_result), num)
 		    toprint = "Query ", num , " Score: ", score
+		    if score != 1:
+		    	toprint += "\n" , "Student's Result:", "\n"
+			for r in student_result:
+				toprint += r, "\n"
+		else: 
+		    fail_query = 1
+		    if retcode < 0:
+        		toprint = "ERROR: Child was terminated by signal", -retcode
+		    else:
+			toprint = "ERROR: returncode: ", retcode
+
+		    toprint += " when executing command: ", query
+		    toprint +='stderr: ', repr(stderr)
+	except OSError, e:
+		print >>sys.stderr, "ERROR: Execution failed:", e
+	return fail_query, score, toprint
+	
+
+# RUN GIVEN STUDENT'S QUERY AND MAKE SURE IT EXECUTES WITHOUT ERROR
+def test_query(student_query):
+	process = subprocess.Popen(student_query, shell=True, stdout=PIPE, stderr=PIPE, bufsize=0)
+	(stdout, stderr) = process.communicate()
+	retcode = process.returncode
+
+	#returncode 0 if no error, 1 if error, less than 0 if terminated by signal
+	try:
+		if retcode == 0:
+		    fail_query = 0
+		    toprint = ""
 		else: 
 		    fail_query = 1
 		    if retcode < 0:
@@ -64,7 +94,7 @@ def run_query(student_query, grader_result, num):
 			toprint = "ERROR: returncode: ", retcode
 
 		    toprint += " when executing command: ", student_query
-		    toprint +='stderr: ', repr(stderr)
+		    toprint += "stderr: " , repr(stderr)
 	except OSError, e:
 		print >>sys.stderr, "ERROR: Execution failed:", e
-	return fail_query, score, toprint
+	return fail_query, toprint

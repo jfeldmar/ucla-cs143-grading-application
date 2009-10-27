@@ -3,6 +3,16 @@
 import os, sys, subprocess, getopt, re;
 from subprocess import Popen, PIPE, STDOUT;
 from helper_UDfunctions import *;
+from default_vars import *;
+
+
+################ Global Variables ####################
+##########[Load from configuration file]##############
+
+# dump entire config file
+for section in config.sections():
+    for option in config.options(section):
+        print " ", option, "=", config.get(section, option)
 
 USAGE = """UCLA-CS143 - Project 1B Grading Script
 
@@ -17,56 +27,10 @@ USAGE: run-Create-Load-SQLscripts.py -submissions <submission_dir> -db <mysql_DB
 		(Optional) Specify database to be used in mysql
 	-user <user-name>
 		(Optional) Specify database user in mysql
-	-default
-		Show default global variable values
+	
+	[ To view/change default values, please see the configuration file (default_vars.config). ]
 
 """
-
-################ Global Variables ####################
-######################################################
-
-# should come from ARGV ( submission directory, test Database, user, create/load script name )
-submission_dir = "../submissions/b/"
-results_dir = "results"
-dir_file = results_dir +"/directories.txt"
-result_file = results_dir +"/results.txt"
-
-graders_query1_output = "scripts/out_q1.txt"
-graders_query2_output = "scripts/out_q2.txt"
-
-query1_file = "query1.sql"
-query2_file = "query2.sql"
-students_query_file = "myquery.sql"
-students_all_queries_file = "queries.sql"
-num_queries = 3
-
-test_DB = "CS143"
-user = "cs144"
-
-drop_DB_script = "./scripts/dropDB-CS143.sql"
-create_DB_script = "./scripts/createDB-CS143.sql"
-create_script = "create.sql"
-load_script = "load.sql"
-#violate_script = "violate.sql"
-
-DEFAULT = """
-submission_dir = "../submissions/b/"
-results_dir = "results"
-dir_file = results_dir +"/directories.txt"
-result_file = results_dir +"/results.txt"
-
-test_DB = "CS143"
-user = "cs144"
-
-drop_DB_script = "./scripts/dropDB-CS143.sql"
-create_DB_script = "./scripts/createDB-CS143.sql"
-create_script = "create.sql"
-load_script = "load.sql"
-
-[to change default values, please edit file directly]
-"""
-######################################################
-################ Global Variables ####################
 
 #CHANGE GLOBAL VARIABLES BASED ON COMMAND-LINE INPUT
 try:
@@ -89,10 +53,12 @@ for opt, arg in options:
 		print "Changing mysql user to %s" % (arg)
 		user = arg
 	elif opt == '--default':
-		print DEFAULT
+		print "To see default values please open the file: ", config_filename
 	else:
 		print "option %s with value %s is not recognized."	% (opt, arg)
 		assert False, "unhandled option"
+
+################ END - Global Variables ####################
 
 #get all submission SID directories
 
@@ -131,18 +97,33 @@ outputDirFile.close()
 resultsFile = open(result_file, 'w')
 resultsFile.write("SID, SCORE-create, SCORE-load, TOTAL-SCORE, NOTES")
 
+# read GRADER's test query1 and query2
+q1 = open(query1_file, 'r')
+right_query1 = q1.read()
+q1.close()
+
+q2 = open(query2_file, 'r')
+right_query2 = q2.read()
+q2.close()
+
 # read GRADER's results for correct query1/query2 run
 f1 = open(graders_query1_output, 'r')
 f1.readline()			# skip first line which lists field names
 right_records_set_q1 = set(f1.read().splitlines())
+f1.close()
 
 f2 = open(graders_query2_output, 'r')
 f2.readline()			# skip first line which lists field names
 right_records_set_q2 = list(f2.read().splitlines())
+f2.close()
 
+print "\n===Query 1==="
+print right_query1
 print "===Expected Query 1 Output==="
 for i in right_records_set_q1:
 	print i
+print "\n===Query 2==="
+print right_query2
 print "===Expected Query 2 Output==="
 for i in right_records_set_q2:
 	print i
@@ -157,10 +138,10 @@ for i in right_records_set_q2:
 	# store success/failure score & output
 	# run load.sql
 	# store success/failure score & output
-	# run queries.sql
+	# run grader's queries
 	# store success/failure score & output
-	# run violate.sql
-	# store success/failure score & output
+	# run student's queries.sql
+	# store success/failure score
 
 sids = list(onlydirs)
 create_script_results = []
@@ -174,15 +155,14 @@ cmd_drop_DB = "mysql -u %s < %s"	% (user, drop_DB_script)
 cmd_create_DB = "mysql -u %s < %s"	% (user, create_DB_script)
 
 for sid in sids:
-
 	cmd_create = "mysql -u %s %s < ../submissions/b/%s/%s"	% (user, test_DB, sid, create_script)
 	cmd_load = "mysql -u %s %s < ../submissions/b/%s/%s"	% (user, test_DB, sid, load_script)
 #	cmd_violate = "mysql -u %s %s < ../submissions/b/%s/%s"	% (user, test_DB, sid, violate_script)
 	
-	print "*****************************"
+	print "\n*****************************"
 	print "****SID: ", sid, "*********"
 
-	# 1. drop database test_DB
+	# 1. drop database test_DB if it exists
 	if (subprocess.call(cmd_drop_DB, shell=True) != 0):
 		create_script_results.append([sid, "0", "ERROR: unable to drop database"])
 		print "Error: Unable to drop database ", test_DB," for SID: ", d	
@@ -206,7 +186,7 @@ for sid in sids:
 	    (stdout, stderr) = process.communicate()
 	    retcode = process.returncode
 
-	    #returncode 0 if no error, 1 if error, less than 0 if terminated by signal
+	    #returncode is 0 if no error, 1 if error, less than 0 if terminated by signal
     	    if retcode == 0:
 	    	    create_failed = 0
 		    create_script_results.append([sid, "1", "passed"])
@@ -270,32 +250,49 @@ for sid in sids:
 
 	print "---------"
 		
-	##################### RUN QUERY SCRIPT #####################
+	##################### TEST QUERIES #####################
 	# if load script failed => error in query script
 	if (load_failed):
 		print "Query Script not Executed because Load Script FAILED"
 		query1_script_results.append([sid, "0", "ERROR: " + load_script + " script failed"])
 		query2_script_results.append([sid, "0", "ERROR: " + load_script + " script failed"])
 		query3_script_results.append([sid, "0", "ERROR: " + load_script + " script failed"])
-	elif (not create_failed and not load_failed):
-		# run query script and store results
+	elif (not create_failed and not load_failed):		
 
-			#query1_file = "query1.sql"
-			#query2_file = "query2.sql"
-			#students_query_file = "myquery.sql"
-			#students_all_queries_file = "queries.sql"
-			#right_records_set_q1
-
-
-		##############uncomment when queries are separated into different files (one query per file)
-		# get student's query statements
-		#student_q1 = open(query1_file.readlines())
-		#student_q2 = open(query2_file.readlines())
-		#student_q3 = open(query3_file.readlines())
-		
+	##################### RUN GRADER's QUERIES ON STUDENT'S DATABASE #####################
+	# execute grader's queries on database and compare output to expected (grader's) output
 		try:
-			print "Running: ", students_all_queries_file, "..."
+			# run QUERY 1			
+			cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, right_query1)
 
+			fail, score, toprint = run_query(cmd, right_records_set_q1, 1)
+			if (not fail):
+				print "Grader Query 1 Score: ", round(100*score), "%"
+			else:
+				print "Grader Query 1 FAILED. Score: 0"
+				toprint
+		except OSError, e:
+		    print >>sys.stderr, "ERROR: Execution failed:", e
+
+		try:
+			# run QUERY 2
+			cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, right_query2)
+
+			fail, score, toprint = run_query(cmd, right_records_set_q2, 2)
+			if (not fail):
+				print "Grader Query 2 Score: ", round(100*score), "%"
+			else:
+				print "Grader Query 2 FAILED. Score: 0"
+				print toprint
+		except OSError, e:
+		    print >>sys.stderr, "ERROR: Execution failed:", e
+
+
+	##################### TEST STUDENT's QUERIES #####################
+	# make sure student submitted correct number (3) of queries and they execute without errors
+
+		try:
+			print "\nRunning: ", students_all_queries_file, "..."
 
 			# parse STUDENT's queries file (separate into individual queries)
 			student_queries = extract_queries("../submissions/b/%s/%s" % (sid, students_all_queries_file), num_queries)
@@ -310,18 +307,20 @@ for sid in sids:
 			print "***"
 		except OSError, e:
 		    print >>sys.stderr, "ERROR: Execution failed:", e
-
+		
 		try:
 			# run QUERY 1
 			if len(student_queries) > 0:
 				cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[0])
 
-				fail, score, toprint = run_query(cmd, right_records_set_q1, 1)
+				fail, toprint = test_query(cmd)
 				if (not fail):
-					print "Query 1 Score: ", round(100*score), "%"
+					print "Student Query 1: Executed Successfully."
 				else:
-					print "Query 1 FAILED. Score: 0"
+					print "Student Query 1: FAILED."
 					toprint
+			else:
+				print "Student Query 1: FAILED - no query found."
 		except OSError, e:
 		    print >>sys.stderr, "ERROR: Execution failed:", e
 
@@ -330,40 +329,30 @@ for sid in sids:
 			if len(student_queries) > 1:
 				cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[1])
 
-				fail, score, toprint = run_query(cmd, right_records_set_q2, 2)
+				fail, toprint = test_query(cmd)
 				if (not fail):
-					print "Query 2 Score: ", round(100*score), "%"
+					print "Student Query 2: Executed Successfully."
 				else:
-					print "Query 2 FAILED. Score: 0"
+					print "Student Query 2 FAILED."
 					print toprint
+			else:
+				print "Student Query 2: FAILED - no query found."
+
 		except OSError, e:
 		    print >>sys.stderr, "ERROR: Execution failed:", e
 
-		try:					
-			# run QUERY 3
+		try:
+			# run QUERY 3 (check that runs without errors)
 			if len(student_queries) > 2:
 				cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[2])
-				process = subprocess.Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE, bufsize=0)
-				(stdout, stderr) = process.communicate()
-				retcode = process.returncode
-
-				#returncode 0 if no error, 1 if error, less than 0 if terminated by signal
-				try:
-					if retcode == 0:
-					    score = 100
-					    print "Query 3 Score:  100.0 %"
-					else: 
-					    if retcode < 0:
-        					toprint = "Query 3 - ERROR: Child was terminated by signal", -retcode
-					    else:
-						toprint = "Query 3 - ERROR: returncode: ", retcode
-
-					    print "Query 3 Score:  0 %"
-
-					    toprint += " when executing command: ", cmd
-					    toprint += "stderr: " , repr(stderr)
-				except OSError, e:
-					print >>sys.stderr, "ERROR: Execution failed:", e
+				fail, toprint = test_query(cmd)
+				if (not fail):
+					print "Student Query 3: Executed Successfully."
+				else:
+					print "Student Query 3: FAILED."
+					print toprint
+			else:
+				print "Student Query 3: FAILED - no query found."
 		except OSError, e:
 		    print >>sys.stderr, "ERROR: Execution failed:", e
 			
