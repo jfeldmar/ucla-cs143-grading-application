@@ -1,18 +1,19 @@
 #!/usr/bin/python
 
-import os, sys, subprocess, getopt, re;
+import os, sys, subprocess, getopt, re, csv;
 from subprocess import Popen, PIPE, STDOUT;
-from helper_UDfunctions import *;
-from default_vars import *;
+from helper_UDfunctions import *;	# import helper functions from helper_UDfunctions.py
+from default_vars import *;	# loads global variables from default_vars.py
 
+# Load SID-Student Name tuples from submissions.csv file
+# (use default_vars.py to change file name/location)
+# store sid-name pairs in dictionary
+submissions_reader = csv.DictReader(open(submissions_data_file), ['sid', 'name'], delimiter=',', quotechar='"')
+name_dictionary = {}
+for row in submissions_reader:
+	name_dictionary[row['sid']] = row['name']
 
 ################ Global Variables ####################
-##########[Load from configuration file]##############
-
-# dump entire config file
-for section in config.sections():
-    for option in config.options(section):
-        print " ", option, "=", config.get(section, option)
 
 USAGE = """UCLA-CS143 - Project 1B Grading Script
 
@@ -28,7 +29,7 @@ USAGE: run-Create-Load-SQLscripts.py -submissions <submission_dir> -db <mysql_DB
 	-user <user-name>
 		(Optional) Specify database user in mysql
 	
-	[ To view/change default values, please see the configuration file (default_vars.config). ]
+	[ To view/change default values, please see the configuration file (default_vars.py). ]
 
 """
 
@@ -53,7 +54,7 @@ for opt, arg in options:
 		print "Changing mysql user to %s" % (arg)
 		user = arg
 	elif opt == '--default':
-		print "To see default values please open the file: ", config_filename
+		print "To see default values please open the file: default_vars.py"
 	else:
 		print "option %s with value %s is not recognized."	% (opt, arg)
 		assert False, "unhandled option"
@@ -93,9 +94,9 @@ outputDirFile.write(dirs)
 outputDirFile.flush()
 outputDirFile.close()
 
-#create output file for script results
+#create output file for script results (in format compatible with MyUCLA Gradebook
+# tab-delimited fields: SID <tab> Name <tab> Score <tab> [Comment]
 resultsFile = open(result_file, 'w')
-resultsFile.write("SID, SCORE-create, SCORE-load, TOTAL-SCORE, NOTES")
 
 # read GRADER's test query1 and query2
 q1 = open(query1_file, 'r')
@@ -131,15 +132,15 @@ for i in right_records_set_q2:
 # for each submission write to file output of running
 # create.sql, load.sql, queries.sql, violate.sql
 
-# 1. drop database test_DB
-# 2. create database test_DB
-# 3. for each submission
+# 1. for each submission
+	# drop database test_DB
+	# create database test_DB
 	# run create.sql
-	# store success/failure score & output
+	# print/store success/failure score & comments
 	# run load.sql
-	# store success/failure score & output
+	# print/store success/failure score & comments
 	# run grader's queries
-	# store success/failure score & output
+	# print/store success/failure score & comments
 	# run student's queries.sql
 	# store success/failure score
 
@@ -155,6 +156,8 @@ cmd_drop_DB = "mysql -u %s < %s"	% (user, drop_DB_script)
 cmd_create_DB = "mysql -u %s < %s"	% (user, create_DB_script)
 
 for sid in sids:
+	points = 0
+
 	cmd_create = "mysql -u %s %s < ../submissions/b/%s/%s"	% (user, test_DB, sid, create_script)
 	cmd_load = "mysql -u %s %s < ../submissions/b/%s/%s"	% (user, test_DB, sid, load_script)
 #	cmd_violate = "mysql -u %s %s < ../submissions/b/%s/%s"	% (user, test_DB, sid, violate_script)
@@ -190,7 +193,6 @@ for sid in sids:
     	    if retcode == 0:
 	    	    create_failed = 0
 		    create_script_results.append([sid, "1", "passed"])
-		    print "Create Script: Successful."
 	    else: 
 	    	    create_failed = 1
 		    if retcode < 0:
@@ -206,6 +208,13 @@ for sid in sids:
 	except OSError, e:
 	    create_failed = 1
 	    print >>sys.stderr, "ERROR: Execution failed:", e
+	    
+	if (create_failed):
+	    print "Create Script: Failed - 0 points."
+	else:
+	    print "Create Script: Successful - ", create_pts ," points."
+	    points += create_pts	
+
 	    
 	print "---------"
 	
@@ -232,7 +241,6 @@ for sid in sids:
     		    if retcode == 0:
 	    		    load_failed = 0
 			    load_script_results.append([sid, "1", "passed"])
-			    print "Load Script: Successful."
 		    else: 
 	    		    load_failed = 1
 			    if retcode < 0:
@@ -248,6 +256,12 @@ for sid in sids:
 		    load_failed = 1
 		    print >>sys.stderr, "ERROR: Execution failed:", e
 
+#		if (load_failed):
+#		    print "Load Script: Failed - 0 points."
+#		else:
+#		    print "Load Script: Successful - ", load_pts ," points."	
+#		    points += load_pts	
+
 	print "---------"
 		
 	##################### TEST QUERIES #####################
@@ -261,32 +275,46 @@ for sid in sids:
 
 	##################### RUN GRADER's QUERIES ON STUDENT'S DATABASE #####################
 	# execute grader's queries on database and compare output to expected (grader's) output
+
+	# run QUERY 1			
 		try:
-			# run QUERY 1			
 			cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, right_query1)
-
-			fail, score, toprint = run_query(cmd, right_records_set_q1, 1)
-			if (not fail):
-				print "Grader Query 1 Score: ", round(100*score), "%"
-			else:
-				print "Grader Query 1 FAILED. Score: 0"
-				toprint
+			fail1, score, toprint = run_query(cmd, right_records_set_q1, 1)
+			if (fail1):
+				print toprint	# print error message if error encountered
 		except OSError, e:
-		    print >>sys.stderr, "ERROR: Execution failed:", e
+			fail1 = 1
+			print >>sys.stderr, "ERROR: Execution failed:", e
+		
+#		# assign/print score for query 1
+#		if (fail1):
+#			print "Grader Query 1 Failed - 0 points."
+#		else:
+#			# give credit for query running without errors
+#			# give credit for correctness of results ( 0 <= score <= 1)
+#			q1pts = float(query1_pts) * float(score) + float(query1_no_error_pts)
+#			points += q1pts
+#			print "Grader Query 1 Score: ", q1pts, " points."
 
+	# run QUERY 2
 		try:
-			# run QUERY 2
 			cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, right_query2)
-
-			fail, score, toprint = run_query(cmd, right_records_set_q2, 2)
-			if (not fail):
-				print "Grader Query 2 Score: ", round(100*score), "%"
-			else:
-				print "Grader Query 2 FAILED. Score: 0"
-				print toprint
+			fail2, score, toprint = run_query(cmd, right_records_set_q2, 2)
+			if (fail2):
+				print toprint	# print error message if error encountered
 		except OSError, e:
+		    fail2 = 1
 		    print >>sys.stderr, "ERROR: Execution failed:", e
 
+#		# assign/print score for query 2
+#		if (fail2):
+#			print "Grader Query 2 Failed - 0 points."
+#		else:
+#			# give credit for query running without errors
+#			# give credit for correctness of results ( 0 <= score <= 1)
+#			q2pts = float(query2_pts) * float(score) + float(query2_no_error_pts)
+#			points += q2pts
+#			print "Grader Query 2 Score: ", q2pts, " points."
 
 	##################### TEST STUDENT's QUERIES #####################
 	# make sure student submitted correct number (3) of queries and they execute without errors
@@ -297,75 +325,96 @@ for sid in sids:
 			# parse STUDENT's queries file (separate into individual queries)
 			student_queries = extract_queries("../submissions/b/%s/%s" % (sid, students_all_queries_file), num_queries)
 
-			print "Found ", len(student_queries), " queries."
 			if (len(student_queries) == 0):
 				print "Insufficient number of queries, at least 1 query required"
-				sys.exit(2)
+				print "Student Queries: No Queries Fount - 0 points"
 			if (len(student_queries) > num_queries):
 				print "Running first ", num_queries, " queries only."
 
 			print "***"
+			fail_extract = 0;
 		except OSError, e:
+		    fail_extract = 1;
 		    print >>sys.stderr, "ERROR: Execution failed:", e
-		
-		try:
+
+		if (not fail_extract):
+			# assign/print point for having correct number of queries
+
+			# find how many queries found as fraction (can't be greater than 1)
+			queries_found = min (len(student_queries)/num_queries, 1)
+
+			print "Found ", len(student_queries), " queries: ", queries_found * has_all_queries_pts ," points."
+			points += queries_found * has_all_queries_pts
+
 			# run QUERY 1
-			if len(student_queries) > 0:
-				cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[0])
+			try:
+				if len(student_queries) > 0:
+					cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[0])
 
-				fail, toprint = test_query(cmd)
-				if (not fail):
-					print "Student Query 1: Executed Successfully."
+					fail, toprint = test_query(cmd)
+					if (fail):
+						print toprint
 				else:
-					print "Student Query 1: FAILED."
-					toprint
-			else:
-				print "Student Query 1: FAILED - no query found."
-		except OSError, e:
-		    print >>sys.stderr, "ERROR: Execution failed:", e
+					print "Student Query 1: FAILED (no query found) - 0 points."
+			except OSError, e:
+			    fail = 1
+			    print >>sys.stderr, "ERROR: Execution failed:", e
 
-		try:
+	#		# assign/print score for student's query 1
+	#		if (fail):
+	#			print "Student Query 1: FAILED - 0 points."
+	#		else:
+	#			print "Student Query 1: Executed Successfully - ", student_queries_pts/num_queries ," points."
+
 			# run QUERY 2
-			if len(student_queries) > 1:
-				cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[1])
+			try:
+				if len(student_queries) > 1:
+					cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[1])
 
-				fail, toprint = test_query(cmd)
-				if (not fail):
-					print "Student Query 2: Executed Successfully."
+					fail, toprint = test_query(cmd)
+					if (fail):
+						print toprint
 				else:
-					print "Student Query 2 FAILED."
-					print toprint
-			else:
-				print "Student Query 2: FAILED - no query found."
+					print "Student Query 2: FAILED (no query found) - 0 points."
+			except OSError, e:
+			    fail = 1
+			    print >>sys.stderr, "ERROR: Execution failed:", e
 
-		except OSError, e:
-		    print >>sys.stderr, "ERROR: Execution failed:", e
+	#		# assign/print score for student's query 2
+	#		if (fail):
+	#			print "Student Query 2 FAILED - 0 points."
+	#		else:
+	#			print "Student Query 2: Executed Successfully - ", student_queries_pts/num_queries ," points."
 
-		try:
-			# run QUERY 3 (check that runs without errors)
-			if len(student_queries) > 2:
-				cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[2])
-				fail, toprint = test_query(cmd)
-				if (not fail):
-					print "Student Query 3: Executed Successfully."
+			# run QUERY 3
+			try:
+				if len(student_queries) > 2:
+					cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[2])
+					fail, toprint = test_query(cmd)
+					if (fail):
+						print toprint
 				else:
-					print "Student Query 3: FAILED."
-					print toprint
-			else:
-				print "Student Query 3: FAILED - no query found."
-		except OSError, e:
-		    print >>sys.stderr, "ERROR: Execution failed:", e
+					print "Student Query 3: FAILED (no query found) - 0 points."
+			except OSError, e:
+			    fail = 1
+			    print >>sys.stderr, "ERROR: Execution failed:", e
+
+	#		# assign/print score for student's query 3
+	#		if (fail):
+	#			print "Student Query 3 FAILED - 0 points."
+	#		else:
+	#			print "Student Query 3: Executed Successfully - ", student_queries_pts/num_queries ," points."
 			
-#write result to files
-for i in range ( min(len(create_script_results),len(load_script_results))):
-	if (create_script_results[i][0] == load_script_results[i][0]):
-		sid = create_script_results[i][0]
-		c_score = create_script_results[i][1]
-		l_score = load_script_results[i][1]
-		total_score = str( int(c_score) + int(l_score) )
-		c_notes = create_script_results[i][2]
-		l_notes = load_script_results[i][2]
-		resultsFile.write(sid + "," + c_score + "," + l_score + "," + total_score + "," + c_notes + "; " + l_notes + "\n")
+##write result to files
+#for i in range ( min(len(create_script_results),len(load_script_results))):
+#	if (create_script_results[i][0] == load_script_results[i][0]):
+#		sid = create_script_results[i][0]
+#		c_score = create_script_results[i][1]
+#		l_score = load_script_results[i][1]
+#		total_score = str( int(c_score) + int(l_score) )
+#		c_notes = create_script_results[i][2]
+#		l_notes = load_script_results[i][2]
+#		resultsFile.write(sid + "," + c_score + "," + l_score + "," + total_score + "," + c_notes + "; " + l_notes + "\n")
 
 resultsFile.flush()
 resultsFile.close()

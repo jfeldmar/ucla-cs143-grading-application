@@ -43,7 +43,7 @@ def extract_queries(students_all_queries_file, num):
 # RUN GIVEN GRADER'S QUERY ON STUDENT'S DATABASE AND COMPARE RESULTS TO GRADER'S RESULTS
 def run_query(query, grader_result, num):
 	fail_query, score, toprint = (0,0,0)
-	process = subprocess.Popen(query, shell=True, stdout=PIPE, stderr=PIPE, bufsize=-1)
+	process = subprocess.Popen(query, shell=True, stdout=PIPE, stderr=PIPE, bufsize=0)
 	(stdout, stderr) = process.communicate()
 	retcode = process.returncode
 
