@@ -1,8 +1,20 @@
 import os, sys, subprocess, getopt, re, time, signal;
 from subprocess import Popen, PIPE, STDOUT;
 
+# construct string for MyUCLA Gradebook TSV file entry and write to file
+# format: sid <tab> name <tab> score <tab> [comment]
+def write_grade(fd, sid, name, score, comment):
+	try:
+		total_score = str(round(score,1))
+		fd.write(sid + "\t" + name + "\t"+ total_score + "\t" + comment + "\n")
+		fd.flush()
+	except e:
+		print >>sys.stderr, "Unable to store gradebook entry for SID: " + sid
+		exit()
+	return
+
 # given a set of expected results and a set of student's results
-# assign score (0 to 1.0) based on how many results are matching
+# assign score (0 to 1.0) based on how many results ar e matching
 def grade(grader_results, student_results, q_num):	
 	if (q_num == 1):
 		if (len(grader_results) == 0):

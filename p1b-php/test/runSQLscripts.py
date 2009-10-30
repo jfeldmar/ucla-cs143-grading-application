@@ -87,7 +87,7 @@ for d in directories:
 print "Number of directories (submissions) found: ", len(onlydirs)
 
 #write directories to file (i.e. SIDs) (one per line)
-outputDirFile = open(dir_file, 'w')
+outputDirFile = open(dir_file, 'w') or sys.exit("Unable to Open " + dir_file + " for storing directory names.")
 sep = "\n"
 dirs = sep.join(onlydirs)
 outputDirFile.write(dirs)
@@ -96,24 +96,24 @@ outputDirFile.close()
 
 #create output file for script results (in format compatible with MyUCLA Gradebook
 # tab-delimited fields: SID <tab> Name <tab> Score <tab> [Comment]
-resultsFile = open(result_file, 'w')
+resultsFile = open(result_file, 'w') or sys.exit("Unable to open output Gradebook file: " + result_file)
 
 # read GRADER's test query1 and query2
-q1 = open(query1_file, 'r')
+q1 = open(query1_file, 'r') or sys.exit("Unable to open grader's query 1: " + query1_file)
 right_query1 = q1.read()
 q1.close()
 
-q2 = open(query2_file, 'r')
+q2 = open(query2_file, 'r') or sys.exit("Unable to open grader's query 2: " + query2_file)
 right_query2 = q2.read()
 q2.close()
 
 # read GRADER's results for correct query1/query2 run
-f1 = open(graders_query1_output, 'r')
+f1 = open(graders_query1_output, 'r') or sys.exit("Unable to open grader's query 1 solution file: " + graders_query1_output)
 f1.readline()			# skip first line which lists field names
 right_records_set_q1 = set(f1.read().splitlines())
 f1.close()
 
-f2 = open(graders_query2_output, 'r')
+f2 = open(graders_query2_output, 'r') or sys.exit("Unable to open grader's query 2 solution file: " + graders_query2_output)
 f2.readline()			# skip first line which lists field names
 right_records_set_q2 = list(f2.read().splitlines())
 f2.close()
@@ -157,15 +157,24 @@ cmd_create_DB = "mysql -u %s < %s"	% (user, create_DB_script)
 
 sys.stdout.flush()
 
+loop_start = time.time()
+
 for sid in sids:
-	points = 0
+	sys.stdout.flush()
 	
+	current_start = time.time()
+
+	# placeholder variables for gradebook file output
+	points = 0
+	comments = ""
+	
+	# restart MySQL to kill possible hanging processes from previous MySQL queries and commands
 	os.system('/etc/init.d/mysql restart')
 	
 	# in case when program output is written to file
 	# this command still displays grading progress to the standard error output
 	# (this allows the user to more easily track progress)
-	print >>sys.stderr, "Grading SID: ", sid
+	print >>sys.stderr, "Grading SID: ", sid, "( ", name_dictionary[sid], ")"
 
 	cmd_create = "mysql -u %s %s < ../submissions/b/%s/%s"	% (user, test_DB, sid, create_script)
 	cmd_load = "mysql -u %s %s < ../submissions/b/%s/%s"	% (user, test_DB, sid, load_script)
@@ -177,8 +186,13 @@ for sid in sids:
 	# 1. drop database test_DB if it exists
 	if (subprocess.call(cmd_drop_DB, shell=True) != 0):
 		create_script_results.append([sid, "0", "ERROR: unable to drop database"])
-		print "Error: Unable to drop database ", test_DB," for SID: ", d	
-		next
+		error_str = "Error: Unable to drop database ", test_DB," for SID: ", d
+		print error_str
+
+		# write results to gradebook and continue to next SID
+		write_grade(resultsFile, sid, name_dictionary[sid], 0, error_str)	
+		continue
+		
 	print "Database ", test_DB," removed"
 
 	sys.stdout.flush()
@@ -186,8 +200,12 @@ for sid in sids:
 	# 2. create database test_DB
 	if (subprocess.call(cmd_create_DB, shell=True) != 0):
 		create_script_results.append([sid, "0", "ERROR: unable to create database"])
-		print "Error: Unable to create database ", test_DB," for SID: ", d
-		next
+		error_str =  "Error: Unable to create database ", test_DB," for SID: ", d
+		print error_str
+		
+		# write results to gradebook and continue to next SID
+		write_grade(resultsFile, sid, name_dictionary[sid], 0, error_str)	
+		continue
 		
 	print "Database ", test_DB, " created"
 
@@ -225,6 +243,7 @@ for sid in sids:
 	    
 	if (create_failed):
 	    print "Create Script: Failed - 0 points."
+	    comments += " create script failed;"
 	else:
 	    print "Create Script: Successful - ", create_pts ," points."
 	    points += create_pts	
@@ -239,10 +258,18 @@ for sid in sids:
 		load_failed = 0
 		print "Load  Script not Executed because Create Script FAILED"
 		print "Query Script not Executed because Create Script FAILED"
+
+		comments += " Load  Script not Executed because Create Script FAILED; Query Script not Executed because Create Script FAILED"
+
 		load_script_results.append([sid, "0", "ERROR: " + create_script + " script failed"])
 		query1_script_results.append([sid, "0", "ERROR: " + create_script + " script failed"])
 		query2_script_results.append([sid, "0", "ERROR: " + create_script + " script failed"])
 		query3_script_results.append([sid, "0", "ERROR: " + create_script + " script failed"])
+		
+		# write results to gradebook and continue to next SID
+		write_grade(resultsFile, sid, name_dictionary[sid], points, comments)			
+		continue
+		
 	else:
 	# run load script and store results
 		try:
@@ -273,6 +300,7 @@ for sid in sids:
 
 		if (load_failed):
 		    print "Load Script: Failed - 0 points."
+		    comments += " load script failed;"
 		else:
 		    print "Load Script: Successful - ", load_pts ," points."	
 		    points += load_pts	
@@ -285,9 +313,17 @@ for sid in sids:
 	# if load script failed => error in query script
 	if (load_failed):
 		print "Query Script not Executed because Load Script FAILED"
+		
 		query1_script_results.append([sid, "0", "ERROR: " + load_script + " script failed"])
 		query2_script_results.append([sid, "0", "ERROR: " + load_script + " script failed"])
 		query3_script_results.append([sid, "0", "ERROR: " + load_script + " script failed"])
+
+		comments += " Query Script not Executed because Create Script FAILED"
+		
+		# write results to gradebook and continue to next SID
+		write_grade(resultsFile, sid, name_dictionary[sid], points, comments)			
+		continue
+		
 	elif (not create_failed and not load_failed):		
 
 	##################### RUN GRADER's QUERIES ON STUDENT'S DATABASE #####################
@@ -307,6 +343,7 @@ for sid in sids:
 		# assign/print score for query 1
 		if (fail1):
 			print "Grader Query 1 Failed - 0 points."
+			comments += " Grader Query 1 Failed;"
 		else:
 			# give credit for query running without errors
 			# give credit for correctness of results ( 0 <= score <= 1)
@@ -332,6 +369,7 @@ for sid in sids:
 		# assign/print score for query 2
 		if (fail2):
 			print "Grader Query 2 Failed - 0 points."
+			comments += " Grader Query 2 Failed;"
 		else:
 			# give credit for query running without errors
 			# give credit for correctness of results ( 0 <= score <= 1)
@@ -364,14 +402,21 @@ for sid in sids:
 
 		sys.stdout.flush()
 
-		if (not fail_extract):
+		if (fail_extract):
+			comments += " Unable to parse student's queries into separate queries"
+		else:
 			# assign/print point for having correct number of queries
 
 			# find how many queries found as fraction (can't be greater than 1)
-			queries_found = min (len(student_queries)/num_queries, 1)
+			queries_found = min (len(student_queries), num_queries)
 
-			print "Found ", len(student_queries), " queries: ", queries_found * has_all_queries_pts ," points."
-			points += queries_found * has_all_queries_pts
+			# give points for the presence of correct number of queries
+			has_all_queries = float(queries_found) / float(num_queries) * has_all_queries_pts
+			
+			print "Found ", len(student_queries), " queries: ", has_all_queries , "/", has_all_queries_pts," points."
+			points += has_all_queries
+			
+			per_query_pts = round(float(student_queries_pts) / float(num_queries), 2)
 
 			# run QUERY 1
 			fail = 1	# reset variable
@@ -391,8 +436,10 @@ for sid in sids:
 			# assign/print score for student's query 1
 			if (fail):
 				print "Student Query 1: FAILED - 0 points."
+				comments += " Student Query 1 FAILED;"
 			else:
-				print "Student Query 1: Executed Successfully - ", student_queries_pts/num_queries ," points."
+				print "Student Query 1: Executed Successfully - ", per_query_pts ," points."
+				points += per_query_pts
 
 			sys.stdout.flush()
 
@@ -407,6 +454,7 @@ for sid in sids:
 						print toprint
 				else:
 					print "Student Query 2: FAILED (no query found) - 0 points."
+					comments += " Student Query 2 - no query found,"
 			except OSError, e:
 			    fail = 1
 			    print >>sys.stderr, "ERROR: Execution failed:", e
@@ -414,8 +462,10 @@ for sid in sids:
 			# assign/print score for student's query 2
 			if (fail):
 				print "Student Query 2 FAILED - 0 points."
+				comments += " Student Query 2 FAILED;"
 			else:
-				print "Student Query 2: Executed Successfully - ", student_queries_pts/num_queries ," points."
+				print "Student Query 2: Executed Successfully - ", per_query_pts ," points."
+				points += per_query_pts
 
 			sys.stdout.flush()
 
@@ -429,6 +479,7 @@ for sid in sids:
 						print toprint
 				else:
 					print "Student Query 3: FAILED (no query found) - 0 points."
+					comments += " Student Query 3 - no query found,"
 			except OSError, e:
 			    fail = 1
 			    print >>sys.stderr, "ERROR: Execution failed:", e
@@ -436,24 +487,21 @@ for sid in sids:
 			# assign/print score for student's query 3
 			if (fail):
 				print "Student Query 3 FAILED - 0 points."
+				comments += " Student Query 3 FAILED;"
 			else:
-				print "Student Query 3: Executed Successfully - ", student_queries_pts/num_queries ," points."
+				print "Student Query 3: Executed Successfully - ", per_query_pts ," points."
+				points += per_query_pts
+
+	else:	
+		comments += " Error Processing Submission"
 				
-	print >>sys.stderr, "Done."
+	# write results to gradebook and continue to next SID
+	write_grade(resultsFile, sid, name_dictionary[sid], points, comments)			
+
+	print >>sys.stderr, "Done. [Time: ", round(time.time() - current_start,2) , "secs]"
 	sys.stdout.flush()
 			
-##write result to files
-#for i in range ( min(len(create_script_results),len(load_script_results))):
-#	if (create_script_results[i][0] == load_script_results[i][0]):
-#		sid = create_script_results[i][0]
-#		c_score = create_script_results[i][1]
-#		l_score = load_script_results[i][1]
-#		total_score = str( int(c_score) + int(l_score) )
-#		c_notes = create_script_results[i][2]
-#		l_notes = load_script_results[i][2]
-#		resultsFile.write(sid + "," + c_score + "," + l_score + "," + total_score + "," + c_notes + "; " + l_notes + "\n")
-
-#resultsFile.flush()
 resultsFile.close()
 
-
+total_time = time.time() - loop_start
+print >> sys.stderr, "Total Elapsed Time: ", int(total_time/60), "min ", round(total_time%60.0,2) , "secs."

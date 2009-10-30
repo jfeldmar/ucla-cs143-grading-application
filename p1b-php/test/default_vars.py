@@ -34,7 +34,7 @@ num_queries = 3
 # the verbose result is printer to stdout and can be logged using redirection (>)
 # note: the violate.sql script is not tested here, it must be checked manually
 results_dir = "results"
-result_file = results_dir + "results.tab"
+result_file = results_dir + "/results.tab"
 
 # This script tests the output for 2 queries provided by grader here
 # if changing the number of queries, please edit code accordingly
@@ -60,8 +60,8 @@ query2_no_error_pts = 3
 query2_pts = 7
 
 #queries.sql - student's queries - correct number of queries and queries ran without error
-has_all_queries_pts = 3	
-student_queries_pts = 7
+has_all_queries_pts = 3		# has correct number of queries
+student_queries_pts = 7		# all queries run without error (otherwise deduct points)
 
 #NOTE: violate.sql is not tested in this program
 
