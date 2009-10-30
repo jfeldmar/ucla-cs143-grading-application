@@ -1,4 +1,4 @@
-import os, sys, subprocess, getopt, re;
+import os, sys, subprocess, getopt, re, time, signal;
 from subprocess import Popen, PIPE, STDOUT;
 
 # given a set of expected results and a set of student's results
@@ -41,11 +41,13 @@ def extract_queries(students_all_queries_file, num):
 	return queries
 
 # RUN GIVEN GRADER'S QUERY ON STUDENT'S DATABASE AND COMPARE RESULTS TO GRADER'S RESULTS
-def run_query(query, grader_result, num):
+def run_query(query, grader_result, num, timeout):
 	fail_query, score, toprint = (0,0,0)
-	process = subprocess.Popen(query, shell=True, stdout=PIPE, stderr=PIPE, bufsize=0)
-	(stdout, stderr) = process.communicate()
-	retcode = process.returncode
+	(failed, stdout, stderr, retcode) = runCmd(query, timeout)
+
+	if (failed):
+		error_str = 'Command timed out (timeout = ', timeout, ' seconds).'
+		return failed, score, error_str
 
 	#returncode 0 if no error, 1 if error, less than 0 if terminated by signal
 	try:
@@ -76,10 +78,14 @@ def run_query(query, grader_result, num):
 	
 
 # RUN GIVEN STUDENT'S QUERY AND MAKE SURE IT EXECUTES WITHOUT ERROR
-def test_query(student_query):
-	process = subprocess.Popen(student_query, shell=True, stdout=PIPE, stderr=PIPE, bufsize=0)
-	(stdout, stderr) = process.communicate()
-	retcode = process.returncode
+def test_query(student_query, timeout):
+	(fail_query, toprint) = (1, "")	# initialize variable
+
+	(failed, stdout, stderr, retcode) = runCmd(student_query, timeout)
+	
+	if (failed):
+		error_str = 'Command timed out (timeout = ', timeout, ' seconds).'
+		return failed, error_str
 
 	#returncode 0 if no error, 1 if error, less than 0 if terminated by signal
 	try:
@@ -100,42 +106,45 @@ def test_query(student_query):
 	return fail_query, toprint
 
 def runCmd(cmd, timeout):
-'''
-Will execute a command, read the output and return it back.
+	'''
+	Will execute a command, read the output and return it back.
 
-@param cmd: command to execute
-@param timeout: process timeout in seconds
-@return: a tuple of three: first stdout, then stderr, then exit code
-@raise OSError: on missing command or if a timeout was reached
-'''
+	@param cmd: command to execute
+	@param timeout: process timeout in seconds
+	@return: a tuple of three: first stdout, then stderr, then exit code
+	@raise OSError: on missing command or if a timeout was reached
+	'''
 
-ph_out = None # process output
-ph_err = None # stderr
-ph_ret = None # return code
+	ph_out = None # process output
+	ph_err = None # stderr
+	ph_ret = None # return code
 
-p = subprocess.Popen(cmd, shell=True,
-                     stdout=subprocess.PIPE,
-                     stderr=subprocess.PIPE)
-# if timeout is not set wait for process to complete
-if not timeout:
-    ph_ret = p.wait()
-else:
-    fin_time = time.time() + timeout
-    while p.poll() == None and fin_time > time.time():
-        time.sleep(1)
+	p = subprocess.Popen(cmd, shell=True,
+                	     stdout=subprocess.PIPE,
+                	     stderr=subprocess.PIPE,
+			     bufsize=0)
+	# if timeout is not set wait for process to complete
+	if not timeout:
+	    ph_ret = p.wait()
+	else:
+	    fin_time = time.time() + timeout
+	    while p.poll() == None and fin_time > time.time():
+        	time.sleep(1)
 
-    # if timeout reached, raise an exception
-    if fin_time < time.time():
+	    # if timeout reached, raise an exception
+	    if fin_time < time.time():
 
-        # starting 2.6 subprocess has a kill() method which is preferable
-        # p.kill()
-        os.kill(p.pid, signal.SIGKILL)
-        raise OSError("Process timeout has been reached")
+        	# starting 2.6 subprocess has a kill() method which is preferable
+        	# p.kill()
+        	os.kill(p.pid, signal.SIGKILL)
+		return (1, 0, 0, 1)	# return timeout error
+#		print >>sys.stderr, "MySQL command ", cmd, " timed out. Aborted"
+#        	raise OSError("Process timeout has been reached")
 
-    ph_ret = p.returncode
+	    ph_ret = p.returncode
 
 
-ph_out, ph_err = p.communicate()
+	ph_out, ph_err = p.communicate()
 
-return (ph_out, ph_err, ph_ret)
+	return (0, ph_out, ph_err, ph_ret)
 

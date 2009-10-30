@@ -7,12 +7,13 @@ test_DB = "CS143"
 user = "cs144"
 
 # timeout time for each mysql command (in seconds)
-timeout = 20
+timeout = 10
 
 # directory containing the student submissions
 # format: each student's directory has name = SID and contains that student's submitted files
 # format: a submission.csv file must be present in order to extract student names
 submission_dir = "../submissions/b/"
+#submission_dir = "../submissions/test/"
 submissions_data_file = submission_dir + "submission.csv"
 
 # name of create and load scripts submitted by students

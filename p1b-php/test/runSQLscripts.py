@@ -155,8 +155,12 @@ query3_script_results = []
 cmd_drop_DB = "mysql -u %s < %s"	% (user, drop_DB_script)
 cmd_create_DB = "mysql -u %s < %s"	% (user, create_DB_script)
 
+sys.stdout.flush()
+
 for sid in sids:
 	points = 0
+	
+	os.system('/etc/init.d/mysql restart')
 	
 	# in case when program output is written to file
 	# this command still displays grading progress to the standard error output
@@ -177,6 +181,8 @@ for sid in sids:
 		next
 	print "Database ", test_DB," removed"
 
+	sys.stdout.flush()
+
 	# 2. create database test_DB
 	if (subprocess.call(cmd_create_DB, shell=True) != 0):
 		create_script_results.append([sid, "0", "ERROR: unable to create database"])
@@ -184,6 +190,9 @@ for sid in sids:
 		next
 		
 	print "Database ", test_DB, " created"
+
+	sys.stdout.flush()
+	
 	print "---------"
 	
 	##################### RUN CREATE SCRIPT #####################
@@ -220,7 +229,8 @@ for sid in sids:
 	    print "Create Script: Successful - ", create_pts ," points."
 	    points += create_pts	
 
-	    
+	sys.stdout.flush()
+	
 	print "---------"
 	
 	##################### RUN LOAD SCRIPT #####################
@@ -267,6 +277,8 @@ for sid in sids:
 		    print "Load Script: Successful - ", load_pts ," points."	
 		    points += load_pts	
 
+	sys.stdout.flush()
+	
 	print "---------"
 		
 	##################### TEST QUERIES #####################
@@ -285,7 +297,7 @@ for sid in sids:
 		fail1 = 1	# initialize variable
 		try:
 			cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, right_query1)
-			fail1, score, toprint = run_query(cmd, right_records_set_q1, 1)
+			fail1, score, toprint = run_query(cmd, right_records_set_q1, 1, timeout)
 			if (fail1):
 				print toprint	# print error message if error encountered
 		except OSError, e:
@@ -302,16 +314,20 @@ for sid in sids:
 			points += q1pts
 			print "Grader Query 1 Score: ", q1pts, " points."
 
+		sys.stdout.flush()
+
 	# run QUERY 2
 		fail2 = 1	# initialize variable
 		try:
 			cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, right_query2)
-			fail2, score, toprint = run_query(cmd, right_records_set_q2, 2)
+			fail2, score, toprint = run_query(cmd, right_records_set_q2, 2, timeout)
 			if (fail2):
 				print toprint	# print error message if error encountered
 		except OSError, e:
 		    fail2 = 1
 		    print >>sys.stderr, "ERROR: Execution failed:", e
+
+		sys.stdout.flush()
 
 		# assign/print score for query 2
 		if (fail2):
@@ -323,6 +339,7 @@ for sid in sids:
 			points += q2pts
 			print "Grader Query 2 Score: ", q2pts, " points."
 
+		sys.stdout.flush()
 	##################### TEST STUDENT's QUERIES #####################
 	# make sure student submitted correct number (3) of queries and they execute without errors
 
@@ -345,6 +362,8 @@ for sid in sids:
 		    fail_extract = 1
 		    print >>sys.stderr, "ERROR: Execution failed:", e
 
+		sys.stdout.flush()
+
 		if (not fail_extract):
 			# assign/print point for having correct number of queries
 
@@ -360,7 +379,7 @@ for sid in sids:
 				if len(student_queries) > 0:
 					cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[0])
 
-					fail, toprint = test_query(cmd)
+					fail, toprint = test_query(cmd, timeout)
 					if (fail):
 						print toprint
 				else:
@@ -375,13 +394,15 @@ for sid in sids:
 			else:
 				print "Student Query 1: Executed Successfully - ", student_queries_pts/num_queries ," points."
 
+			sys.stdout.flush()
+
 			# run QUERY 2
 			fail = 1	# reset variable			
 			try:
 				if len(student_queries) > 1:
 					cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[1])
 
-					fail, toprint = test_query(cmd)
+					fail, toprint = test_query(cmd, timeout)
 					if (fail):
 						print toprint
 				else:
@@ -396,12 +417,14 @@ for sid in sids:
 			else:
 				print "Student Query 2: Executed Successfully - ", student_queries_pts/num_queries ," points."
 
+			sys.stdout.flush()
+
 			# run QUERY 3
 			fail = 1	# reset variable
 			try:
 				if len(student_queries) > 2:
 					cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[2])
-					fail, toprint = test_query(cmd)
+					fail, toprint = test_query(cmd, timeout)
 					if (fail):
 						print toprint
 				else:
