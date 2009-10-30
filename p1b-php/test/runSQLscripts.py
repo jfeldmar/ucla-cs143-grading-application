@@ -157,6 +157,11 @@ cmd_create_DB = "mysql -u %s < %s"	% (user, create_DB_script)
 
 for sid in sids:
 	points = 0
+	
+	# in case when program output is written to file
+	# this command still displays grading progress to the standard error output
+	# (this allows the user to more easily track progress)
+	print >>sys.stderr, "Grading SID: ", sid
 
 	cmd_create = "mysql -u %s %s < ../submissions/b/%s/%s"	% (user, test_DB, sid, create_script)
 	cmd_load = "mysql -u %s %s < ../submissions/b/%s/%s"	% (user, test_DB, sid, load_script)
@@ -202,7 +207,7 @@ for sid in sids:
 	        	print >>sys.stderr, "ERROR: returncode: ", retcode
 			create_script_results.append([sid, "0", repr(stderr)])
 
-		    print >>sys.stderr, " when executing command: ", cmd_create
+		    #print >>sys.stderr, " when executing command: ", cmd_create
 		    print 'stderr: ', repr(stderr)
 
 	except OSError, e:
@@ -250,17 +255,17 @@ for sid in sids:
 	        		print >>sys.stderr, "ERROR: returncode: ", retcode
 				load_script_results.append([sid, "0", repr(stderr)])
 
-			    print >>sys.stderr, " when executing command: ", cmd_load
+			    #print >>sys.stderr, " when executing command: ", cmd_load
 			    print 'stderr: ', repr(stderr)
 		except OSError, e:
 		    load_failed = 1
 		    print >>sys.stderr, "ERROR: Execution failed:", e
 
-#		if (load_failed):
-#		    print "Load Script: Failed - 0 points."
-#		else:
-#		    print "Load Script: Successful - ", load_pts ," points."	
-#		    points += load_pts	
+		if (load_failed):
+		    print "Load Script: Failed - 0 points."
+		else:
+		    print "Load Script: Successful - ", load_pts ," points."	
+		    points += load_pts	
 
 	print "---------"
 		
@@ -277,6 +282,7 @@ for sid in sids:
 	# execute grader's queries on database and compare output to expected (grader's) output
 
 	# run QUERY 1			
+		fail1 = 1	# initialize variable
 		try:
 			cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, right_query1)
 			fail1, score, toprint = run_query(cmd, right_records_set_q1, 1)
@@ -286,17 +292,18 @@ for sid in sids:
 			fail1 = 1
 			print >>sys.stderr, "ERROR: Execution failed:", e
 		
-#		# assign/print score for query 1
-#		if (fail1):
-#			print "Grader Query 1 Failed - 0 points."
-#		else:
-#			# give credit for query running without errors
-#			# give credit for correctness of results ( 0 <= score <= 1)
-#			q1pts = float(query1_pts) * float(score) + float(query1_no_error_pts)
-#			points += q1pts
-#			print "Grader Query 1 Score: ", q1pts, " points."
+		# assign/print score for query 1
+		if (fail1):
+			print "Grader Query 1 Failed - 0 points."
+		else:
+			# give credit for query running without errors
+			# give credit for correctness of results ( 0 <= score <= 1)
+			q1pts = float(query1_pts) * float(score) + float(query1_no_error_pts)
+			points += q1pts
+			print "Grader Query 1 Score: ", q1pts, " points."
 
 	# run QUERY 2
+		fail2 = 1	# initialize variable
 		try:
 			cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, right_query2)
 			fail2, score, toprint = run_query(cmd, right_records_set_q2, 2)
@@ -306,19 +313,20 @@ for sid in sids:
 		    fail2 = 1
 		    print >>sys.stderr, "ERROR: Execution failed:", e
 
-#		# assign/print score for query 2
-#		if (fail2):
-#			print "Grader Query 2 Failed - 0 points."
-#		else:
-#			# give credit for query running without errors
-#			# give credit for correctness of results ( 0 <= score <= 1)
-#			q2pts = float(query2_pts) * float(score) + float(query2_no_error_pts)
-#			points += q2pts
-#			print "Grader Query 2 Score: ", q2pts, " points."
+		# assign/print score for query 2
+		if (fail2):
+			print "Grader Query 2 Failed - 0 points."
+		else:
+			# give credit for query running without errors
+			# give credit for correctness of results ( 0 <= score <= 1)
+			q2pts = float(query2_pts) * float(score) + float(query2_no_error_pts)
+			points += q2pts
+			print "Grader Query 2 Score: ", q2pts, " points."
 
 	##################### TEST STUDENT's QUERIES #####################
 	# make sure student submitted correct number (3) of queries and they execute without errors
 
+		fail_extract = 1 # initialize variable
 		try:
 			print "\nRunning: ", students_all_queries_file, "..."
 
@@ -332,9 +340,9 @@ for sid in sids:
 				print "Running first ", num_queries, " queries only."
 
 			print "***"
-			fail_extract = 0;
+			fail_extract = 0
 		except OSError, e:
-		    fail_extract = 1;
+		    fail_extract = 1
 		    print >>sys.stderr, "ERROR: Execution failed:", e
 
 		if (not fail_extract):
@@ -347,6 +355,7 @@ for sid in sids:
 			points += queries_found * has_all_queries_pts
 
 			# run QUERY 1
+			fail = 1	# reset variable
 			try:
 				if len(student_queries) > 0:
 					cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[0])
@@ -360,13 +369,14 @@ for sid in sids:
 			    fail = 1
 			    print >>sys.stderr, "ERROR: Execution failed:", e
 
-	#		# assign/print score for student's query 1
-	#		if (fail):
-	#			print "Student Query 1: FAILED - 0 points."
-	#		else:
-	#			print "Student Query 1: Executed Successfully - ", student_queries_pts/num_queries ," points."
+			# assign/print score for student's query 1
+			if (fail):
+				print "Student Query 1: FAILED - 0 points."
+			else:
+				print "Student Query 1: Executed Successfully - ", student_queries_pts/num_queries ," points."
 
 			# run QUERY 2
+			fail = 1	# reset variable			
 			try:
 				if len(student_queries) > 1:
 					cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[1])
@@ -380,13 +390,14 @@ for sid in sids:
 			    fail = 1
 			    print >>sys.stderr, "ERROR: Execution failed:", e
 
-	#		# assign/print score for student's query 2
-	#		if (fail):
-	#			print "Student Query 2 FAILED - 0 points."
-	#		else:
-	#			print "Student Query 2: Executed Successfully - ", student_queries_pts/num_queries ," points."
+			# assign/print score for student's query 2
+			if (fail):
+				print "Student Query 2 FAILED - 0 points."
+			else:
+				print "Student Query 2: Executed Successfully - ", student_queries_pts/num_queries ," points."
 
 			# run QUERY 3
+			fail = 1	# reset variable
 			try:
 				if len(student_queries) > 2:
 					cmd = "mysql -u %s %s -e \"%s\""	% (user, test_DB, student_queries[2])
@@ -399,11 +410,14 @@ for sid in sids:
 			    fail = 1
 			    print >>sys.stderr, "ERROR: Execution failed:", e
 
-	#		# assign/print score for student's query 3
-	#		if (fail):
-	#			print "Student Query 3 FAILED - 0 points."
-	#		else:
-	#			print "Student Query 3: Executed Successfully - ", student_queries_pts/num_queries ," points."
+			# assign/print score for student's query 3
+			if (fail):
+				print "Student Query 3 FAILED - 0 points."
+			else:
+				print "Student Query 3: Executed Successfully - ", student_queries_pts/num_queries ," points."
+				
+	print >>sys.stderr, "Done."
+	sys.stdout.flush()
 			
 ##write result to files
 #for i in range ( min(len(create_script_results),len(load_script_results))):
@@ -416,7 +430,7 @@ for sid in sids:
 #		l_notes = load_script_results[i][2]
 #		resultsFile.write(sid + "," + c_score + "," + l_score + "," + total_score + "," + c_notes + "; " + l_notes + "\n")
 
-resultsFile.flush()
+#resultsFile.flush()
 resultsFile.close()
 
 
