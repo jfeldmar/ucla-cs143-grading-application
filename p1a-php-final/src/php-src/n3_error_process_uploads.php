@@ -223,7 +223,7 @@ while($line = fgetcsv($FILE, 0, ','))
 		    # reformat text to display php code literally (without execution)
 		    if (preg_match("/.$submitted_php_extension$/", $submitted_file)){
 			    $lines = htmlentities($lines);
-			    $lines = "<pre>".$lines."<pre>";
+			    $lines = "<pre>".$lines."</pre>";
 		    }
 		    fwrite($CFILE, $lines);
 		    fclose($CFILE);

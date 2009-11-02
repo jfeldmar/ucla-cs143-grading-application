@@ -2,8 +2,10 @@
 
 ###################################################
 ## save form data from previous page (i.e. SIDs for submissions to grade) into a log
-## load default test cases and allow user to edit them
-## functionality: add/remove/save as default test cases
+## displays results of running test cases on selected submissions
+## provides buttons to save log file of results as well as MyUCLA Gradebook compatible file
+## provides interface to change scores and notes for each student
+## provides interface to change which file from a student's submission is graded
 ###################################################
 
 #**********GLOBAL VARIABLES***********
