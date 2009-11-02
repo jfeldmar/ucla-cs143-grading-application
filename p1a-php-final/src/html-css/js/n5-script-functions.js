@@ -361,7 +361,8 @@ function submit_tsv(myform)
 		var score = subs[i].getElementsByClassName('tscore')[0].innerHTML;
 		var notes = subs[i].getElementsByClassName('num_correct_score')[0].innerHTML +"; "+ subs[i].getElementsByClassName('tnotes')[0].innerHTML;
 		
-		// enclose text in quotes
+		// generate entry for current student in TSV format
+		// to edit output format, edit this line
 		tsv[i] = sid + '\t' + '\"' + sname + '\"\t' + score + '\t' + '\"' + notes + '\"';
 	}
 

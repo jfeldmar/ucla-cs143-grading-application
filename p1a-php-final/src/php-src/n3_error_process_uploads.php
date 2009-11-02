@@ -59,7 +59,7 @@ echo header('Content-type: text/html');
 <h1>CS143 - Project 1A Grading Application</h1>
 <p align=center><input type=button value='Restart' onClick="location.href='../html-css/start.html'"/></p>
 
-<h2> === Process Uploaded Data === </h2>
+<h2> === Step 3. Process Uploaded Data === </h2>
 
 <?php
 

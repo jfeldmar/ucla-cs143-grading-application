@@ -110,7 +110,7 @@ foreach ($unique_sids as $sid)
 <h1>CS143 - Project 1A Grading Application</h1>
 <p align=center><input type=button value='Restart' onClick="location.href='../html-css/start.html'"/></p>
 
-<h2> === Load/Save Test Cases & Run Tests === </h2>
+<h2> === Step 5. Load/Save Test Cases & Run Tests === </h2>
 
 <script type="text/javascript" src="../html-css/js/n5-script-functions.js"></script>
 <script type="text/javascript" src="../html-css/js/wz_tooltip.js"></script>

@@ -52,7 +52,7 @@ if ( !is_uploaded_file($_FILES[$submission_tarfile_field_name]['tmp_name']) )
 <h1>CS143 - Project 1A Grading Application</h1>
 <p align=center><input type=button value='Restart' onClick="location.href='../html-css/start.html'"/></p>
 
-<h2> === Processing Uploaded Files... ===</h2>
+<h2> === Step 2. Processing Uploaded Files... ===</h2>
 
 <?php
 #

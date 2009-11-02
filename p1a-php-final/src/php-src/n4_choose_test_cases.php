@@ -37,7 +37,7 @@ function addSelection()
 	if (optn.text != false){
 		var soltn = prompt("Confirm or edit solution", eval(optn.text));
 		if (soltn != null){
-			var descr = prompt("Enter test case description <br/>(no commas)", "testing order of operations");
+			var descr = prompt("Enter test case description (no commas)", "testing order of operations");
 			if (descr.indexOf(",") >= 0) {alert("Commas Not Allowed in Description");}
 			else if (descr != false){
 				optn.value = optn.text + "," + soltn + "," + descr.replace('"', '\"');
@@ -113,7 +113,7 @@ function deselectAll()
 <h1>CS143 - Project 1A Grading Application</h1>
 <p align=center><input type=button value='Restart' onClick="location.href='../html-css/start.html'"/></p>
 
-<h2> === Add/Delete/Confirm/Save Test Cases === </h2>
+<h2> === Step 4. Add/Delete/Confirm/Save Test Cases === </h2>
 
 <?php
 
