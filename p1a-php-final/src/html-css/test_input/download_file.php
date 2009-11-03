@@ -8,7 +8,7 @@ $data = fread($LOG, filesize($filename));
 fclose($LOG); 
 
 header("Content-Type:application/x-download");  
-header("Content-Disposition:attachment;filename='".basename($filename)."'\n\n");
+header("Content-Disposition:attachment;filename=".basename($filename)."\n\n");
 echo "$data";
 exit();
 
