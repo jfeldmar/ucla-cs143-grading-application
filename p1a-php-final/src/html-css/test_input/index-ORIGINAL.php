@@ -31,7 +31,7 @@ echo "<h2>Result</h2>\n";
 /* add negative sign handling , Chu-Cheng */
 if (preg_match("/^(-|\d)+(\.\d*)?((\+|-|\*|\/)-?\d+(\.\d*)?)*$/", $expr, $matches)) {
     eval("\$value = $expr;");
-    echo "$expr = $value\n";
+    echo "$expr = <span id='result'>$value</span>\n";
 } else {
     echo "Invalid input expression $expr.\n";
 }
