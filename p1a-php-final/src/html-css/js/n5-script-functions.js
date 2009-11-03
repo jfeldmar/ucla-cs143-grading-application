@@ -54,7 +54,7 @@ function is_numericOLD(input){
 	return !isNaN(input) && (input >= 0);
 }
 
-function update_total_score(tablediv){
+function update_total_score(tablediv, maxpts){
 	var t =  document.getElementById(tablediv).getElementsByTagName("table")[0];
 	var scores = t.getElementsByClassName("qscore");
 	var sum = 0;
@@ -63,7 +63,7 @@ function update_total_score(tablediv){
 	{
 		var temp = eval(trim(scores[i].innerHTML));
 		sum += temp;
-		if (temp == $max_pts)
+		if (temp == maxpts)
 			num_correct++;
 	}
 	t.getElementsByClassName("tscore")[0].innerHTML = sum;
