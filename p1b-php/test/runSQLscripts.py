@@ -44,9 +44,8 @@ except getopt.GetoptError, err:
 for opt, arg in options:
 	if opt in ('-s', '--submissions'):
 		print "Changing submission directory to %s" % (arg)
-		if (re.match('/$', arg) == None):
-			arg += '/'
-		submission_dir = arg
+		# drop forward slash at the end of string if present
+		submission_dir = re.sub('/$', '', submission_dir)	
 	elif opt in ('-d', '--database'):
 		print "Changing mysql database to %s" % (arg)
 		test_DB = arg
@@ -81,7 +80,7 @@ directories = os.listdir(submission_dir)
 # extract only directory names from directories
 onlydirs = []
 for d in directories:
-	if ( os.path.isdir(submission_dir + d) == True ):
+	if ( os.path.isdir(submission_dir + '/' + d) == True ):
 		onlydirs.append(d)
 
 print "Number of directories (submissions) found: ", len(onlydirs)
@@ -169,16 +168,16 @@ for sid in sids:
 	comments = ""
 	
 	# restart MySQL to kill possible hanging processes from previous MySQL queries and commands
-	os.system('/etc/init.d/mysql restart')
+	os.system(sql_restart_command)
 	
 	# in case when program output is written to file
 	# this command still displays grading progress to the standard error output
 	# (this allows the user to more easily track progress)
 	print >>sys.stderr, "Grading SID: ", sid, "( ", name_dictionary[sid], ")"
 
-	cmd_create = "mysql -u %s %s < ../submissions/b/%s/%s"	% (user, test_DB, sid, create_script)
-	cmd_load = "mysql -u %s %s < ../submissions/b/%s/%s"	% (user, test_DB, sid, load_script)
-#	cmd_violate = "mysql -u %s %s < ../submissions/b/%s/%s"	% (user, test_DB, sid, violate_script)
+	cmd_create = "mysql -u %s %s < %s/%s/%s"	% (user, test_DB, submission_dir, sid, create_script)
+	cmd_load = "mysql -u %s %s < %s/%s/%s"	% (user, test_DB, submission_dir, sid, load_script)
+#	cmd_violate = "mysql -u %s %s < %s/%s/%s"	% (user, test_DB, submission_dir, sid, violate_script)
 	
 	print "\n*****************************"
 	print "****SID: ", sid, "*********"
@@ -386,7 +385,7 @@ for sid in sids:
 			print "\nRunning: ", students_all_queries_file, "..."
 
 			# parse STUDENT's queries file (separate into individual queries)
-			student_queries = extract_queries("../submissions/b/%s/%s" % (sid, students_all_queries_file), num_queries)
+			student_queries = extract_queries("%s/%s/%s" % ( submission_dir, sid, students_all_queries_file), num_queries)
 
 			if (len(student_queries) == 0):
 				print "Insufficient number of queries, at least 1 query required"

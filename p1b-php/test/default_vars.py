@@ -1,6 +1,7 @@
 ########################################################
 # THESE VARIABLE MAYBE CHANGED BY THE USER AS DESIRED
 # IMPORTANT: Follow Python Syntax to avoid syntax error
+#	(change at your own risk and backup original)
 ########################################################
 
 test_DB = "CS143"
@@ -12,9 +13,9 @@ timeout = 10
 # directory containing the student submissions
 # format: each student's directory has name = SID and contains that student's submitted files
 # format: a submission.csv file must be present in order to extract student names
-submission_dir = "../submissions/b/"
+submission_dir = "../submissions/b"
 #submission_dir = "../submissions/test/"
-submissions_data_file = submission_dir + "submission.csv"
+submissions_data_file = submission_dir + "/submission.csv"
 
 # name of create and load scripts submitted by students
 # (this is submitted by the students and name should be given in the project specification)
@@ -75,5 +76,7 @@ dir_file = results_dir + "/directories.txt"
 
 drop_DB_script = "./scripts/dropDB-CS143.sql"
 create_DB_script = "./scripts/createDB-CS143.sql"
+
+sql_restart_command = '/etc/init.d/mysql restart'
 
 
