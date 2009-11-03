@@ -71,6 +71,11 @@ function select(opt)
 // submit selected testcase in selected mode (load or save)
 function choosesubmit(state)
 {
+	var opts = document.getElementById("tests").options;
+	if (opts.length <= 0){
+		alert("Please select at least one submission to grade");
+		return;
+	}
 	if (state == 'load')
 	{
 		alert("using these test cases for this run only");
@@ -85,7 +90,7 @@ function choosesubmit(state)
 	document.getElementById("myform").submit();
 }
 
-// select all test cases
+// select all submissions
 function selectAll()
 {
 	var opts = document.getElementById("tests").options;
@@ -95,7 +100,7 @@ function selectAll()
 	}	
 }
 
-// deselect all test cases
+// deselect all submissions
 function deselectAll()
 {
 	var opts = document.getElementById("tests").options;

@@ -210,7 +210,8 @@ function update_links(sid, nfile)
 		// get current query max point value
 		// note: the result in the result_cell is inside a <div> tag
 		var max_score = document.getElementById("query_max_score_" + r).innerHTML;
-		score_cell.innerHTML = parseFloat(max_score) * parseFloat(recommend_score(sample_cell.innerHTML, result_cell.getElementsByTagName('div')[0].innerHTML));
+		
+		score_cell.innerHTML = parseFloat(max_score) * parseFloat(recommend_score(trim(sample_cell.innerHTML), trim(result_cell.getElementsByTagName('div')[0].innerHTML)));
 		
 		// if query passed, don't include query description
 		if (score_cell.innerHTML == "1")
@@ -268,7 +269,7 @@ function get_result(link)
 
 		// extract query result from html by finding the tag whose id='result'
 	   var tag = document.getElementById('result');
-	   if ( tag != null && is_numeric(tag.innerHTML) ){	// if value exists
+	   if ( tag != null ){	// if value exists
 		   var rv = tag.innerHTML;
 		   return_string = "<div onmouseover=\"Tip('Answer Correct')\" onmouseout=\"UnTip()\">" + rv + "</div>";
 		   // remove the temporary div tag
@@ -336,13 +337,19 @@ function hide_all(hide)
 // recommend score between 0 and 1 where 1 is 100% correct
 function recommend_score(expected, received)
 {
-	if (is_numeric(expected) && is_numeric(received))
+	// if output is correctly blank, return 100% correct
+	if (expected == "" && received == ""){
+		return "1";
+	} 
+	else if (is_numeric(expected) && is_numeric(received))
 	{
 		if (parseFloat(expected) - parseFloat(received) < 0.001)
 			return "1";
 		else
 			return "0.5";
-	}else { return "0"; }
+	}else {
+	 return "0"; 
+	}
 }
 
 function submit_tsv(myform)
@@ -394,4 +401,21 @@ function submit_log(myform)
 	document.getElementById('log_data').value = html;
 	hide_all('<span>Hide</span>');
 	document.getlog.submit();
+}
+
+// Removes leading whitespaces
+function LTrim( value ) {
+	var re = /\s*((\S+\s*)*)/;
+	return value.replace(re, "$1");
+}
+
+// Removes ending whitespaces
+function RTrim( value ) {
+	var re = /((\s*\S+)*)\s*/;
+	return value.replace(re, "$1");
+}
+
+// Removes leading and ending whitespaces
+function trim( value ) {
+	return LTrim(RTrim(value));
 }
