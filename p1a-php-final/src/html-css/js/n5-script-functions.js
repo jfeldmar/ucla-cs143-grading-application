@@ -63,7 +63,7 @@ function update_total_score(tablediv, maxpts){
 	{
 		var temp = eval(trim(scores[i].innerHTML));
 		sum += temp;
-		if (temp == maxpts)
+		if (temp == eval(maxpts))
 			num_correct++;
 	}
 	t.getElementsByClassName("tscore")[0].innerHTML = sum;
