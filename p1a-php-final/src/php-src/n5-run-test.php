@@ -215,7 +215,7 @@ if (file_exists($descriptions_directory)){
 mkdir($descriptions_directory) or die ("Unable to create $descriptions_directory directory");
 
 # create query/solution/description files for new test cases
-for ($i = 0; $i < count(queries); $i++)
+for ($i = 0; $i < count($queries); $i++)
 {
 	$index = $i + 1;
 	$QFILE = fopen("$query_directory/query$index.txt", 'w+') or die("Can't open $query_directory/query$#.txt for writing");
