@@ -39,6 +39,7 @@ echo header('Content-type: text/html');
 	
 
 	<link rel="stylesheet" type="text/css" href="<?php echo $CSS_file; ?>" />
+	
 <script type="text/javascript">
 
 <?php
@@ -107,7 +108,7 @@ foreach ($unique_sids as $sid)
 </script>
 </head>
 
-<?php echo "<body onload=\"load_totals('".$default_php."');\">"; ?>
+<?php echo "<body onload=\"max_pts = $max_pts;load_totals('".$default_php."');\">"; ?>
 
 <h1>CS143 - Project 1A Grading Application</h1>
 <p align=center><input type=button value='Restart' onClick="location.href='../html-css/start.html'"/></p>
@@ -294,10 +295,10 @@ foreach ($unique_sids as $sid)
 	
 	## "Sum Score" Button (for current student only)
        echo "&nbsp;&nbsp;Test Case Results for SID $sid ($sids_names[$sid])\n";
-       echo "<a class=button href=\"#\"  style=\"width:110\" onclick=\"javascript:update_total_score('$sid','$max_pts');\" ><span>Sum Scores</span></a>\n";
+       echo "<a class=button href=\"#\"  style=\"width:110\" onclick=\"javascript:update_total_score('$sid');\" ><span>Sum Scores</span></a>\n";
 #       echo "<a class=button href=\"#\"  style=\"width:105\" onclick=\"javascript:update_notes('$sid');\" ><span>Concat Notes</span></a></p>\n";
 
-#       echo "<input type=\"button\" onclick=\"javascript:update_total_score('$sid','$max_pts');\" value=\"Sum Scores\" >\n";
+#       echo "<input type=\"button\" onclick=\"javascript:update_total_score('$sid');\" value=\"Sum Scores\" >\n";
 #       echo "<input type=\"button\" onclick=\"javascript:update_notes('$sid');\" value=\"Concat Notes\" >\n";
 
        echo "<div class=\"submissions\" id=\"$sid\" title=\"$sids_names[$sid]\" style=\"overflow:hidden;display:none\">\n";

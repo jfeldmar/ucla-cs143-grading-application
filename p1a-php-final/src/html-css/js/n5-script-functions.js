@@ -54,16 +54,16 @@ function is_numericOLD(input){
 	return !isNaN(input) && (input >= 0);
 }
 
-function update_total_score(tablediv, maxpts){
+function update_total_score(tablediv){
 	var t =  document.getElementById(tablediv).getElementsByTagName("table")[0];
 	var scores = t.getElementsByClassName("qscore");
 	var sum = 0;
 	var num_correct = 0;
 	for (i = 0; i < scores.length; i++)
 	{
-		var temp = eval(trim(scores[i].innerHTML));
+		var temp = eval(scores[i].innerHTML);
 		sum += temp;
-		if (temp == eval(maxpts))
+		if (temp == max_pts)
 			num_correct++;
 	}
 	t.getElementsByClassName("tscore")[0].innerHTML = sum;
@@ -211,9 +211,7 @@ function update_links(sid, nfile)
 		// note: the result in the result_cell is inside a <div> tag
 		var max_score = document.getElementById("query_max_score_" + r).innerHTML;
 		
-		var expected_score = trim(sample_cell.innerHTML);
-		var given_score = trim(result_cell.getElementsByTagName('div')[0].innerHTML));
-		score_cell.innerHTML = parseFloat(max_score) * parseFloat(recommend_score(expected_score, given_score);
+		score_cell.innerHTML = parseFloat(max_score) * parseFloat(recommend_score(trim(sample_cell.innerHTML), trim(result_cell.getElementsByTagName('div')[0].innerHTML)));
 		
 		// if query passed, don't include query description
 		if (score_cell.innerHTML == "1")
