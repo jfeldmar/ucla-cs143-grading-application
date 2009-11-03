@@ -214,7 +214,7 @@ function update_links(sid, nfile)
 		score_cell.innerHTML = parseFloat(max_score) * parseFloat(recommend_score(trim(sample_cell.innerHTML), trim(result_cell.getElementsByTagName('div')[0].innerHTML)));
 		
 		// if query passed, don't include query description
-		if (score_cell.innerHTML == max_pts)
+		if (eval(score_cell.innerHTML) == max_pts)
 		{
 			notes_cell.innerHTML = "";
 		}
