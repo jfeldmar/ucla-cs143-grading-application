@@ -95,7 +95,7 @@ if ( is_uploaded_file($_FILES[$sample_solution_field_name]['tmp_name']))
 	echo "<p>Processing Sample Calculator PHP file upload...</p>";
 	
 	#
-	#Check for correct file extension (*.tar)
+	#Check for correct file extension (*.php)
 	#
 	$php_parts_info = pathinfo( $_FILES[$sample_solution_field_name]['name']);
 
@@ -119,6 +119,10 @@ if ( is_uploaded_file($_FILES[$sample_solution_field_name]['tmp_name']))
 
 	echo "<p><b>Size of PHP file: " . filesize("$upload_dir/$php_filename") . "</b></p>"; 
 	echo "<p>uploaded PHP Sample Calculator Solution file.</p>";
+	
+	# change mode of file to 644 because after being copied to the file-uploads directory
+	# the user changes and needs permission to access file
+	chmod("$upload_dir/$php_filename", 0644) or die("unable to change mode of calculator to 644");
 	
 	#
 	# 3. extract into submissions directory
