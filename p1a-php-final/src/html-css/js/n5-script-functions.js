@@ -148,7 +148,6 @@ function ChooseFilePopUp(url, sid, file_array)
 		pop_up_text += '<a href="../submissions/'+sid + "/" + file_array[i] + '" target="_blank"/>Preview File</a>';
 		pop_up_text += "<br/>";
 	}
-	alert(pop_up_text);
 	
 	var strWindowFeatures = "modal=off,status=no,width=250,height=250,location=no,chrome=yes,centerscreen=yes";
 	
