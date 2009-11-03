@@ -134,25 +134,28 @@ var phpFileToGrade = new Object;
 // a pop-up window comes up which gives a choice of all the files the student has submitted
 // once the user click on one of the files, that file is plugged in as the source
 // used to run all the test cases (shown in the student's table)
-function ChooseFilePopUp(url, sid)
+function ChooseFilePopUp(url, sid, file_array)
 {
 	pop_up_text = "";
 	cur_sid = sid;
 	// create code for the list of files the current student has submitted
 	// when the user clicks on one, the pop-up is closed and that file is selected
-	var arr = eval("files_"+sid);
-	for (i in arr)
+
+
+	for (i in file_array)
 	{
-		pop_up_text += '<input value=\"' + arr[i] + '\" type=button onclick=\"window.opener.close_window(window, this.value);\">';
-		pop_up_text += '<a href="../submissions/'+sid + "/" + arr[i] + '" target="_blank"/>Preview File</a>';
+		pop_up_text += '<input value=\"' + file_array[i] + '\" type=button onclick=\"window.opener.close_window(window, this.value);\">';
+		pop_up_text += '<a href="../submissions/'+sid + "/" + file_array[i] + '" target="_blank"/>Preview File</a>';
 		pop_up_text += "<br/>";
 	}
-		
+	alert(pop_up_text);
+	
 	var strWindowFeatures = "modal=off,status=no,width=250,height=250,location=no,chrome=yes,centerscreen=yes";
 	
 	// close pop-up window if it's open
 	if (typeof choose_file_window != 'undefined')
 		choose_file_window.close();
+
 	
 	// open pop-up window with list of the student's submitted files
 	var choose_file_window = window.open(url, "ChooseFile",strWindowFeatures);

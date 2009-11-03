@@ -39,84 +39,85 @@ echo header('Content-type: text/html');
 	
 
 	<link rel="stylesheet" type="text/css" href="<?php echo $CSS_file; ?>" />
-	
-<script type="text/javascript">
 
-<?php
-
-## for each submission, print a javascript array containing all files submitted by that student
-###################################################
-
-## Open log that lists submissions to grade, create array of unique SIDs
-###################################################
-$FH = fopen($sids_to_grade_file, 'r') or die("Unable to open $sids_to_grade_file; contains list of submission SID's to grade");
-$temp_array = explode( "\n", fread($FH, filesize("$sids_to_grade_file")));
-fclose($FH);
-if ( $temp_array == 'FALSE' or count($temp_array) == 0)
-	die("Unable to extract submitted SID's from submissions.csv file");
-$unique_sids = array_unique($temp_array);
-
-$last = array_pop($unique_sids);
-echo "var unique_sids = new Array(" . implode( ",", $unique_sids) . $last . ");\n";
-
-#load SID-Name Array File into Javascript Array/Hash Table
-$sids_names = unserialize(file_get_contents($sid_name_file));
-echo "var sids-names = Object();\n";
-foreach ($sids_names as $key => $value)
-{
-	echo "sids-names['$key'] = '$value';\n";
-}
-
-###################################################
-
-# for each unique sid, create "files-sid" array listing all files submitted
-foreach ($unique_sids as $sid)
-{
-	# open directory and read files,
-	# then print javascript array variable containing the data
-	$declaration = "";
-
-	$files = array();
-	$DIR = opendir("$submissions_directory/$sid") or die("Can't open submission directory $submissions_directory/$sid for $sid");
-	while ( $f = readdir($DIR))
-	{
-    	    if ($f != "." && $f != "..")
-		    array_push($files, $f);
-	}
-	closedir($DIR);
-
-	# print files to array
-	$declaration = "var files_$sid = new Array(";
-	
-	$i = 0;
-	foreach ($files as $submitted_file){
-		if (file_exists("$submissions_directory/$sid/$submitted_file")){
-			#if ($submitted_file =~ m/.php/){
-			if ($i > 0){
-				$declaration .= ", ";
-			}
-			$declaration .= "\"$submitted_file\"";
-			$i++;
-		}
-	}
-	$declaration .= ");";
-	
-	print "$declaration\n";
-}
-?>
-
-</script>
 </head>
 
 <?php echo "<body onload=\"max_pts = $max_pts;load_totals('".$default_php."');\">"; ?>
+	
+<script  type="text/javascript">
+	temp = "we are still testing";
+<?php
+
+
+	## for each submission, print a javascript array containing all files submitted by that student
+	###################################################
+
+	## Open log that lists submissions to grade, create array of unique SIDs
+	###################################################
+	$FH = fopen($sids_to_grade_file, 'r') or die("Unable to open $sids_to_grade_file; contains list of submission SID's to grade");
+	$temp_array = explode( "\n", fread($FH, filesize("$sids_to_grade_file")));
+	fclose($FH);
+	if ( $temp_array == 'FALSE' or count($temp_array) == 0)
+		die("Unable to extract submitted SID's from submissions.csv file");
+	$unique_sids = array_unique($temp_array);
+
+	$last = array_pop($unique_sids);
+	echo "unique_sids = [" . implode( ",", $unique_sids) . $last . "];\n";
+
+	#load SID-Name Array File into Javascript Array/Hash Table
+	$sids_names = unserialize(file_get_contents($sid_name_file));
+	echo "sidsnames = [];\n";
+	foreach ($sids_names as $key => $value)
+	{
+		echo "sidsnames['$key'] = '$value';\n";
+	}
+
+	###################################################
+
+	# for each unique sid, create "files-sid" array listing all files submitted
+	foreach ($unique_sids as $sid)
+	{
+		# open directory and read files,
+		# then print javascript array variable containing the data
+		$declaration = "";
+
+		$files = array();
+		$DIR = opendir("$submissions_directory/$sid") or die("Can't open submission directory $submissions_directory/$sid for $sid");
+		while ( $f = readdir($DIR))
+		{
+    		    if ($f != "." && $f != "..")
+			    array_push($files, $f);
+		}
+		closedir($DIR);
+
+		# print files to array
+		$declaration = "files_$sid = [";
+
+		$i = 0;
+		foreach ($files as $submitted_file){
+			if (file_exists("$submissions_directory/$sid/$submitted_file")){
+				#if ($submitted_file =~ m/.php/){
+				if ($i > 0){
+					$declaration .= ", ";
+				}
+				$declaration .= "\"$submitted_file\"";
+				$i++;
+			}
+		}
+		$declaration .= "];";
+
+		print "$declaration\n";
+	}
+	?>
+</script>
+
+<script type="text/javascript" src="../html-css/js/n5-script-functions.js"></script>
+<script type="text/javascript" src="../html-css/js/wz_tooltip.js"></script>
 
 <h1>CS143 - Project 1A Grading Application</h1>
 <p align=center><input type=button value='Restart' onClick="location.href='../html-css/start.html'"/></p>
 
 <h2> === Step 5. Load/Save Test Cases & Run Tests === </h2>
-
-<script type="text/javascript" src="../html-css/js/n5-script-functions.js"></script>
-<script type="text/javascript" src="../html-css/js/wz_tooltip.js"></script>
 
 <?php
 
@@ -306,7 +307,7 @@ foreach ($unique_sids as $sid)
 	## Name of/ Link to file being graded now
        echo "<p align=center>Graded File: <a class=\"link_editable\" href=$submissions_directory/$sid/$default_php target=_blank > $default_php </a>\n";
         ## Button to change file being graded
-       echo "&nbsp;or&nbsp;<a class=button style=\"width:200\" href=\"#\" onclick=\"ChooseFilePopUp('$pop_up_window','$sid');\"/><span>Choose PHP File to Grade</span></a></p>\n";
+       echo "&nbsp;or&nbsp;<a class=button style=\"width:200\" href=\"#\" onclick=\"ChooseFilePopUp('$pop_up_window','$sid', files_$sid);\"/><span>Choose PHP File to Grade</span></a></p>\n";
 
 	## Query Table (Student's solution, Sample Solution, Student Result, Score, Notes)       
        echo "<table width=90% border=\"1\" align=\"center\">";
