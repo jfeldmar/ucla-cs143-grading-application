@@ -39,10 +39,11 @@ result_file = results_dir + "/results.tab"
 
 # This script tests the output for 2 queries provided by grader here
 # if changing the number of queries, please edit code accordingly
-query1_file = "scripts/test_query1.sql"
-query2_file = "scripts/test_query2.sql"
-graders_query1_output = "scripts/out_q1.txt"
-graders_query2_output = "scripts/out_q2.txt"
+queries_dir = "test_queries"
+query1_file = queries_dir + "/test_query1.sql"
+query2_file = queries_dir + "/test_query2.sql"
+graders_query1_output = queries_dir + "/out_q1.txt"
+graders_query2_output = queries_dir + "/out_q2.txt"
 
 
 ################# POINT VALUES ######################
