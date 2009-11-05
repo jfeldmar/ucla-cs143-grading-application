@@ -72,7 +72,7 @@ student_queries_pts = 7		# all queries run without error (otherwise deduct point
 # (edit at your own risk)
 ########################################################
 
-dir_file = results_dir + "/directories.txt"
+dir_file = results_dir + "/SIDs.txt"
 
 drop_DB_script = "./scripts/dropDB-CS143.sql"
 create_DB_script = "./scripts/createDB-CS143.sql"
