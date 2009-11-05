@@ -1,0 +1,11 @@
+first	last
+Halle	Berry
+Pierce	Brosnan
+John	Cleese
+Paul	Darrow
+Judi	Dench
+Thomas	Ho
+Michael	Madsen
+Rosamund	Pike
+Toby	Stephens
+Rick	Yune
