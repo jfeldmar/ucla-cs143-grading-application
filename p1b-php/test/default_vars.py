@@ -53,17 +53,17 @@ create_pts = 10
 #load ran successfully
 load_pts = 10
 
-#query1 - correct output/no errors
+#query1 - correct output/no errors (grader's test query)
 query1_no_error_pts = 3
 query1_pts = 7
 
-#query2 - correct output/no errors
+#query2 - correct output/no errors (grader's test query)
 query2_no_error_pts = 3
 query2_pts = 7
 
 #queries.sql - student's queries - correct number of queries and queries ran without error
-has_all_queries_pts = 3		# has correct number of queries
-student_queries_pts = 7		# all queries run without error (otherwise deduct points)
+has_all_queries_pts = 3		# has correct number of student queries
+student_queries_pts = 7		# all student queries run without error (otherwise deduct points)
 
 #NOTE: violate.sql is not tested in this program
 

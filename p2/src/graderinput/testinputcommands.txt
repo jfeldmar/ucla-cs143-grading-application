@@ -1,0 +1,4 @@
+open
+run load1.txt
+run select1.txt select1.txt.soltn
+close

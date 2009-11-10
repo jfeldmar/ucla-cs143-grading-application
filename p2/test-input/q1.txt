@@ -1,0 +1,1 @@
+select * from movie where key > 1000 and key < 1010
