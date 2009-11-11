@@ -63,6 +63,6 @@ print "\tPART D - Submissions found: ", len(directories_d)
 #outputDirFile.close()
 
 ############# COMPARE SUBMISSIONS USING DIFF ##############
-compare_submissions(submission_dir, directories_a, directories_b, directories_c, directories_d)
+compare_submissions("../"+submission_dir, name_dictionary, directories_b, directories_c, directories_d)
 
 exit(1)
