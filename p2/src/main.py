@@ -38,8 +38,9 @@ for part in parts:
 		name_dictionary[row['sid']] = row['name']
 
 
+print "=== Loading Student Submissions"
 # print number of name-sid pairs found
-print "=== Name-SID Pairs: ", len(name_dictionary), " entries"
+print "\tName-SID Pairs: ", len(name_dictionary), " entries"
 
 # get list of all submission directories for each part
 directories_a = listdirs(submission_dir_a)
@@ -47,10 +48,10 @@ directories_b = listdirs(submission_dir_b)
 directories_c = listdirs(submission_dir_c)
 directories_d = listdirs(submission_dir_d)
 # print summary
-print "PART A: Submissions found: ", len(directories_a)
-print "PART B: Submissions found: ", len(directories_b)
-print "PART C: Submissions found: ", len(directories_c)
-print "PART D: Submissions found: ", len(directories_d)
+print "\tPART A - Submissions found: ", len(directories_a)
+print "\tPART B - Submissions found: ", len(directories_b)
+print "\tPART C - Submissions found: ", len(directories_c)
+print "\tPART D - Submissions found: ", len(directories_d)
 
 
 ##write directories to file (i.e. SIDs) (one per line)
@@ -62,6 +63,6 @@ print "PART D: Submissions found: ", len(directories_d)
 #outputDirFile.close()
 
 ############# COMPARE SUBMISSIONS USING DIFF ##############
-
+compare_submissions(submission_dir, directories_a, directories_b, directories_c, directories_d)
 
 exit(1)

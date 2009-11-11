@@ -27,6 +27,12 @@ part_C_files = ["BTreeIndex.h", "BTreeIndex.cc", "BTreeNode.h", "BTreeNode.cc", 
  # SqlEngine.cc, BTreeIndex.h, BTreeIndex.cc, BTreeNode.h, BTreeNode.cc, and Bruinbase.h are optional
 part_D_files = ["SqlEngine.h", "SqlEngine.cc", "BTreeIndex.h", "BTreeIndex.cc", "BTreeNode.h", "BTreeNode.cc", "Bruinbase.h"] 
 
+# when checking the amount of changes made to a resubmitted file, the diff command output
+# must be below this threshhold to avoid having points deducted
+diff_threshhold = 0.5
+
+# penalty of total final grade for each time the diff_threshhold is exceeded
+diff_penalty = 0.05
 
 
 # HELPER FUNCTIONS
