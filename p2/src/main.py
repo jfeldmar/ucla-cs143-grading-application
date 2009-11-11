@@ -43,6 +43,7 @@ print "=== Loading Student Submissions"
 print "\tName-SID Pairs: ", len(name_dictionary), " entries"
 
 # get list of all submission directories for each part
+# listdir(): returns all directories in 'folder' whose name is 9 digits (i.e. SID number)
 directories_a = listdirs(submission_dir_a)
 directories_b = listdirs(submission_dir_b)
 directories_c = listdirs(submission_dir_c)
@@ -63,6 +64,6 @@ print "\tPART D - Submissions found: ", len(directories_d)
 #outputDirFile.close()
 
 ############# COMPARE SUBMISSIONS USING DIFF ##############
-compare_submissions("../"+submission_dir, name_dictionary, directories_b, directories_c, directories_d)
+compare_submissions(submission_dir, name_dictionary, directories_b, directories_c, directories_d)
 
 exit(1)

@@ -1,4 +1,4 @@
-import os
+import os, re
 
 # directory containing the student submissions (RELATIVE TO main.py)
 # format: each student's directory has name = SID and contains that student's submitted files
@@ -13,8 +13,8 @@ submissions_data_file = "submission.csv"
 graderscriptfile = 'graderinput/testinputcommands.txt'
 
 
-# list of files submitted for each part of the project (A, B, C, D) [excludes README file]
-# (used to run diff on files to makes sure no significant changes were made)
+# list of files submitted (including optional) for each part of the project (A, B, C, D)
+# [excludes README file]
 
 part_A_files = ["SqlEngine.cc"]
 
@@ -34,11 +34,13 @@ diff_threshhold = 0.5
 # penalty of total final grade for each time the diff_threshhold is exceeded
 diff_penalty = 0.05
 
+diff_D_vs_C = ["BTreeIndex.h", "BTreeIndex.cc", "BTreeNode.h", "BTreeNode.cc", "Bruinbase.h"] 
+diff_C_vs_B = ["BTreeNode.h", "BTreeNode.cc", "SqlEngine.cc"]
 
-# HELPER FUNCTIONS
+# returns all directories in 'folder' whose name is 9 digits (i.e. SID number)
 def listdirs(folder):
 	dirs = []
 	for d in (os.listdir(folder)):
-		if os.path.isdir(os.path.join(folder, d)):
+		if (os.path.isdir(os.path.join(folder, d)) and re.match("^[0-9]{9}$",d)):
 			dirs.append(d)
 	return dirs
