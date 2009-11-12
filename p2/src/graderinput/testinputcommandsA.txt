@@ -1,13 +1,8 @@
 # Lines starting with # are ignored
 # Syntax:
 # (one command per line)
-#		    open:	start bruinbase
-#		   close:	quit bruinbase
 #	    LOAD command:	LOAD tablename FROM 'filename'
-#	SELECT command:		SELECT ... FROM ... WHERE
-
-# start bruinbase
-open
+#	  SELECT command:	SELECT ... FROM ... WHERE
 
 5 "loading xsmall.del"
 LOAD xsmall FROM 'sampletest/xsmall.del' WITH INDEX
@@ -73,6 +68,3 @@ select_cmd_results/xlarge_result_2.txt
 SELECT * FROM xlarge WHERE key > 400 AND key < 500 AND key > 100 AND key < 4000000
 select_cmd_results/xlarge_result_3.txt
 
-
-# close bruinbase
-close

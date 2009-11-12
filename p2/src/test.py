@@ -1,14 +1,22 @@
 #!/usr/bin/python
 
-from re import *
+def printhere(fd):
+	print fd.readline()
+	print fd.readline()
 
-your_re = compile(raw_input("Expression for testing? "));
+filename = "graderinput/testinputcommandsD.txt"
 
+fd = open(filename, 'r')
+
+n = 1
 while 1:
-        info = raw_input("Enter string to test: ");
-        if info == "": break
-        print info
-        if search(your_re,info):
-                print "Matches!"
-        else:
-                print "Does NOT match"
+	line = fd.readline()
+	if not line:
+		break
+	pass
+	print line
+	if (n == 2):
+		printhere(fd)
+
+	n += 1
+	

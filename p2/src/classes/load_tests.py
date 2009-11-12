@@ -14,100 +14,87 @@ from default_vars import *;	# loads global variables from ../default_vars.py
 # if error encountered quit with detail of where error found
 # return error_code/error_msg, commands array
 
-def load_grader_test_file():
+def load_grader_test_file(graderscriptfile):
+
+	# commands list which will be returned by function
 	commands = []
+	
 	# save current working directory
 	savedir = os.getcwd()
-	f = open(graderscriptfile, 'r')
-	# change to the directory of the grader's script file
-	os.chdir(os.path.dirname(graderscriptfile))
 	
-	for line in f:
-		# skip comment lines and empty lines
-		if (re.match("^\s*#",line) or re.match("^\s*$", line)):
-			continue
-		cmd_type, cmd, points, description = validate_command(line)
-		y = command(cmd_type, cmd, points, description)
+	# open grader's test command file
+	fd = open(graderscriptfile, 'r')
+	
+	# switch to the directory of the grader's script file
+	os.chdir(os.path.dirname(graderscriptfile))
+
+	# read file
+	while 1:
+		# skip lines until not empty line and not comment line
+		line = skip_comment_empty_lines(fd)
+
+		# if reached end of file, exit loop
+		if not line:
+			break
+		pass
+		
+		# extract LOAD, or SELECT command and its appropriate information
+		cmd_type, cmd, points, description, solution = validate_command(fd, line, graderscriptfile)
+		
+		y = command(cmd_type, cmd, points, description, solution)
 		commands.append(y)
+		
 		print '\t', y.cmd
 		
-	f.close()
-	# change to original working directory
+	fd.close()
+
+	# switch to original working directory
 	os.chdir(savedir)
 	
 	# return array of extracted commands
 	return commands
 		
 
-def validate_command(command):
+def validate_command(fd, command1, graderscriptfile):
 	cmd_type = ""
 	cmd = ""
 	points = 0
 	description = ""
+	solution_file = ""	# applies only to SELECT commands
 	
 	# parse command
-	# if open: ./bruinbase
-	# if close: QUIT
-	# if run: open file, parse LOAD/SELECT information
-	
-	# remove unnecessary whitespace
-	command = command.strip()
+	# if run: parse LOAD/SELECT command information
 	
 	#process command
 	try:
-		# skip empty commands
-		if ( len(command) != 0):
-			tokens = command.split()	# split by whitespace characters
-			
-			if (tokens[0] == 'open'):
-				cmd_type = 'open'
-				cmd = './bruinbase'
-			elif (tokens[0] == 'close'):
-				cmd_type = 'close'
-				cmd = 'QUIT'
-			elif (tokens[0] == 'run'):
-				if (len(tokens) < 2):
-					raise ValidateException(command, "Insufficient Number of Parameters")
-					
-				cmd_type = 'run'
-				# open filename (second parameter)
-				fd = open(tokens[1], 'r')
+		# remove padding whitespace
+		# split command by whitespace characters
+		tokens = command1.strip().split()	
 
-				# read line which stores Points and Description
-				line1_tokens = fd.readline().split()
+		# read Score/Description line
+		points, description = get_command_info(command1, tokens)
 
-				# store POINTS value (error if not integer)
-				if (len(line1_tokens[0]) < 1):
-					raise ValidateException(command, "Points Value not specified in line 1 of "+ tokens[1])
-				if (not line1_tokens[0].isdigit()):
-					raise ValidateException(command, "Points Value not a positive integer in line 1 of "+ tokens[1])
-				else:
-					points = line1_tokens[0]
+		# skip empty lines and comments
+		command2 = skip_comment_empty_lines(fd)
 
-				# store DESCRIPTION if not empty
-				if (not line1_tokens[1] == ""):
-					description = line1_tokens[1].strip()
+		# read LOAD/SELECT command data
+		if ( is_load_command(command2)):
+			cmd_type = "LOAD"
+			cmd = command2
+		elif ( is_select_command(command2)):
+			cmd_type = "SELECT"
+			cmd = command2
 
-				# store COMMAND if not empty (otherwise error)
-				cmd = fd.readline().strip()
-				if (cmd == ""):
-					raise ValidateException(command, "Bruinbase command cannot be empty")
-				
-				# make sure the syntax of speficied LOAD/SELECT command is valid
-				if (not valid_load_select_command(cmd)):
-					error_str = "Invalid Syntanx in specified LOAD/SELECT command in line 2 of " + tokens[1] + " (for LOAD command, check if file exists)."
-					raise ValidateException(command, error_str)
-					
-				# if SELECT command make sure second filename parameter exists
-				if (None != re.match("^\s*SELECT", cmd, re.IGNORECASE)):
-					if (len(tokens) < 3):
-						raise ValidateException(cmd, "Invalid Solution File Provided")
-					if (not os.path.exists(tokens[2])):
-						raise ValidateException(cmd, "Invalid Solution File Provided")
+			# skip empty lines and comments
+			command3 = skip_comment_empty_lines(fd)
 
-				fd.close()
+			# get solution filename
+			if( os.path.exists( command3 ) ):
+				solution_file = command3
 			else:
-				raise ValidateException(command, "Invalid Syntax")
+				raise ValidateException(command3, "Expecting SELECT command solution file - Invalid Solution File Provided")
+		else:
+			raise ValidateException(command2, "Invalid Syntax - Expecting LOAD or SELECT command")
 
 	except ValidateException, e:
 		print >> sys.stderr, "Error in Grader's Script: ", graderscriptfile
@@ -118,25 +105,60 @@ def validate_command(command):
 		print >> sys.stderr, e
 		exit()
 			
-	return cmd_type, cmd, points, description
+	return cmd_type, cmd, points, description, solution_file
 
+def get_command_info(cmd, tokens):
+	# store POINTS value (error if not integer)
+	if (not tokens[0].isdigit()):
+		raise ValidateException(cmd, "Expecting line containing Points/Description")
+	else:
+		points = tokens[0].strip()
 
-def valid_load_select_command(cmd):
-	# regular expressions for matching LOAD and SELECT statements
+	# store DESCRIPTION if not empty
+	description = ""
+	if (len(tokens) > 1):
+		description = tokens[1].strip()
+	
+	return points, description
+
+def is_load_command(cmd):
+	# regular expressions for matching LOAD statements
 	# case-insensitive, filename optionally included in SINGLE quotes
 	load_re = "^\s*LOAD\s+[^\s]+\s+FROM\s+'?([^'\s]+)'?(\s+WITH\s+INDEX)?\s*"
-	select_re = "^\s*SELECT\s+[^\s]+\s+FROM\s+[^\s]+\s*"
 
-	# See if load command matches
 	if (None != re.match(load_re, cmd, re.IGNORECASE)):
 		# make sure file to be loaded from exists
 		filename = re.match(load_re, cmd, re.IGNORECASE).group(1)
 		if (os.path.exists(filename)):
 			return 1
 		else:
-			return 0
-	elif (None != re.match(select_re, cmd, re.IGNORECASE)):
+			err_str = "LOAD command target file '" + filename + "' does not exists"
+			raise ValidateException(cmd, err_str)
+	else:
+		return 0
+
+def is_select_command(cmd):
+	# regular expressions for matching SELECT statements
+	# case-insensitive
+	select_re = "^\s*SELECT\s+[^\s]+\s+FROM\s+[^\s]+\s*"
+
+	if (None != re.match(select_re, cmd, re.IGNORECASE)):
 		return 1
 	else:
 		return 0
-	
+
+
+# input:	file descriptor, currently read line
+# process:	read next line until line is not empty and doesn't have comment (i.e. starts with #)
+# return:	non-trivial line
+def skip_comment_empty_lines(fd):
+	line = fd.readline()
+	if not line:
+		return line.strip()
+
+	while (re.match("^\s*#",line) or re.match("^\s*$", line)):
+		line = fd.readline()
+		if not line:
+			break
+					
+	return line.strip()

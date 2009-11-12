@@ -1,5 +1,8 @@
 import os, re
 
+# empty bruinbase compressed file
+clean_bruinbase = "../bruinbase.zip"
+
 # directory containing the student submissions (RELATIVE TO main.py)
 # format: each student's directory has name = SID and contains that student's submitted files
 # format: a submission.csv file must be present in order to extract student names
@@ -10,7 +13,10 @@ submission_dir_c = submission_dir + '/c'
 submission_dir_d = submission_dir + '/d'
 submissions_data_file = "submission.csv"
 
-graderscriptfile = 'graderinput/testinputcommands.txt'
+# files containing test commands for Part A and for Part D
+graderscriptfileA = 'graderinput/testinputcommands_small.txt'
+#graderscriptfileA = 'graderinput/testinputcommandsA.txt'
+graderscriptfileD = 'graderinput/testinputcommandsD.txt'
 
 
 # list of files submitted (including optional) for each part of the project (A, B, C, D)
@@ -29,10 +35,10 @@ part_D_files = ["SqlEngine.h", "SqlEngine.cc", "BTreeIndex.h", "BTreeIndex.cc", 
 
 # when checking the amount of changes made to a resubmitted file, the diff command output
 # must be below this threshhold to avoid having points deducted
-diff_threshhold = 0.5
+diff_threshold = 0.5
 
 # penalty of total final grade for each time the diff_threshhold is exceeded
-diff_penalty = 0.05
+diff_penalty_amt = 2
 
 diff_D_vs_C = ["BTreeIndex.h", "BTreeIndex.cc", "BTreeNode.h", "BTreeNode.cc", "Bruinbase.h"] 
 diff_C_vs_B = ["BTreeNode.h", "BTreeNode.cc", "SqlEngine.cc"]
