@@ -1,2 +1,0 @@
-10 "testing my test"
-load movie from 'testinputcommands.txt'
