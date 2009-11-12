@@ -1,6 +1,16 @@
 #!/usr/bin/python
 
-import sys, csv
+
+import sys, csv, os
+
+# IMPORTANT IF THIS SCRIPT IS NOT RUN FROM ITS OWN DIRECTORY
+#	saves caller's directory, changes to script's directory
+#	at the end of script, changes back to caller's directory
+caller_dir = os.getcwd()
+script_dir = sys.path[0]
+os.chdir(script_dir)
+
+
 sys.path.append('./classes')
 from default_vars import *;	# loads global variables and helper function from default_vars.py
 from load_tests import *;	# module to load grader-specified test cases
@@ -186,4 +196,6 @@ os.chdir(curdir)
 #commands_part_D
 #print "Commands to run on Part D ", len(commands_part_D)
 
+# switch back to the caller's directory
+os.chdir(caller_dir)
 exit(1)

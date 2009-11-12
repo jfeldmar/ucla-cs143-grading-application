@@ -5,7 +5,7 @@
 #	  SELECT command:	SELECT ... FROM ... WHERE
 
 5 "loading xsmall.del"
-LOAD xsmall FROM 'sampletest/xsmall.del' WITH INDEX
+LOAD xsmall FROM 'sample_load_data/xsmall.del' WITH INDEX
 
 10 "size of xsmall"
 SELECT COUNT(*) FROM xsmall
@@ -16,7 +16,7 @@ SELECT * FROM xsmall WHERE key < 2500
 select_cmd_results/xsmall_result_2.txt
 
 5 "loading small.del"
-LOAD small FROM 'sampletest/small.del' WITH INDEX
+LOAD small FROM 'sample_load_data/small.del' WITH INDEX
 
 10 "size of small"
 SELECT COUNT(*) FROM small
@@ -27,7 +27,7 @@ SELECT * FROM small WHERE key > 100 AND key < 500
 select_cmd_results/small_result_2.txt
 
 5 "loading medium.del"
-LOAD medium FROM 'sampletest/medium.del' WITH INDEX
+LOAD medium FROM 'sample_load_data/medium.del' WITH INDEX
 
 10 "size of mediem"
 SELECT COUNT(*) FROM medium
@@ -38,7 +38,7 @@ SELECT * FROM medium WHERE key = 489
 select_cmd_results/medium_result_2.txt
 
 5 "loading large.del"
-LOAD large FROM 'sampletest/large.del' WITH INDEX
+LOAD large FROM 'sample_load_data/large.del' WITH INDEX
 
 10 "size of large"
 SELECT COUNT(*) FROM large
@@ -54,7 +54,7 @@ select_cmd_results/large_result_3.txt
 
 
 5 "loading xlarge.del"
-LOAD xlarge FROM 'sampletest/xlarge.del' WITH INDEX
+LOAD xlarge FROM 'sample_load_data/xlarge.del' WITH INDEX
 
 10 "size of xlarge"
 SELECT COUNT(*) FROM xlarge
