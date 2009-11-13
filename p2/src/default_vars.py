@@ -13,9 +13,11 @@ submission_dir_c = submission_dir + '/c'
 submission_dir_d = submission_dir + '/d'
 submissions_data_file = "submission.csv"
 
-# files containing test commands for Part A and for Part D
+# files containing test commands for Part A
 graderscriptfileA = 'graderinput/testinputcommands_small.txt'
 #graderscriptfileA = 'graderinput/testinputcommandsA.txt'
+
+# files containing test commands for Part D
 graderscriptfileD = 'graderinput/testinputcommandsD.txt'
 
 
@@ -43,10 +45,6 @@ diff_penalty_amt = 2
 diff_D_vs_C = ["BTreeIndex.h", "BTreeIndex.cc", "BTreeNode.h", "BTreeNode.cc", "Bruinbase.h"] 
 diff_C_vs_B = ["BTreeNode.h", "BTreeNode.cc", "SqlEngine.cc"]
 
-# returns all directories in 'folder' whose name is 9 digits (i.e. SID number)
-def listdirs(folder):
-	dirs = []
-	for d in (os.listdir(folder)):
-		if (os.path.isdir(os.path.join(folder, d)) and re.match("^[0-9]{9}$",d)):
-			dirs.append(d)
-	return dirs
+# threshold after which a command automatically fails if it hasn't returned yet
+command_timeout = 20
+

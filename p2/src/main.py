@@ -2,6 +2,7 @@
 
 
 import sys, csv, os
+from subprocess import Popen, PIPE, STDOUT
 
 # IMPORTANT IF THIS SCRIPT IS NOT RUN FROM ITS OWN DIRECTORY
 #	saves caller's directory, changes to script's directory
@@ -12,11 +13,10 @@ os.chdir(script_dir)
 
 
 sys.path.append('./classes')
-from default_vars import *;	# loads global variables and helper function from default_vars.py
-from load_tests import *;	# module to load grader-specified test cases
-from diff_submissions import *;	# module to check differences among parts of submissions
-from subprocess import Popen, PIPE, STDOUT
-
+from default_vars import *	# loads global variables and helper function from default_vars.py
+from load_tests import *	# module to load grader-specified test cases
+from diff_submissions import *	# module to check differences among parts of submissions
+from helper_functions import *
 # steps:
 #	check that grader's script is valid (store commands in array)
 #	read submissions data (sid, name, files submitted)
@@ -147,23 +147,27 @@ else:
 	print >>sys.stderr, "Error - Code does not compile with submitted files"
 	exit()
 
-#for c in cmds:
-#	print c.cmd
-#exit()
-
 for tcmd in commands_part_A:
-#	print os.getcwd()
+	# print command being executed
 	print tcmd.cmd
+	
+	# write command to a file so it can be passed to STDIN of bruinbase process
 	fd = open("temp.cmd", 'w')
 	fd.write(tcmd.cmd)
 	fd.write('\n')
 	fd.close()
 	fd = open("temp.cmd", 'r')
+	
+	# run command, get output/error stream, parse
 	if (os.path.exists('bruinbase')):
-		cmd_str = tcmd.cmd
-		p = subprocess.Popen('./bruinbase', stdout=PIPE, stdin=fd, stderr=PIPE)
-		(mstdout, mstderr) = p.communicate()
+
+		# start bruinbase process and pass command as STDIN
 		
+#		p = subprocess.Popen('./bruinbase', stdout=PIPE, stdin=fd, stderr=PIPE)
+#		(mstdout, mstderr) = p.communicate()
+		(mstdout, mstderr, err_code) = runCmd('./bruinbase', fd, command_timeout)
+		
+		# for SELECT command, parse output and timing info
 		if (tcmd.cmd_type == "SELECT"):
 			# match content between "Bruinbase>", '.' matches newline, case ignored
 			re_stdout = "^\s*Bruinbase>\s*(.+)Bruinbase>\s*$"
@@ -181,6 +185,7 @@ for tcmd in commands_part_A:
 			# check if output correct
 			# assign points
 			
+		# for LOAD command, parse error
 		elif (tcmd.cmd_type == "LOAD"):
 			#check if error
 			#assign points
@@ -188,6 +193,8 @@ for tcmd in commands_part_A:
 		else:
 			err_str = tcmd.cmd + " => unrecognized command"
 			exit(err_str)
+	else:
+		exit("Cannot find Bruinbase source code")
 
 os.chdir(curdir)
 
@@ -199,3 +206,5 @@ os.chdir(curdir)
 # switch back to the caller's directory
 os.chdir(caller_dir)
 exit(1)
+
+
