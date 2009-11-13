@@ -162,10 +162,8 @@ for tcmd in commands_part_A:
 	if (os.path.exists('bruinbase')):
 
 		# start bruinbase process and pass command as STDIN
-		
-#		p = subprocess.Popen('./bruinbase', stdout=PIPE, stdin=fd, stderr=PIPE)
-#		(mstdout, mstderr) = p.communicate()
 		(mstdout, mstderr, err_code) = runCmd('./bruinbase', fd, command_timeout)
+		print "error??? ", err_code
 		
 		# for SELECT command, parse output and timing info
 		if (tcmd.cmd_type == "SELECT"):
