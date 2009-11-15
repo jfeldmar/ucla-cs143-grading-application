@@ -67,6 +67,12 @@ class SqlEngine {
    * @return error code. 0 if no error
    */
   static RC parseLoadLine(const std::string& line, int& key, std::string& value);
+   
+/////////////////////////////////////////////// helper functions ///////////////////////////
+  static void  print_this(const int key, const std::string value, const int attr);
+  
+static bool compare_value(const std::string l_bound_val, const std::string u_bound_val, const std::string equal_val, const std::string value, const bool less_than_equal, const bool greatter_than_equal);
+  
 };
 
 #endif /* SQLENGINE_H */

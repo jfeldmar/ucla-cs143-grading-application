@@ -18,6 +18,9 @@
  */
 class BTLeafNode {
   public:
+	//making a constructor
+	BTLeafNode();
+	
    /**
     * Insert the (key, rid) pair to the node.
     * Remember that all keys inside a B+tree node should be kept sorted.
@@ -73,7 +76,7 @@ class BTLeafNode {
     * @return 0 if successful. Return an error code if there is an error.
     */
     RC setNextNodePtr(PageId pid);
-
+	
    /**
     * Return the number of keys stored in the node.
     * @return the number of keys in the node
@@ -96,13 +99,31 @@ class BTLeafNode {
     */
     RC write(PageId pid, PageFile& pf);
 
-  private:
-   /**
-    * The main memory buffer for loading the content of the disk page 
-    * that contains the node.
-    */
-    char buffer[PageFile::PAGE_SIZE];
+	//sets the parents PID to the given PID
+	RC setparentPtr(PageId pid);
+
+	//sets the childs own PID to the given PID
+	RC setownPtr(PageId pid);
+	
+	//returns the parents pid
+	PageId getparentPtr();
+	
+	//returns the own pid
+	PageId getownPtr();
+
+	char* get_buffer();
+	
+	private:
+	char buffer[PageFile::PAGE_SIZE];
+	static const int MAX_KEY_COUNT = 80; //but actually space for 6. reseved for one.
+	static const int OFFSET = 16;
+	
 }; 
+
+
+/////////////////////
+////non leafe starts here!!
+///////////////////////////
 
 
 /**
@@ -110,6 +131,9 @@ class BTLeafNode {
  */
 class BTNonLeafNode {
   public:
+	//making a constructor
+	BTNonLeafNode();
+	 
    /**
     * Insert a (key, pid) pair to the node.
     * Remember that all keys inside a B+tree node should be kept sorted.
@@ -174,12 +198,25 @@ class BTNonLeafNode {
     */
     RC write(PageId pid, PageFile& pf);
 
-  private:
-   /**
-    * The main memory buffer for loading the content of the disk page 
-    * that contains the node.
-    */
-    char buffer[PageFile::PAGE_SIZE];
+	//sets the parents PID to the given PID
+	RC setparentPtr(PageId pid);
+
+	//sets the childs own PID to the given PID
+	RC setownPtr(PageId pid);
+	
+	//returns the parents pid
+	PageId getparentPtr();
+	
+	//returns self pid
+	PageId getownPtr();
+	
+	char* get_buffer();
+	
+	private:
+	char buffer[PageFile::PAGE_SIZE];
+	static const RC MAX_KEY_COUNT_NONLEAF = 80; //but actually space for 6. reseved for one.
+	static const int OFFSET = 16;
+	
 }; 
 
 #endif /* BTNODE_H */

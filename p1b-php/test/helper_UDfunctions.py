@@ -117,6 +117,7 @@ def test_query(student_query, timeout):
 		print >>sys.stderr, "ERROR: Execution failed:", e
 	return fail_query, toprint
 
+# Run Command with a Timeout value
 def runCmd(cmd, timeout):
 	'''
 	Will execute a command, read the output and return it back.
@@ -150,11 +151,8 @@ def runCmd(cmd, timeout):
         	# p.kill()
         	os.kill(p.pid, signal.SIGKILL)
 		return (1, 0, 0, 1)	# return timeout error
-#		print >>sys.stderr, "MySQL command ", cmd, " timed out. Aborted"
-#        	raise OSError("Process timeout has been reached")
 
 	    ph_ret = p.returncode
-
 
 	ph_out, ph_err = p.communicate()
 

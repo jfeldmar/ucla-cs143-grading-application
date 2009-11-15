@@ -49,7 +49,17 @@ class BTreeIndex {
    * @return error code. 0 if no error
    */
   RC close();
+
+	//helper function roorPid initializer and writter
+ // RC makeRoot();
+  PageId parent(const PageId& pid); //returns the parents pageid
+	  
+  //locates the parent and insert stuff into it!
+  RC insert_in_parent(PageId N, int key, PageId Nchild);
     
+  //helper function to locate
+  PageId locate_helper(int key, PageId pid);
+
   /**
    * Insert (key, RecordId) pair to the index.
    * @param key[IN] the key for the value inserted into the index
@@ -89,12 +99,25 @@ class BTreeIndex {
    * @return error code. 0 if no error
    */
   RC readForward(IndexCursor& cursor, int& key, RecordId& rid);
+
+//make a function to access the rootPid and treeHeight
+	PageId getrootPid();
+	
+	long int gettreeHeight();
+
+	int print_tree();
+	
+	int print_tree_helper(PageId pid);
   
+	PageFile getpf();
+	
+	void print_nodes();
+	
  private:
   PageFile pf;         /// the PageFile used to store the actual b+tree in disk
 
   PageId   rootPid;    /// the PageId of the root node
-  int      treeHeight; /// the height of the tree
+  long int      treeHeight; /// the height of the tree
   /// Note that the content of the above two variables will be gone when
   /// this class is destructed. Make sure to store the values of the two 
   /// variables in disk, so that they can be reconstructed when the index

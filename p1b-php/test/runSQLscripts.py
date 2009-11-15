@@ -2,6 +2,15 @@
 
 import os, sys, subprocess, getopt, re, csv;
 from subprocess import Popen, PIPE, STDOUT;
+
+# IMPORTANT IF THIS SCRIPT IS NOT RUN FROM ITS OWN DIRECTORY
+#	saves caller's directory, changes to script's directory
+#	at the end of script, changes back to caller's directory
+caller_dir = os.getcwd()
+script_dir = sys.path[0]
+os.chdir(script_dir)
+
+
 from helper_UDfunctions import *;	# import helper functions from helper_UDfunctions.py
 from default_vars import *;	# loads global variables from default_vars.py
 
@@ -504,3 +513,6 @@ resultsFile.close()
 
 total_time = time.time() - loop_start
 print >> sys.stderr, "Total Elapsed Time: ", int(total_time/60), "min ", round(total_time%60.0,2) , "secs."
+
+# switch back to the caller's directory
+os.chdir(caller_dir)
