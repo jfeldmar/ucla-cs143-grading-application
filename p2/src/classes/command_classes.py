@@ -5,10 +5,12 @@ import sys;
 class command:
 	# parameter: one line command string
 	# returns: 0 if failed, command object otherwise (change this to be external)
-	def __init__( self, cmd_type, cmd, points, description, solution):	# parse first word and return required command
+	def __init__( self, cmd_type, cmd, points, timeout, maxIOs, description, solution):	# parse first word and return required command
 		self.cmd_type = cmd_type
 		self.cmd = cmd
-		self.points = points
+		self.points = int(points)
+		self.timeout = int(timeout)
+		self.maxIOs = int(maxIOs)
 		self.description = description
 		self.solution  = solution
 	cmd_type = ""			# LOAD or SELECT

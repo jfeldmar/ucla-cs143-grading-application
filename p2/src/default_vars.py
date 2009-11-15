@@ -14,11 +14,12 @@ submission_dir_d = submission_dir + '/d'
 submissions_data_file = "submission.csv"
 
 # files containing test commands for Part A
-graderscriptfileA = 'graderinput/testinputcommands_small.txt'
-#graderscriptfileA = 'graderinput/testinputcommandsA.txt'
+graders_file_directory = 'graderinput'
+graderscriptfileA = graders_file_directory + '/testinputcommands_small.txt'
+#graderscriptfileA = graders_file_directory + '/testinputcommandsA.txt'
 
 # files containing test commands for Part D
-graderscriptfileD = 'graderinput/testinputcommandsD.txt'
+graderscriptfileD = graders_file_directory + '/testinputcommandsD.txt'
 
 
 # list of files submitted (including optional) for each part of the project (A, B, C, D)
@@ -46,5 +47,6 @@ diff_D_vs_C = ["BTreeIndex.h", "BTreeIndex.cc", "BTreeNode.h", "BTreeNode.cc", "
 diff_C_vs_B = ["BTreeNode.h", "BTreeNode.cc", "SqlEngine.cc"]
 
 # threshold after which a command automatically fails if it hasn't returned yet
-command_timeout = 20
+global_command_timeout = 20
 
+temp_file = "temp.cmd"

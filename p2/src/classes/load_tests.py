@@ -39,9 +39,9 @@ def load_grader_test_file(graderscriptfile):
 		pass
 		
 		# extract LOAD, or SELECT command and its appropriate information
-		cmd_type, cmd, points, description, solution = validate_command(fd, line, graderscriptfile)
+		cmd_type, cmd, points, timeout, maxIOs, description, solution = validate_command(fd, line, graderscriptfile)
 		
-		y = command(cmd_type, cmd, points, description, solution)
+		y = command(cmd_type, cmd, points, timeout, maxIOs, description, solution)
 		commands.append(y)
 		
 		print '\t', y.cmd
@@ -67,34 +67,35 @@ def validate_command(fd, command1, graderscriptfile):
 	
 	#process command
 	try:
-		# remove padding whitespace
-		# split command by whitespace characters
-		tokens = command1.strip().split()	
-
-		# read Score/Description line
-		points, description = get_command_info(command1, tokens)
-
-		# skip empty lines and comments
-		command2 = skip_comment_empty_lines(fd)
 
 		# read LOAD/SELECT command data
-		if ( is_load_command(command2)):
+		if ( is_load_command(command1)):
 			cmd_type = "LOAD"
-			cmd = command2
-		elif ( is_select_command(command2)):
+			cmd = command1
+		elif ( is_select_command(command1)):
 			cmd_type = "SELECT"
-			cmd = command2
+			cmd = command1
 
 			# skip empty lines and comments
-			command3 = skip_comment_empty_lines(fd)
+			command2 = skip_comment_empty_lines(fd)
 
-			# get solution filename
-			if( os.path.exists( command3 ) ):
-				solution_file = command3
+			# for SELECT command get solution filename
+			if( os.path.exists( command2 ) ):
+				solution_file = command2
 			else:
-				raise ValidateException(command3, "Expecting SELECT command solution file - Invalid Solution File Provided")
+				raise ValidateException(command2, "Expecting SELECT command solution file - Invalid Solution File Provided")
 		else:
-			raise ValidateException(command2, "Invalid Syntax - Expecting LOAD or SELECT command")
+			raise ValidateException(command1, "Invalid Syntax - Expecting LOAD or SELECT command")
+
+		# skip empty lines and comments
+		command3 = skip_comment_empty_lines(fd)
+
+		# split line by whitespace characters
+		tokens = command3.split()	
+
+		# read Score/Timeout/MaxIOs/Description line
+		points, timeout, maxIOs, description = get_command_info(command3, tokens)
+
 
 	except ValidateException, e:
 		print >> sys.stderr, "Error in Grader's Script: ", graderscriptfile
@@ -105,21 +106,23 @@ def validate_command(fd, command1, graderscriptfile):
 		print >> sys.stderr, e
 		exit()
 			
-	return cmd_type, cmd, points, description, solution_file
+	return cmd_type, cmd, points, timeout, maxIOs, description, solution_file
 
 def get_command_info(cmd, tokens):
-	# store POINTS value (error if not integer)
-	if (not tokens[0].isdigit()):
-		raise ValidateException(cmd, "Expecting line containing Points/Description")
-	else:
-		points = tokens[0].strip()
+	# store POINTS/TIMEOUT/MAXIOS values (error if not number)
+	try:
+		points = int(tokens[0])
+		timeout = int(tokens[1])	# value in seconds
+		maxIOs = int(tokens[2])
+	except ValueError:
+		raise ValidateException(cmd, "Expecting line containing Points/Timeout/MaxIOs/Description Line (values must be separated by whitespace)")
 
 	# store DESCRIPTION if not empty
 	description = ""
-	if (len(tokens) > 1):
-		description = tokens[1].strip()
+	if (len(tokens) > 3):
+		description = tokens[3]
 	
-	return points, description
+	return points, timeout, maxIOs, description
 
 def is_load_command(cmd):
 	# regular expressions for matching LOAD statements

@@ -105,6 +105,8 @@ print "Commands to run on Part A: ", len(commands_part_A)
 #					check if # pages as expected????
 
 student = grading_results[0]
+score = 0
+comments =  ""
 print "=== Grading SID - ", student.sid
 
 # remove current bruinbase version
@@ -123,7 +125,9 @@ if retcode == 0:
 else:
 	print >>sys.stderr, "Error Extracting Bruinbase - check that the file exists and is valid"
 	exit()
-	
+
+# copy allowed files into test bruinbase
+# if file doesn't exists in student's submission, do nothing
 for allowed_file in part_A_files:
 	src = submission_dir_a + '/' + student.sid + '/' + allowed_file
 	if (os.path.exists(src)):
@@ -131,68 +135,123 @@ for allowed_file in part_A_files:
 		if retcode == 0:
 			print "\t=== Copied file '", allowed_file, "' to bruinbase"
 		else:
-			print >>sys.stderr, "Error Extracting Bruinbase - check that the file exists and is valid"
+			err_str = "Error Copying Student File - ", allowed_file, " - to test bruinbase directory"
+			print >>sys.stderr, err_str
 			exit()
-	else:
-		print >>sys.stderr, "Required File Not Submitted: ", allowed_file
 
 # make bruinbase
 curdir = os.getcwd()
 os.chdir('bruinbase')
 print "\t=== Executing make"
 retcode = os.system("make")
-if retcode == 0:
-	print "\t=== 'make' successful"
-else:
+if retcode != 0:
+	# change to failed score
 	print >>sys.stderr, "Error - Code does not compile with submitted files"
-	exit()
+	score = 0
+	comments += "; Bruinbase does not successfully compile with Part A submissions"
+else:
+	print "\t=== 'make' successful"
 
-for tcmd in commands_part_A:
-	# print command being executed
-	print tcmd.cmd
-	
-	# write command to a file so it can be passed to STDIN of bruinbase process
-	fd = open("temp.cmd", 'w')
-	fd.write(tcmd.cmd)
-	fd.write('\n')
-	fd.close()
-	fd = open("temp.cmd", 'r')
-	
-	# run command, get output/error stream, parse
-	if (os.path.exists('bruinbase')):
+	for tcmd in commands_part_A:
+		score = 0
+		comments =  ""
 
-		# start bruinbase process and pass command as STDIN
-		(mstdout, mstderr, err_code) = runCmd('./bruinbase', fd, command_timeout)
-		print "error??? ", err_code
-		
-		# for SELECT command, parse output and timing info
-		if (tcmd.cmd_type == "SELECT"):
-			# match content between "Bruinbase>", '.' matches newline, case ignored
-			re_stdout = "^\s*Bruinbase>\s*(.+)Bruinbase>\s*$"
-			
-			q_result = re.match(re_stdout, mstdout, re.IGNORECASE|re.S)
-			if q_result == None:
-				sys.exit("no match found")
-			print "stdout:\n", q_result.group(1)			
-			print "stderr:\n", mstderr
-			
-			result = q_result.group(1)
-			err = mstderr
-			
-			# check if no error
-			# check if output correct
-			# assign points
-			
-		# for LOAD command, parse error
-		elif (tcmd.cmd_type == "LOAD"):
-			#check if error
-			#assign points
-			print "stderr:\n", mstderr
+		# print command being executed
+		print tcmd.cmd
+
+		# write command to a file so it can be passed to STDIN of bruinbase process
+		fd = open(temp_file, 'w')
+		fd.write(tcmd.cmd)
+		fd.write('\n')
+		fd.close()
+		fd = open(temp_file, 'r')
+
+		# run command, get output/error stream, parse
+		if (os.path.exists('bruinbase')):
+
+			# start bruinbase process and pass command as STDIN
+			# if err_code = 1, error encountered
+			(mstdout, err, err_code) = runCmd('./bruinbase', fd, min(tcmd.timeout, global_command_timeout))
+
+#			print "stdout:\n", mstdout
+#			print "stderr:\n", err
+
+			# process failed if command timed out
+			# no points awarded
+			if ( err_code != 0 ):
+#				print "Command timed out or error encountered - ", mstdout, "/", err
+				score = 0
+				comments += " command (" + tcmd.cmd + ") failed - " + err
+#				print comments
+			# otherwise, parse output
+			else:
+				# for LOAD command, check for error
+				if (tcmd.cmd_type == "LOAD"):
+					#check if error
+					#assign points
+					if (err != ""):
+						score = 0
+						comments += "Error: " + err
+						#print "stderr:\n", err
+
+				# for SELECT command
+				# check for error, if no error
+				# parse output and timing info
+				#
+				elif (tcmd.cmd_type == "SELECT"):
+					# check if error
+					#	(error can come for invalid syntax, or error returned by Bruinbase)
+					(time, pages, err_str) = parse_select_stats(err)
+					
+					# if error parsing time/pages or error in command
+					if (time < 0):
+						score = 0
+						comments += "Error running select command (" + str(tcmd.cmd) + ") output: " + str(err_str)
+#						print comments
+						
+					# otherwise, parse and grade result
+					else:
+						# check if Maximum Number of IOs exceeded
+						if (pages > tcmd.maxIOs):
+							score = 0
+							comments += "Command exceeded maximum number of Pages Read (" + str(tcmd.maxIOs) + ")"
+							#print comments
+						else:
+							# Expected result format
+							re_select_stdout = "^\s*Bruinbase>\s*(.+)Bruinbase>\s*$"
+
+							# match output between "Bruinbase>", '.' matches newline, case ignored
+							q_result = re.match(re_select_stdout, mstdout, re.IGNORECASE|re.S)
+
+							# if not match, output does not match format specifications
+							if q_result == None:
+								score = 0
+								comments += "Invalid Bruinbase Output for Select Query"
+
+							# store query result
+							student_result = q_result.group(1)
+
+							# check if output correct
+							file_loc = script_dir + '/' + graders_file_directory
+							score, cmt = grade_output(student_result, tcmd.solution, file_loc)
+							comments += cmt
+				
+							#print "Score: ", score
+
+							# assign points
+				else:
+					score = 0
+					comments += tcmd.cmd + " => unrecognized command"
+					print comments
 		else:
-			err_str = tcmd.cmd + " => unrecognized command"
-			exit(err_str)
-	else:
-		exit("Cannot find Bruinbase source code")
+			exit("Error: Cannot find Bruinbase source code")
+
+		print "Score: ", score
+		print "Comments: ", comments
+
+# delete temporary file
+if os.path.exists(temp_file):
+	os.remove(temp_file)
 
 os.chdir(curdir)
 

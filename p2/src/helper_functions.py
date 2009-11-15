@@ -18,7 +18,7 @@ def runCmd(cmd, fd_stdin, timeout):
 	@param cmd: command to execute
 	@param timeout: process timeout in seconds
 	@return: a tuple of three: first stdout, then stderr, then exit code
-	@raise OSError: on missing command or if a timeout was reached
+			if exit code = 1, error encountered
 	'''
 
 	ph_out = None # process output
@@ -38,15 +38,13 @@ def runCmd(cmd, fd_stdin, timeout):
 	    while p.poll() == None and fin_time > time.time():
         	time.sleep(1)
 
-	    # if timeout reached, raise an exception
+	    # if timeout reached, return error code
 	    if fin_time < time.time():
 
         	# starting 2.6 subprocess has a kill() method which is preferable
         	# p.kill()
         	os.kill(p.pid, signal.SIGKILL)
-		return (1, 0, 1)	# return timeout error
-#		print >>sys.stderr, "MySQL command ", cmd, " timed out. Aborted"
-#        	raise OSError("Process timeout has been reached")
+		return (0, "command timed out", 1)	# return timeout error
 
 	    ph_ret = p.returncode
 
@@ -55,3 +53,70 @@ def runCmd(cmd, fd_stdin, timeout):
 
 	return (ph_out, ph_err, ph_ret)
 
+# parse
+def parse_select_stats(result):
+	# expected format: -- 0.000 seconds to run the select command. Read 1 pages
+	stats_re = ".*\s+([0-9]*\.?[0-9]+)\s+seconds.*Read\s+([\d]+)\s+pages\s*$"
+	err_re = ".*Error.*"
+
+	if (re.match(err_re, result, re.IGNORECASE|re.S)):
+		err_str =  result
+		return -1, 0, err_str
+	elif (None == re.match(stats_re, result, re.IGNORECASE|re.S)):
+		err_str = result, ": Invalid syntax for Timing/Page Data"
+		return -1, 0, err_str
+	else:
+		time = re.match(stats_re, result, re.IGNORECASE|re.S).group(1)
+		pages = re.match(stats_re, result, re.IGNORECASE|re.S).group(2)
+		print "Time: ", time
+		print "Pages: ", pages
+		return float(time), int(pages), ""
+
+# compare student's output to expected output for current SELECT query
+# student_result is a string
+# grader_result is a file
+def grade_output(student_result, grader_result, correct_dir):
+	save_dir = os.getcwd()
+	os.chdir(correct_dir)
+	score = 0
+	comment = ""
+
+	if (not os.path.exists(grader_result)):
+		err_str = "Unable to locate solution file: ", grader_result
+		raise OSError(err_str)
+
+	# create sets from grader's solution and student's result
+	solution_tuples = open(grader_result, 'r').read().split('\n')
+
+	# make sure grader's file is not empty
+	if (len(solution_tuples) == 0):
+		err_str = "ERROR: Unexpected Input - Grader's query output file has length 0: ", grader_result
+		raise OSError( err_str )
+
+	# remove empty entries
+	for line in solution_tuples:
+		if not line.strip():
+			solution_tuples.remove(line)
+
+	# If last line of grader's results is timing/pages read data, remove it		
+	# expected format: -- 0.000 seconds to run the select command. Read 1 pages
+	stats_re = ".*\s+([0-9]*\.?[0-9]+)\s+seconds.*Read\s+([\d]+)\s+pages\s*$"
+	if (re.match(stats_re, solution_tuples[-1], re.IGNORECASE|re.S)):
+		solution_tuples.pop(-1)
+
+	# parse student solution into a list
+	student_tuples = student_result.splitlines()
+	# remove empty entires
+	for line in student_tuples:
+		if not line.strip():
+			student_tuples.remove(line)
+			
+#	print "SOLUTION:", solution_tuples
+#	print "STUDENT OUT:",student_tuples
+		
+	# calculate score
+	fraction_correct = float(len(set(solution_tuples) & set(student_tuples))) / float(len(solution_tuples))
+	score = round (fraction_correct, 2)
+	
+	os.chdir(save_dir)
+	return score, comment

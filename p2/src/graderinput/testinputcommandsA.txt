@@ -4,67 +4,67 @@
 #	    LOAD command:	LOAD tablename FROM 'filename'
 #	  SELECT command:	SELECT ... FROM ... WHERE
 
-5 "loading xsmall.del"
 LOAD xsmall FROM 'sample_load_data/xsmall.del' WITH INDEX
+5 "loading xsmall.del"
 
-10 "size of xsmall"
 SELECT COUNT(*) FROM xsmall
 select_cmd_results/count_xsmall_result.txt
+10 "size of xsmall"
 
-10 "< condition on xsmall"
 SELECT * FROM xsmall WHERE key < 2500
 select_cmd_results/xsmall_result_2.txt
+10 "< condition on xsmall"
 
-5 "loading small.del"
 LOAD small FROM 'sample_load_data/small.del' WITH INDEX
+5 "loading small.del"
 
-10 "size of small"
 SELECT COUNT(*) FROM small
 select_cmd_results/count_small_result.txt
+10 "size of small"
 
-10 "< and > conditions on small"
 SELECT * FROM small WHERE key > 100 AND key < 500
 select_cmd_results/small_result_2.txt
+10 "< and > conditions on small"
 
-5 "loading medium.del"
 LOAD medium FROM 'sample_load_data/medium.del' WITH INDEX
+5 "loading medium.del"
 
-10 "size of mediem"
 SELECT COUNT(*) FROM medium
 select_cmd_results/count_medium_result.txt
+10 "size of mediem"
 
-10 "= condition on medium"
 SELECT * FROM medium WHERE key = 489
 select_cmd_results/medium_result_2.txt
+10 "= condition on medium"
 
-5 "loading large.del"
 LOAD large FROM 'sample_load_data/large.del' WITH INDEX
+5 "loading large.del"
 
-10 "size of large"
 SELECT COUNT(*) FROM large
 select_cmd_results/count_large_result.txt
+10 "size of large"
 
-10 "> condition on large"
 SELECT * FROM large WHERE key > 4500
 select_cmd_results/large_result_2.txt
+10 "> condition on large"
 
-10 "two > conditions on large"
 SELECT * FROM large WHERE key > 4500 AND key > 0
 select_cmd_results/large_result_3.txt
+10 "two > conditions on large"
 
 
-5 "loading xlarge.del"
 LOAD xlarge FROM 'sample_load_data/xlarge.del' WITH INDEX
+5 "loading xlarge.del"
 
-10 "size of xlarge"
 SELECT COUNT(*) FROM xlarge
 select_cmd_results/count_xlarge_result.txt
+10 "size of xlarge"
 
-10 "= condition on xlarge"
 SELECT * FROM xlarge WHERE key = 4240
 select_cmd_results/xlarge_result_2.txt
+10 "= condition on xlarge"
 
-10 "two < and two > conditions on xlarge"
 SELECT * FROM xlarge WHERE key > 400 AND key < 500 AND key > 100 AND key < 4000000
 select_cmd_results/xlarge_result_3.txt
+10 "two < and two > conditions on xlarge"
 
