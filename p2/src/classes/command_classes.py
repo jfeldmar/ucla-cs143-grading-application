@@ -45,8 +45,8 @@ class query_result:
 	max_time = 0.0
 	maxIOS = 0		# default value, should be reset according to config file
 	student_ans = ""
-	time = 0.0		# in seconds
 	correct_ans = ""
+	time = 0.0		# in seconds (-1 if command timed out or process failed)
 	score = 0
 	comment = ""
 
