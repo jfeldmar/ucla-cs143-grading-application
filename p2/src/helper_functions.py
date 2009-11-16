@@ -1,6 +1,9 @@
-import os, re, subprocess, time, signal
+import sys, os, re, subprocess, time, signal
 from subprocess import Popen, PIPE, STDOUT
 
+sys.path.append('./classes')
+from default_vars import *	# loads global variables and helper function from default_vars.py
+from command_classes import *
 
 # returns all directories in 'folder' whose name is 9 digits (i.e. SID number)
 def listdirs(folder):
@@ -9,6 +12,199 @@ def listdirs(folder):
 		if (os.path.isdir(os.path.join(folder, d)) and re.match("^[0-9]{9}$",d)):
 			dirs.append(d)
 	return dirs
+
+
+
+# Re-installs clean version of Bruinbase (base code given to students)
+# Copies student's submitted files to Bruinbase (if none, score = 0)
+# "MAKE" Bruinbase solution (if compile error, score = 0)
+# RETURNS: 1 if success, 0 if error encountered
+
+def set_up(curr_student, part, allowed_files, submission_dir):
+
+	install_clean_bruinbase(bruinbase_loc, clean_bruinbase)
+
+	# copy allowed files into test bruinbase (if student submitted any)
+	student_files = submission_dir + '/' + curr_student.sid
+	num_copied = copy_student_files(student_files, bruinbase_loc, allowed_files)
+
+	if (num_copied == 0):
+		RD = query_result()
+		RD.part = part	
+		RD.query = "All queries for Part " + RD.part
+		RD.score = 0
+		RD.comment += " No Files were submitted for Part " + RD.part
+		
+		print "\t\tScore: ", RD.score
+		print "\t\tComments: ", RD.comment
+		
+		curr_student.results.append(RD)
+
+		return 0
+
+	# make bruinbase
+	curdir = os.getcwd()
+	os.chdir(bruinbase_loc)
+	print "\t=== Executing make"
+	retcode = os.system(make_bruinbase)
+
+	# if compilation failed, score 0, go to next student
+	if retcode != 0:
+		# score = 0
+		RD = query_result()
+		RD.part = part	
+		RD.query = "All queries for Part " + RD.part
+		RD.score = 0
+		RD.comment += " Bruinbase did not successfully compile using Part " + RD.part + " submission"
+
+		print "\t\tScore: ", RD.score
+		print "\t\tComments: ", RD.comment
+
+		curr_student.results.append(RD)
+
+		os.chdir(curdir)
+
+		return 0
+		
+	print "\t=== 'make' successful"
+
+	os.chdir(curdir)
+	return 1
+
+def run_commands(curr_student, commands, part, script_dir):
+	curdir = os.getcwd()
+	os.chdir(bruinbase_loc)
+
+	# execute for each scheduled command in selected Part
+	for tcmd in commands:
+
+		RD = query_result()
+		RD.part = part
+
+		# print command being executed
+		print "\t\t", tcmd.cmd
+
+		# store query
+		RD.query = tcmd.cmd
+		# store timeout value
+		RD.max_time = min(tcmd.timeout, global_command_timeout)
+		# store max pages read value
+		RD.maxIOs = tcmd.maxIOs
+		# store expected solution
+
+		# write command to a file so it can be passed to STDIN of bruinbase process
+		fd = open(temp_file, 'w')
+		fd.write(tcmd.cmd)
+		fd.write('\n')
+		fd.close()
+		fd = open(temp_file, 'r')
+
+		# run command, get output/error stream, parse
+		if (os.path.exists(bruinbase_loc)):
+
+			# start bruinbase process and pass command as STDIN
+			# if err_code = 1, error encountered
+			(mstdout, err, err_code, time) = runCmd( run_bruinbase, fd, min(tcmd.timeout, global_command_timeout))
+
+			RD.time = time
+
+#			print "stdout:\n", mstdout
+#			print "stderr:\n", err
+
+			# process failed if command timed out
+			# no points awarded
+			if ( err_code != 0 ):
+				RD.score = 0
+				RD.comment += " command (" + tcmd.cmd + ") failed - " + err
+#				print "Command timed out or error encountered - ", mstdout, "/", err
+			# otherwise, parse output
+			else:
+				# for LOAD command, check for error, assign points
+				if (tcmd.cmd_type == "LOAD"):
+
+					# if stderr not empty, then error encountered
+					if (err != ""):
+						RD.score = 0
+						RD.comment += "Error: " + err
+						#print "stderr:\n", err
+					# otherwise, give points for LOAD command
+					else:
+						RD.score = tcmd.points
+
+				# for SELECT command
+				# check for error, if no error
+				# parse output and timing info
+				#
+				elif (tcmd.cmd_type == "SELECT"):
+					# check if error
+					#	(error can come for invalid syntax, or error returned by Bruinbase)
+					(time, pages, err_str) = parse_select_stats(err)
+
+					# if error parsing time/pages or error in command
+					if (time < 0):
+						RD.score = 0
+						RD.comment += "Error running select command (" + str(tcmd.cmd) + ") output: " + str(err_str)
+#						print comments
+
+					# otherwise, parse and grade result
+					else:
+						# check if Maximum Number of IOs exceeded
+						if (pages > tcmd.maxIOs):
+							RD.score = 0
+							RD.comment += "Command exceeded maximum number of Pages Read (" + str(tcmd.maxIOs) + ")"
+							#print comments
+						else:
+							# Expected result format
+							re_select_stdout = "^\s*Bruinbase>\s*(.+)Bruinbase>\s*$"
+
+							# match output between "Bruinbase>", '.' matches newline, case ignored
+							q_result = re.match(re_select_stdout, mstdout, re.IGNORECASE|re.S)
+
+							# if not match, output does not match format specifications
+							if q_result == None:
+								RD.score = 0
+								RD.comment += "Invalid Bruinbase Output for Select Query"
+
+							# store query result
+							student_result = q_result.group(1)
+
+							# check if output correct
+							solution_file = script_dir + '/' + graders_file_directory + '/' + tcmd.solution
+
+							if (not os.path.exists(solution_file)):
+								err_str = "Unable to locate solution file: ", solution_file
+								raise OSError(err_str)
+
+							# read grader's solution file
+							grader_result = open(solution_file, 'r').read()
+
+							score, comments = grade_output(student_result, grader_result)
+
+							RD.correct_ans = grader_result
+							RD.student_ans = student_result
+							RD.score = tcmd.points * score
+							RD.comment += comments
+
+							#print "Score: ", score
+				else:
+					RD.score = 0
+					RD.comment += tcmd.cmd + " => unrecognized command"
+		else:
+			exit("Error: Cannot find Bruinbase source code")
+
+		print "\t\t\tScore: ", RD.score
+		print "\t\t\tComments: ", RD.comment
+		
+		curr_student.results.append(RD)
+
+	os.chdir(curdir)
+
+	return
+
+
+
+
+
 
 # run command with timeout threshold
 def runCmd(cmd, fd_stdin, timeout):
@@ -55,10 +251,10 @@ def runCmd(cmd, fd_stdin, timeout):
 		return (ph_out, ph_err, ph_ret, ph_time)	# return timeout error
 		
 	    ph_ret = p.returncode
+	    ph_time = fin_time
 
 
 	ph_out, ph_err = p.communicate()
-	ph_time = fin_time
 
 	return (ph_out, ph_err, ph_ret, ph_time)
 
@@ -90,6 +286,8 @@ def grade_output(student_result, grader_result):
 	score = 0
 	comment = ""
 
+	# create sets from grader's solution and student's result
+	
 	solution_tuples = grader_result.split('\n')
 	
 	# remove empty entries
@@ -115,8 +313,10 @@ def grade_output(student_result, grader_result):
 	score = round (fraction_correct, 2)
 
 	if (score != 1):
-		print "SOLUTION:", solution_tuples
-		print "STUDENT OUT:",student_tuples
+		comment = "result incorrect"
+#	if (score != 1):
+#		print "SOLUTION:", solution_tuples
+#		print "STUDENT OUT:",student_tuples
 	
 	return score, comment
 
