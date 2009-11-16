@@ -24,6 +24,8 @@ def runCmd(cmd, fd_stdin, timeout):
 	ph_out = None # process output
 	ph_err = None # stderr
 	ph_ret = None # return code
+	ph_time = None # execution time
+	
 
 	p = subprocess.Popen(cmd, shell=True,
                 	     stdout=subprocess.PIPE,
@@ -44,14 +46,21 @@ def runCmd(cmd, fd_stdin, timeout):
         	# starting 2.6 subprocess has a kill() method which is preferable
         	# p.kill()
         	os.kill(p.pid, signal.SIGKILL)
-		return (0, "command timed out", 1)	# return timeout error
-
+		
+		ph_out = 0
+		ph_err = "command timed out"
+		ph_ret = 1
+		ph_time = -1
+		
+		return (ph_out, ph_err, ph_ret, ph_time)	# return timeout error
+		
 	    ph_ret = p.returncode
 
 
 	ph_out, ph_err = p.communicate()
+	ph_time = fin_time
 
-	return (ph_out, ph_err, ph_ret)
+	return (ph_out, ph_err, ph_ret, ph_time)
 
 # parse
 def parse_select_stats(result):
@@ -77,24 +86,12 @@ def parse_select_stats(result):
 # grader_result is a file
 # RETURNS:	score (0 <= score <= 1)
 #		comments ( information about score, if necessary)
-def grade_output(student_result, grader_result, correct_dir):
-	save_dir = os.getcwd()
-	os.chdir(correct_dir)
+def grade_output(student_result, grader_result):
 	score = 0
 	comment = ""
 
-	if (not os.path.exists(grader_result)):
-		err_str = "Unable to locate solution file: ", grader_result
-		raise OSError(err_str)
-
-	# create sets from grader's solution and student's result
-	solution_tuples = open(grader_result, 'r').read().split('\n')
-
-	# make sure grader's file is not empty
-	if (len(solution_tuples) == 0):
-		err_str = "ERROR: Unexpected Input - Grader's query output file has length 0: ", grader_result
-		raise OSError( err_str )
-
+	solution_tuples = grader_result.split('\n')
+	
 	# remove empty entries
 	for line in solution_tuples:
 		if not line.strip():
@@ -112,15 +109,15 @@ def grade_output(student_result, grader_result, correct_dir):
 	for line in student_tuples:
 		if not line.strip():
 			student_tuples.remove(line)
-			
-#	print "SOLUTION:", solution_tuples
-#	print "STUDENT OUT:",student_tuples
-		
+					
 	# calculate score
 	fraction_correct = float(len(set(solution_tuples) & set(student_tuples))) / float(len(solution_tuples))
 	score = round (fraction_correct, 2)
+
+	if (score != 1):
+		print "SOLUTION:", solution_tuples
+		print "STUDENT OUT:",student_tuples
 	
-	os.chdir(save_dir)
 	return score, comment
 
 def install_clean_bruinbase(bruinbase_loc, clean_bruinbase):
@@ -143,8 +140,11 @@ def install_clean_bruinbase(bruinbase_loc, clean_bruinbase):
 # copy student submitted files into test Bruinbase
 # if file doesn't exists in student's submission, do nothing
 # only copies files which are allowed (specified by grader)
+# RETURNS: number of files copied
 def copy_student_files(student_files, bruinbase_loc, allowed_files):
 
+	num_copied = 0
+	
 	for allowed_file in allowed_files:
 		src = student_files + '/' + allowed_file
 		
@@ -153,6 +153,8 @@ def copy_student_files(student_files, bruinbase_loc, allowed_files):
 			retcode = subprocess.call(["cp", src, bruinbase_loc])
 			if retcode == 0:
 				print "\t=== Copied file '", allowed_file, "' to bruinbase"
+				num_copied += 1
 			else:
 				err_str = "Error Copying Student File - ", allowed_file, " - to test bruinbase directory"
 				exit(err_str)
+	return num_copied
