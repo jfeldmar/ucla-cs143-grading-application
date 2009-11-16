@@ -41,10 +41,12 @@ class student_result:
 # stores details query result
 class query_result:
 	query = ""
+	part = ""		# which submitted part is being graded (A,B,C, or D)
+	max_time = 0.0
+	maxIOS = 0		# default value, should be reset according to config file
 	student_ans = ""
-	time = ""		# in seconds
+	time = 0.0		# in seconds
 	correct_ans = ""
-	threshhold = 1		# default value, should be reset according to config file
 	score = 0
 	comment = ""
 

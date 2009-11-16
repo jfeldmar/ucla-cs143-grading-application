@@ -50,3 +50,12 @@ diff_C_vs_B = ["BTreeNode.h", "BTreeNode.cc", "SqlEngine.cc"]
 global_command_timeout = 20
 
 temp_file = "temp.cmd"
+
+# location of test Bruinbase
+bruinbase_loc = "./bruinbase"
+
+# make command to compile Bruinbase
+make_bruinbase = "make -s"
+
+# Bruinbase executable (command)
+run_bruinbase = "./bruinbase"

@@ -68,13 +68,15 @@ def parse_select_stats(result):
 	else:
 		time = re.match(stats_re, result, re.IGNORECASE|re.S).group(1)
 		pages = re.match(stats_re, result, re.IGNORECASE|re.S).group(2)
-		print "Time: ", time
-		print "Pages: ", pages
+		print "\t\t\tTime: ", time
+		print "\t\t\tPages: ", pages
 		return float(time), int(pages), ""
 
 # compare student's output to expected output for current SELECT query
 # student_result is a string
 # grader_result is a file
+# RETURNS:	score (0 <= score <= 1)
+#		comments ( information about score, if necessary)
 def grade_output(student_result, grader_result, correct_dir):
 	save_dir = os.getcwd()
 	os.chdir(correct_dir)
@@ -120,3 +122,37 @@ def grade_output(student_result, grader_result, correct_dir):
 	
 	os.chdir(save_dir)
 	return score, comment
+
+def install_clean_bruinbase(bruinbase_loc, clean_bruinbase):
+	# remove current bruinbase version
+	if os.path.exists(bruinbase_loc):
+		retcode = subprocess.call(["rm","-rf", bruinbase_loc])
+		if retcode == 0:
+			print "\t=== Removed ", bruinbase_loc, " directory"
+		else:
+			err_str = "Error Deleting " + bruinbase_loc + " directory, check directory permissions"
+			exit(err_str)
+
+	# Extract clean version of bruinbase (i.e. zip given to students)
+	retcode = subprocess.call(["unzip", "-q", "-d", bruinbase_loc, clean_bruinbase])
+	if retcode == 0:
+		print "\t=== Created Clean Bruinbase from archive file"
+	else:
+		exit("Error Extracting Bruinbase - check that the file exists and is valid")
+
+# copy student submitted files into test Bruinbase
+# if file doesn't exists in student's submission, do nothing
+# only copies files which are allowed (specified by grader)
+def copy_student_files(student_files, bruinbase_loc, allowed_files):
+
+	for allowed_file in allowed_files:
+		src = student_files + '/' + allowed_file
+		
+		# if student submitted the file, copy it to test Bruinbase directory
+		if (os.path.exists(src)):
+			retcode = subprocess.call(["cp", src, bruinbase_loc])
+			if retcode == 0:
+				print "\t=== Copied file '", allowed_file, "' to bruinbase"
+			else:
+				err_str = "Error Copying Student File - ", allowed_file, " - to test bruinbase directory"
+				exit(err_str)
