@@ -113,6 +113,9 @@ def get_command_info(cmd, tokens):
 	try:
 		points = int(tokens[0])
 		timeout = int(tokens[1])	# value in seconds
+		if (timeout <= 0):
+			err_str = "Invalid Timeout Value, expecting value greater than 0 seconds (" + cmd + ")"
+			exit(err_str)
 		maxIOs = int(tokens[2])
 	except ValueError:
 		raise ValidateException(cmd, "Expecting line containing Points/Timeout/MaxIOs/Description Line (values must be separated by whitespace)")

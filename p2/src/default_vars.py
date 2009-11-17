@@ -14,6 +14,10 @@ submission_dir_d = submission_dir + '/d'
 submissions_data_file = "submission.csv"
 
 # files containing test commands for Part A
+# IMPORTANT: this directory is hard-coded in the sample graderscriptfile
+# 	If you are changing this directory, make sure to update the location of
+#	LOAD files in the graderscriptfile(s) to work correctly with respect to the
+#	Bruinbase code location
 graders_file_directory = 'graderinput'
 graderscriptfileA = graders_file_directory + '/testinputcommands_small.txt'
 #graderscriptfileA = graders_file_directory + '/testinputcommandsA.txt'
@@ -46,13 +50,13 @@ diff_penalty_amt = 2
 diff_D_vs_C = ["BTreeIndex.h", "BTreeIndex.cc", "BTreeNode.h", "BTreeNode.cc", "Bruinbase.h"] 
 diff_C_vs_B = ["BTreeNode.h", "BTreeNode.cc", "SqlEngine.cc"]
 
-# threshold after which a command automatically fails if it hasn't returned yet
+# threshold after which a command automatically fails if it hasn't returned yet (in seconds)
 global_command_timeout = 20
 
 temp_file = "temp.cmd"
 
 # location of test Bruinbase
-bruinbase_loc = "./bruinbase"
+bruinbase_loc = "bruinbase"
 
 # make command to compile Bruinbase
 make_bruinbase = "make -s"

@@ -33,8 +33,8 @@ commands_part_A = load_grader_test_file(graderscriptfileA)
 print "=== Found ", len(commands_part_A), " commands."
 
 ## load commands to be tested on Part D
-#commands_part_D = load_grader_test_file(graderscriptfileD)
-#print "=== Found ", len(commands_part_D), " commands."
+commands_part_D = load_grader_test_file(graderscriptfileD)
+print "=== Found ", len(commands_part_D), " commands."
 
 ############# LOAD STUDENTS' SUBMISSION DIRECTORIES/NAMES ##############
 	# Load SID-Student Name tuples from  all submissions.csv files
@@ -87,10 +87,6 @@ print "\tPART D - Submissions found: ", len(directories_d)
 #num_diff_penalties = compare_submissions(submission_dir, grading_results, directories_b, directories_c, directories_d)
 #print "\tFound ", num_diff_penalties, " violations of threshold value ", diff_threshold
 
-############# RUN TEST COMMANDS ON PART A ##############
-#commands_part_A
-print "Commands to run on Part A: ", len(commands_part_A)
-
 # for each student in grading_results list
 #	unzip clean version of bruinbase
 #	copy allowed Part A files into bruinbase
@@ -104,25 +100,69 @@ print "Commands to run on Part A: ", len(commands_part_A)
 #					check if output correct (add points accordingly)
 #					check if # pages as expected????
 
+
+############# RUN TEST COMMANDS ON PART A ##############
+#commands_part_A
+#print "Commands to run on Part A: ", len(commands_part_A)
+#for student in grading_results:
+#	print "=== Part A - Grading SID - ", student.sid
+#	print >> sys.stderr, "=== Part A - Grading SID - ", student.sid
+#
+#	# create a query_result instance to store information for Bruinbase query result
+#	
+#	if (set_up(student, "A", part_A_files, submission_dir_a)):
+#		run_commands(student, commands_part_A, "A", script_dir)
+#		
+#	print >> sys.stderr, "Results Size: ", len(student.results)
+	
+############# RUN TEST COMMANDS ON PART D ##############
+#commands_part_D
+print "Commands to run on Part D ", len(commands_part_D)
 for student in grading_results:
-	print "=== Grading SID - ", student.sid
-	print >> sys.stderr, "=== Grading SID - ", student.sid
+	sys.stderr.flush()
+
+	print "=== Part D - Grading SID - ", student.sid
+	print >> sys.stderr, "=== Part D - Grading SID - ", student.sid
 
 	# create a query_result instance to store information for Bruinbase query result
 	
-	if (set_up(student, "A", part_A_files, submission_dir_a)):
-		run_commands(student, commands_part_A, "A", script_dir)
+	if (set_up(student, "D", part_D_files, submission_dir_d)):
+		run_commands(student, commands_part_D, "D", script_dir)
 		
 	print >> sys.stderr, "Results Size: ", len(student.results)
+	
 	
 # delete temporary file
 if os.path.exists(temp_file):
 	os.remove(temp_file)
 
+#print results to file
+fd =open("results_file.out", 'w')
 
-############# RUN TEST COMMANDS ON PART D ##############
-#commands_part_D
-#print "Commands to run on Part D ", len(commands_part_D)
+for student in grading_results:
+	out_str = "##### Grades for: " + student.sid + " (" + student.name + ") ##### " 
+	fd.write(out_str)
+
+	fd.write("Diff Among Submissions Penalties:")
+	for penalty in student.diff_penalties:
+		out_str = "Amount: " + penalty.amount+ '\n'
+		out_str += "Comment: "+ penalty.comment+ '\n'
+		fd.write(out_str)
+
+	fd.write("Bruinbase Commands Results:")
+	for result in student.results:
+		out_str = '\t'+ result.part+ " - "+ result.query+ '\n'
+		out_str += "\tMax Time/IOs: "+ str(result.max_time) + '/'+ str(result.maxIOs) + '\n'
+		out_str += "\tResult Time/Score:"+ str(result.time) + '/'+ result.score+ '\n'
+		if (score == 0):
+			out_str += "Student Ans: "+ result.student_ans+ '\n'
+			out_str += "Correct Ans: "+ result.correct_ans+ '\n'
+		out_str += "Comments: "+ result.comment+ '\n'
+		
+		fd.write(out_str)
+	fd.flush()
+
+fd.close()
 
 # switch back to the caller's directory
 os.chdir(caller_dir)

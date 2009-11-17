@@ -43,14 +43,12 @@ def set_up(curr_student, part, allowed_files, submission_dir):
 		return 0
 
 	# make bruinbase
-	curdir = os.getcwd()
-	os.chdir(bruinbase_loc)
 	print "\t=== Executing make"
-	retcode = os.system(make_bruinbase)
+	(mstdout, err, err_code, time) = runCmd(make_bruinbase, None, 0, bruinbase_loc) 	# stdin=subprocess.PIPE, timeout 0 (i.e. not timed)
 
 	# if compilation failed, score 0, go to next student
-	if retcode != 0:
-		# score = 0
+	if err_code != 0:
+		# score = 0 for this submission (for current Part)
 		RD = query_result()
 		RD.part = part	
 		RD.query = "All queries for Part " + RD.part
@@ -62,19 +60,13 @@ def set_up(curr_student, part, allowed_files, submission_dir):
 
 		curr_student.results.append(RD)
 
-		os.chdir(curdir)
-
 		return 0
 		
 	print "\t=== 'make' successful"
 
-	os.chdir(curdir)
 	return 1
 
 def run_commands(curr_student, commands, part, script_dir):
-	curdir = os.getcwd()
-	os.chdir(bruinbase_loc)
-
 	# execute for each scheduled command in selected Part
 	for tcmd in commands:
 
@@ -98,13 +90,13 @@ def run_commands(curr_student, commands, part, script_dir):
 		fd.write('\n')
 		fd.close()
 		fd = open(temp_file, 'r')
-
+		
 		# run command, get output/error stream, parse
 		if (os.path.exists(bruinbase_loc)):
 
 			# start bruinbase process and pass command as STDIN
 			# if err_code = 1, error encountered
-			(mstdout, err, err_code, time) = runCmd( run_bruinbase, fd, min(tcmd.timeout, global_command_timeout))
+			(mstdout, err, err_code, time) = runCmd( run_bruinbase, fd, min(tcmd.timeout, global_command_timeout), bruinbase_loc)
 
 			RD.time = time
 
@@ -125,8 +117,9 @@ def run_commands(curr_student, commands, part, script_dir):
 					# if stderr not empty, then error encountered
 					if (err != ""):
 						RD.score = 0
-						RD.comment += "Error: " + err
+						RD.comment += err
 						#print "stderr:\n", err
+						
 					# otherwise, give points for LOAD command
 					else:
 						RD.score = tcmd.points
@@ -197,8 +190,6 @@ def run_commands(curr_student, commands, part, script_dir):
 		
 		curr_student.results.append(RD)
 
-	os.chdir(curdir)
-
 	return
 
 
@@ -207,7 +198,7 @@ def run_commands(curr_student, commands, part, script_dir):
 
 
 # run command with timeout threshold
-def runCmd(cmd, fd_stdin, timeout):
+def runCmd(cmd, fd_stdin, timeout, change_dir):
 	'''
 	Will execute a command, read the output and return it back.
 
@@ -227,6 +218,7 @@ def runCmd(cmd, fd_stdin, timeout):
                 	     stdout=subprocess.PIPE,
 			     stdin = fd_stdin,
                 	     stderr=subprocess.PIPE,
+			     cwd = change_dir,
 			     bufsize=0)
 	# if timeout is not set wait for process to complete
 	if not timeout:

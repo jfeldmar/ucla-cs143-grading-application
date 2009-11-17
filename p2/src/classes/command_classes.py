@@ -39,7 +39,7 @@ class query_result:
 		self.query = ""
 		self.part = ""		# which submitted part is being graded (A,B,C, or D)
 		self.max_time = 0.0
-		self.maxIOS = 0		# default value, should be reset according to config file
+		self.maxIOs = 0		# default value, should be reset according to config file
 		self.student_ans = ""
 		self.correct_ans = ""
 		self.time = 0.0		# in seconds (-1 if command timed out or process failed)
