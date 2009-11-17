@@ -28,12 +28,14 @@ from helper_functions import *
 start_time = time.time()
 
 ############# LOAD GRADER'S TEST FILE ##############
-print "=== Loading Grader's Test Commands"
 
+print "=== Loading Grader's Test Commands - Part A"
 # load commands to be tested on Part A
 commands_part_A = load_grader_test_file(graderscriptfileA)
 print "=== Found ", len(commands_part_A), " commands."
 
+
+print "=== Loading Grader's Test Commands - Part D"
 ## load commands to be tested on Part D
 commands_part_D = load_grader_test_file(graderscriptfileD)
 print "=== Found ", len(commands_part_D), " commands."
@@ -125,6 +127,7 @@ for student in grading_results:
 
 	#print >> sys.stderr, "Results Size: ", len(student.results)
 	
+	# use to run only the first (x=4) submissions [ for error checking ]
 #	if (grading_results.index(student) == 4):
 #		break	
 		

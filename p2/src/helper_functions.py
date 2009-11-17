@@ -70,6 +70,9 @@ def run_commands(curr_student, commands, part, script_dir, allowed_files, curr_s
 	# execute for each scheduled command in selected Part
 	for tcmd in commands:
 	
+		# print command being executed
+		print "\t\t", tcmd.cmd
+
 		# if command is RESTART
 		# 	run set up again:
 		#		unzip clean bruinbase solution
@@ -81,9 +84,6 @@ def run_commands(curr_student, commands, part, script_dir, allowed_files, curr_s
 
 		RD = query_result()
 		RD.part = part
-
-		# print command being executed
-		print "\t\t", tcmd.cmd
 
 		# store query
 		RD.query = tcmd.cmd
@@ -195,6 +195,8 @@ def run_commands(curr_student, commands, part, script_dir, allowed_files, curr_s
 		else:
 			exit("Error: Cannot find Bruinbase source code")
 
+		fd.close()
+		
 		print "\t\t\tScore: ", RD.score
 		print "\t\t\tComments: ", RD.comment
 		
