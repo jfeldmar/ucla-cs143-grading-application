@@ -38,7 +38,7 @@ def load_grader_test_file(graderscriptfile):
 			break
 		pass
 		
-		# extract LOAD, or SELECT command and its appropriate information
+		# extract RESTART, LOAD, or SELECT command and its appropriate information
 		cmd_type, cmd, points, timeout, maxIOs, description, solution = validate_command(fd, line, graderscriptfile)
 		
 		y = command(cmd_type, cmd, points, timeout, maxIOs, description, solution)
@@ -61,15 +61,20 @@ def validate_command(fd, command1, graderscriptfile):
 	points = 0
 	description = ""
 	solution_file = ""	# applies only to SELECT commands
-	
+	timeout = 0
+	maxIOs = 0
+
 	# parse command
-	# if run: parse LOAD/SELECT command information
+	# if run: parse RESTART/LOAD/SELECT command information
 	
 	#process command
 	try:
 
-		# read LOAD/SELECT command data
-		if ( is_load_command(command1)):
+		# read RESTART/LOAD/SELECT command data
+		if ( is_restart_command(command1)):
+			cmd_type = "RESTART"
+			cmd = "RESTART"
+		elif ( is_load_command(command1)):
 			cmd_type = "LOAD"
 			cmd = command1
 		elif ( is_select_command(command1)):
@@ -87,14 +92,15 @@ def validate_command(fd, command1, graderscriptfile):
 		else:
 			raise ValidateException(command1, "Invalid Syntax - Expecting LOAD or SELECT command")
 
-		# skip empty lines and comments
-		command3 = skip_comment_empty_lines(fd)
+		if (cmd_type != "RESTART"):
+			# skip empty lines and comments
+			command3 = skip_comment_empty_lines(fd)
 
-		# split line by whitespace characters
-		tokens = command3.split()	
+			# split line by whitespace characters
+			tokens = command3.split()	
 
-		# read Score/Timeout/MaxIOs/Description line
-		points, timeout, maxIOs, description = get_command_info(command3, tokens)
+			# read Score/Timeout/MaxIOs/Description line
+			points, timeout, maxIOs, description = get_command_info(command3, tokens)
 
 
 	except ValidateException, e:
@@ -126,6 +132,14 @@ def get_command_info(cmd, tokens):
 		description = tokens[3]
 	
 	return points, timeout, maxIOs, description
+
+def is_restart_command(cmd):
+	restart_re = "\s*RESTART\s*"
+	
+	if (None != re.match(restart_re, cmd, re.IGNORECASE)):
+		return 1
+	else:
+		return 0
 
 def is_load_command(cmd):
 	# regular expressions for matching LOAD statements

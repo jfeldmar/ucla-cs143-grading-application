@@ -10,13 +10,38 @@
 # NOTE:
 #	- LOAD command maxIOs can be set to anything
 
-LOAD medium FROM '../graderinput/sample_load_data/medium.del' WITH INDEX
-5 60 0 "loading medium.del"
+LOAD large FROM '../graderinput/sample_load_data/large.del' WITH INDEX
+5 60 0 "loading large.del"
 
-SELECT COUNT(*) FROM medium
-select_cmd_results/count_medium_result.txt
-10 60 100 "size of mediem"
+SELECT COUNT(*) FROM large
+select_cmd_results/count_large_result.txt
+10 60 100 "size of large"
 
-SELECT * FROM medium WHERE key = 489
-select_cmd_results/medium_result_2.txt
-10 60 100 "equality condition on medium"
+SELECT * FROM large WHERE key > 4500
+select_cmd_results/large_result_2.txt
+10 60 100 "> condition on large"
+
+RESTART
+
+LOAD large FROM '../graderinput/sample_load_data/large.del' WITH INDEX
+5 60 0 "loading large.del"
+
+SELECT * FROM large WHERE key > 4500 AND key > 0
+select_cmd_results/large_result_3.txt
+10 60 100 "two > conditions on large"
+
+
+LOAD xlarge FROM '../graderinput/sample_load_data/xlarge.del' WITH INDEX
+5 60 0 "loading xlarge.del"
+
+SELECT COUNT(*) FROM xlarge
+select_cmd_results/count_xlarge_result.txt
+10 60 100 "size of xlarge"
+
+SELECT * FROM xlarge WHERE key = 4240
+select_cmd_results/xlarge_result_2.txt
+10 60 100 "= condition on xlarge"
+
+SELECT * FROM xlarge WHERE key > 400 AND key < 500 AND key > 100 AND key < 4000000
+select_cmd_results/xlarge_result_3.txt
+10 60 100 "two < and two > conditions on xlarge"

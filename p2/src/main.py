@@ -103,45 +103,31 @@ print "\tFound ", num_diff_penalties, " violations of threshold value ", diff_th
 #					check if # pages as expected????
 
 
-############# RUN TEST COMMANDS ON PART A ##############
+############# RUN TEST COMMANDS ON PART A and PART D ##############
 #commands_part_A
 print "Commands to run on Part A: ", len(commands_part_A)
-#student = grading_results[0]
+print "Commands to run on Part D ", len(commands_part_D)
+
 for student in grading_results:
 	sys.stderr.flush()
 
-	print "=== Part A - Grading SID - ", student.sid
-	print >> sys.stderr, "=== Part A - Grading SID - ", student.sid
-
-	# create a query_result instance to store information for Bruinbase query result
+	print "=== Grading SID - ", student.sid, " - Part A"
+	print >> sys.stderr, "=== Grading SID - ", student.sid, " - Part A"
 
 	if (set_up(student, "A", part_A_files, submission_dir_a)):
-		run_commands(student, commands_part_A, "A", script_dir)
+		run_commands(student, commands_part_A, "A", script_dir, part_A_files, submission_dir_a)
 
-	#print >> sys.stderr, "Results Size: ", len(student.results)
-#	if (grading_results.index(student) == 4):
-#		break
-	
-############# RUN TEST COMMANDS ON PART D ##############
-#commands_part_D
-print "Commands to run on Part D ", len(commands_part_D)
-#student = grading_results[0]
-for student in grading_results:
-	sys.stderr.flush()
-
-	print "=== Part D - Grading SID - ", student.sid
-	print >> sys.stderr, "=== Part D - Grading SID - ", student.sid
-
-	# create a query_result instance to store information for Bruinbase query result
+	print "=== Grading SID - ", student.sid, " - Part D"
+	print >> sys.stderr, "=== Grading SID - ", student.sid, " - Part D"
 
 	if (set_up(student, "D", part_D_files, submission_dir_d)):
-		run_commands(student, commands_part_D, "D", script_dir)
+		run_commands(student, commands_part_D, "D", script_dir, part_D_files, submission_dir_d)
 
 	#print >> sys.stderr, "Results Size: ", len(student.results)
-
-#	if (grading_results.index(student) == 4):
-#		break
 	
+#	if (grading_results.index(student) == 4):
+#		break	
+		
 	
 # delete temporary file
 if os.path.exists(temp_file):
@@ -150,9 +136,26 @@ if os.path.exists(temp_file):
 total_time = int(time.time() - start_time)
 print >> sys.stderr, "Auto-Grader Execution Time: ", GetInHMS(total_time)
 
+# calculate max total points
+# max Part A points
+pts_a = 0
+for cmd in commands_part_A:
+	pts_a += cmd.points
+# max Part D points
+pts_d = 0
+for cmd in commands_part_D:
+	pts_d += cmd.points
+
+print >> sys.stderr,  "Max Part A Points: ", str(pts_a)
+print >> sys.stderr,  "Max Part D Points: ", str(pts_d)
+print >> sys.stderr,  "Max TOTAL Points: ", str(pts_a + pts_d)
+
+
 output = open('data.pkl', 'wb')
 pickle.dump(grading_results, output)
 output.close()
+
+os.system('python generate_output.py')
 
 # switch back to the caller's directory
 os.chdir(caller_dir)

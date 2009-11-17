@@ -20,12 +20,12 @@ def listdirs(folder):
 # "MAKE" Bruinbase solution (if compile error, score = 0)
 # RETURNS: 1 if success, 0 if error encountered
 
-def set_up(curr_student, part, allowed_files, submission_dir):
+def set_up(curr_student, part, allowed_files, curr_submission_dir):
 
 	install_clean_bruinbase(bruinbase_loc, clean_bruinbase)
 
 	# copy allowed files into test bruinbase (if student submitted any)
-	student_files = submission_dir + '/' + curr_student.sid
+	student_files = curr_submission_dir + '/' + curr_student.sid
 	num_copied = copy_student_files(student_files, bruinbase_loc, allowed_files)
 
 	if (num_copied == 0):
@@ -66,9 +66,18 @@ def set_up(curr_student, part, allowed_files, submission_dir):
 
 	return 1
 
-def run_commands(curr_student, commands, part, script_dir):
+def run_commands(curr_student, commands, part, script_dir, allowed_files, curr_submission_dir):
 	# execute for each scheduled command in selected Part
 	for tcmd in commands:
+	
+		# if command is RESTART
+		# 	run set up again:
+		#		unzip clean bruinbase solution
+		#		copy student's files into clean solution
+		#		run make
+		if (tcmd.cmd_type == 'RESTART'):
+			set_up(curr_student, part, allowed_files, curr_submission_dir)
+			continue
 
 		RD = query_result()
 		RD.part = part
