@@ -136,7 +136,8 @@ def run_commands(curr_student, commands, part, script_dir):
 					# if error parsing time/pages or error in command
 					if (time < 0):
 						RD.score = 0
-						RD.comment += "Error running select command (" + str(tcmd.cmd) + ") output: " + str(err_str)
+						#err_str
+						RD.comment += "Error running select command (" + str(tcmd.cmd) + ") output=> " + str(err_str)
 #						print comments
 
 					# otherwise, parse and grade result
@@ -222,28 +223,30 @@ def runCmd(cmd, fd_stdin, timeout, change_dir):
 			     bufsize=0)
 	# if timeout is not set wait for process to complete
 	if not timeout:
-	    ph_ret = p.wait()
+		ph_ret = p.wait()
 	else:
-	    fin_time = time.time() + timeout
-	    while p.poll() == None and fin_time > time.time():
-        	time.sleep(1)
+		start_time = time.time()
+		fin_time = time.time() + timeout
+		while p.poll() == None and fin_time > time.time():
+			time.sleep(1)
 
-	    # if timeout reached, return error code
-	    if fin_time < time.time():
+		# if timeout reached, return error code
+		now = time.time()
+		if fin_time < now:
 
-        	# starting 2.6 subprocess has a kill() method which is preferable
-        	# p.kill()
-        	os.kill(p.pid, signal.SIGKILL)
-		
-		ph_out = 0
-		ph_err = "command timed out"
-		ph_ret = 1
-		ph_time = -1
-		
-		return (ph_out, ph_err, ph_ret, ph_time)	# return timeout error
-		
-	    ph_ret = p.returncode
-	    ph_time = fin_time
+			# starting 2.6 subprocess has a kill() method which is preferable
+			# p.kill()
+			os.kill(p.pid, signal.SIGKILL)
+
+			ph_out = 0
+			ph_err = "command timed out"
+			ph_ret = 1
+			ph_time = -1
+
+			return (ph_out, ph_err, ph_ret, ph_time)	# return timeout error
+
+		ph_ret = p.returncode
+		ph_time = int(now - start_time)
 
 
 	ph_out, ph_err = p.communicate()
@@ -253,11 +256,13 @@ def runCmd(cmd, fd_stdin, timeout, change_dir):
 # parse
 def parse_select_stats(result):
 	# expected format: -- 0.000 seconds to run the select command. Read 1 pages
-	stats_re = ".*\s+([0-9]*\.?[0-9]+)\s+seconds.*Read\s+([\d]+)\s+pages\s*$"
+	stats_re = ".*--\s+([0-9]*\.?[0-9]+)\s+seconds.*Read\s+([\d]+)\s+pages\s*$"
 	err_re = ".*Error.*"
 
 	if (re.match(err_re, result, re.IGNORECASE|re.S)):
 		err_str =  result
+		stats_re = "--\s+([0-9]*\.?[0-9]+)\s+seconds.*Read\s+([\d]+)\s+pages\s*$"
+		err_str = re.sub(stats_re, '', err_str)
 		return -1, 0, err_str
 	elif (None == re.match(stats_re, result, re.IGNORECASE|re.S)):
 		err_str = result, ": Invalid syntax for Timing/Page Data"
@@ -305,7 +310,7 @@ def grade_output(student_result, grader_result):
 	score = round (fraction_correct, 2)
 
 	if (score != 1):
-		comment = "result incorrect"
+		comment = "SELECT command result is incorrect"
 #	if (score != 1):
 #		print "SOLUTION:", solution_tuples
 #		print "STUDENT OUT:",student_tuples
@@ -350,3 +355,16 @@ def copy_student_files(student_files, bruinbase_loc, allowed_files):
 				err_str = "Error Copying Student File - ", allowed_file, " - to test bruinbase directory"
 				exit(err_str)
 	return num_copied
+
+def GetInHMS(seconds):
+    hours = seconds / 3600
+    seconds -= 3600*hours
+    minutes = seconds / 60
+    seconds -= 60*minutes
+    if hours == 0:
+    	if minutes == 0:
+	        return "%02d secs" % (seconds)
+	else:
+	        return "%02d mins %02d secs" % (minutes, seconds)
+    else:
+	return "%02d hrs %02d mins %02d secs" % (hours, minutes, seconds)

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 
-import sys, csv, os
+import sys, csv, os, time, pickle
 from subprocess import Popen, PIPE, STDOUT
 
 # IMPORTANT IF THIS SCRIPT IS NOT RUN FROM ITS OWN DIRECTORY
@@ -24,6 +24,8 @@ from helper_functions import *
 #		run grader's script
 #		store score/result (short/long version)
 ##################################################################
+
+start_time = time.time()
 
 ############# LOAD GRADER'S TEST FILE ##############
 print "=== Loading Grader's Test Commands"
@@ -83,9 +85,9 @@ print "\tPART D - Submissions found: ", len(directories_d)
 #	Compare specified files between Part D and C, and Part C and B
 #	store 'diff_penalty' objects in student's 'student_result' object
 
-#print "=== Checking for major changes between file submissions (using diff)"
-#num_diff_penalties = compare_submissions(submission_dir, grading_results, directories_b, directories_c, directories_d)
-#print "\tFound ", num_diff_penalties, " violations of threshold value ", diff_threshold
+print "=== Checking for major changes between file submissions (using diff)"
+num_diff_penalties = compare_submissions(submission_dir, grading_results, directories_b, directories_c, directories_d)
+print "\tFound ", num_diff_penalties, " violations of threshold value ", diff_threshold
 
 # for each student in grading_results list
 #	unzip clean version of bruinbase
@@ -103,21 +105,27 @@ print "\tPART D - Submissions found: ", len(directories_d)
 
 ############# RUN TEST COMMANDS ON PART A ##############
 #commands_part_A
-#print "Commands to run on Part A: ", len(commands_part_A)
-#for student in grading_results:
-#	print "=== Part A - Grading SID - ", student.sid
-#	print >> sys.stderr, "=== Part A - Grading SID - ", student.sid
-#
-#	# create a query_result instance to store information for Bruinbase query result
-#	
-#	if (set_up(student, "A", part_A_files, submission_dir_a)):
-#		run_commands(student, commands_part_A, "A", script_dir)
-#		
-#	print >> sys.stderr, "Results Size: ", len(student.results)
+print "Commands to run on Part A: ", len(commands_part_A)
+#student = grading_results[0]
+for student in grading_results:
+	sys.stderr.flush()
+
+	print "=== Part A - Grading SID - ", student.sid
+	print >> sys.stderr, "=== Part A - Grading SID - ", student.sid
+
+	# create a query_result instance to store information for Bruinbase query result
+
+	if (set_up(student, "A", part_A_files, submission_dir_a)):
+		run_commands(student, commands_part_A, "A", script_dir)
+
+	#print >> sys.stderr, "Results Size: ", len(student.results)
+#	if (grading_results.index(student) == 4):
+#		break
 	
 ############# RUN TEST COMMANDS ON PART D ##############
 #commands_part_D
 print "Commands to run on Part D ", len(commands_part_D)
+#student = grading_results[0]
 for student in grading_results:
 	sys.stderr.flush()
 
@@ -125,46 +133,29 @@ for student in grading_results:
 	print >> sys.stderr, "=== Part D - Grading SID - ", student.sid
 
 	# create a query_result instance to store information for Bruinbase query result
-	
+
 	if (set_up(student, "D", part_D_files, submission_dir_d)):
 		run_commands(student, commands_part_D, "D", script_dir)
-		
-	print >> sys.stderr, "Results Size: ", len(student.results)
+
+	#print >> sys.stderr, "Results Size: ", len(student.results)
+
+#	if (grading_results.index(student) == 4):
+#		break
 	
 	
 # delete temporary file
 if os.path.exists(temp_file):
 	os.remove(temp_file)
 
-#print results to file
-fd =open("results_file.out", 'w')
+total_time = int(time.time() - start_time)
+print >> sys.stderr, "Auto-Grader Execution Time: ", GetInHMS(total_time)
 
-for student in grading_results:
-	out_str = "##### Grades for: " + student.sid + " (" + student.name + ") ##### " 
-	fd.write(out_str)
-
-	fd.write("Diff Among Submissions Penalties:")
-	for penalty in student.diff_penalties:
-		out_str = "Amount: " + penalty.amount+ '\n'
-		out_str += "Comment: "+ penalty.comment+ '\n'
-		fd.write(out_str)
-
-	fd.write("Bruinbase Commands Results:")
-	for result in student.results:
-		out_str = '\t'+ result.part+ " - "+ result.query+ '\n'
-		out_str += "\tMax Time/IOs: "+ str(result.max_time) + '/'+ str(result.maxIOs) + '\n'
-		out_str += "\tResult Time/Score:"+ str(result.time) + '/'+ result.score+ '\n'
-		if (score == 0):
-			out_str += "Student Ans: "+ result.student_ans+ '\n'
-			out_str += "Correct Ans: "+ result.correct_ans+ '\n'
-		out_str += "Comments: "+ result.comment+ '\n'
-		
-		fd.write(out_str)
-	fd.flush()
-
-fd.close()
+output = open('data.pkl', 'wb')
+pickle.dump(grading_results, output)
+output.close()
 
 # switch back to the caller's directory
 os.chdir(caller_dir)
+
 exit(1)
 

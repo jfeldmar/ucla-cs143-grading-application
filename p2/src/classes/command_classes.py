@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import sys;
 
 class command:
@@ -42,14 +40,14 @@ class query_result:
 		self.maxIOs = 0		# default value, should be reset according to config file
 		self.student_ans = ""
 		self.correct_ans = ""
-		self.time = 0.0		# in seconds (-1 if command timed out or process failed)
+		self.time = 0		# in seconds (-1 if command timed out or process failed)
 		self.score = 0
 		self.comment = ""
 
 # stores data for penalty to be applied if diff between a pair of files exceeds threshold
 class diff_penalty:
-	def __init__(self, sid, amount, comment):
+	def __init__(self, sid, penalty, comment):
 		self.sid = sid
-		self.amount = amount
+		self.penalty = penalty
 		self.comment = comment
 	

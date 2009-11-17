@@ -44,7 +44,7 @@ part_D_files = ["SqlEngine.h", "SqlEngine.cc", "BTreeIndex.h", "BTreeIndex.cc", 
 # must be below this threshhold to avoid having points deducted
 diff_threshold = 0.5
 
-# penalty of total final grade for each time the diff_threshhold is exceeded
+# penalty (in points) of total final grade for each time the diff_threshhold is exceeded
 diff_penalty_amt = 2
 
 diff_D_vs_C = ["BTreeIndex.h", "BTreeIndex.cc", "BTreeNode.h", "BTreeNode.cc", "Bruinbase.h"] 
@@ -63,3 +63,6 @@ make_bruinbase = "make -s"
 
 # Bruinbase executable (command)
 run_bruinbase = "./bruinbase"
+
+# MyUCLA Gradebook compatible File Destination
+UCLA_Gradebook_GRADES_File = "cs143-TSV-Grades.tab"
