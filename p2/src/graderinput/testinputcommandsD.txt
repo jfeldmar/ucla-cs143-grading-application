@@ -15,7 +15,7 @@ LOAD large FROM '../graderinput/sample_load_data/large.del' WITH INDEX
 
 SELECT COUNT(*) FROM large
 select_cmd_results/count_large_result.txt
-10 60 100 "size of large"
+10 60 400 "size of large"
 
 SELECT * FROM large WHERE key > 4500
 select_cmd_results/large_result_2.txt
@@ -36,7 +36,7 @@ LOAD xlarge FROM '../graderinput/sample_load_data/xlarge.del' WITH INDEX
 
 SELECT COUNT(*) FROM xlarge
 select_cmd_results/count_xlarge_result.txt
-10 60 100 "size of xlarge"
+10 60 1500 "size of xlarge"
 
 SELECT * FROM xlarge WHERE key = 4240
 select_cmd_results/xlarge_result_2.txt

@@ -20,7 +20,7 @@ LOAD small FROM '../graderinput/sample_load_data/small.del' WITH INDEX
 
 SELECT COUNT(*) FROM small
 select_cmd_results/count_small_result.txt
-10 60 100 "size of small"
+10 60 200 "size of small"
 
 SELECT * FROM small WHERE key > 100 AND key < 500
 select_cmd_results/small_result_2.txt
@@ -31,7 +31,7 @@ LOAD medium FROM '../graderinput/sample_load_data/medium.del' WITH INDEX
 
 SELECT COUNT(*) FROM medium
 select_cmd_results/count_medium_result.txt
-10 60 100 "size of mediem"
+10 60 200 "size of mediem"
 
 SELECT * FROM medium WHERE key = 489
 select_cmd_results/medium_result_2.txt
