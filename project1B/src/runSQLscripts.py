@@ -514,5 +514,7 @@ resultsFile.close()
 total_time = time.time() - loop_start
 print >> sys.stderr, "Total Elapsed Time: ", int(total_time/60), "min ", round(total_time%60.0,2) , "secs."
 
+print >> sys.stderr, "MyUCLA Gradebook (tsv) file written to ", result_file
+
 # switch back to the caller's directory
 os.chdir(caller_dir)

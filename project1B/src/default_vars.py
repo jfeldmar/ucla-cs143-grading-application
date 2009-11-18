@@ -34,7 +34,7 @@ num_queries = 3
 # this is the name of the UCLA MyGradebook compatible file
 # the verbose result is printer to stdout and can be logged using redirection (>)
 # note: the violate.sql script is not tested here, it must be checked manually
-results_dir = "results"
+results_dir = "RESULTS"
 result_file = results_dir + "/results.tab"
 
 # This script tests the output for 2 queries provided by grader here
@@ -75,8 +75,8 @@ student_queries_pts = 7		# all student queries run without error (otherwise dedu
 
 dir_file = results_dir + "/SIDs.txt"
 
-drop_DB_script = "./scripts/dropDB-CS143.sql"
-create_DB_script = "./scripts/createDB-CS143.sql"
+drop_DB_script = "./scripts/dropDB.sql"
+create_DB_script = "./scripts/createDB.sql"
 
 sql_restart_command = '/etc/init.d/mysql restart'
 
