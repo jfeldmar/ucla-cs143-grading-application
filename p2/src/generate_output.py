@@ -76,10 +76,10 @@ for student in grading_results:
 	for result in student.results:
 		out_str = student.sid + "\t"
 		out_str += result.query + "\t"
-		out_str += '\n'.join(result.student_ans) + "\t"
+		out_str += '\\n'.join(result.student_ans) + "\t"
 		out_str += str(result.time) + "\t"		
 		out_str += str(result.IOs) + "\t"
-		out_str += '\n'.join(result.correct_ans) + "\t"
+		out_str += '\\n'.join(result.correct_ans) + "\t"
 		out_str += str(result.max_time) + "\t"
 		out_str += str(result.maxIOs) + "\t"
 		out_str += str(result.score) + "\t"
