@@ -1,2 +1,2 @@
-24556
+12278
   -- 0.040 seconds to run the select command. Read 2731 pages
