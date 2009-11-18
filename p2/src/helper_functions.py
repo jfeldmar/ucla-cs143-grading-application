@@ -107,6 +107,8 @@ def run_commands(curr_student, commands, part, script_dir, allowed_files, curr_s
 			# if err_code = 1, error encountered
 			(mstdout, err, err_code, time) = runCmd( run_bruinbase, fd, min(tcmd.timeout, global_command_timeout), bruinbase_loc)
 
+			# store the actual amount of time the command took to run
+			# not the time output by the command
 			RD.time = time
 
 #			print "stdout:\n", mstdout
@@ -141,6 +143,9 @@ def run_commands(curr_student, commands, part, script_dir, allowed_files, curr_s
 					# check if error
 					#	(error can come for invalid syntax, or error returned by Bruinbase)
 					(time, pages, err_str) = parse_select_stats(err)
+					
+					# store the number of pages read
+					RD.IOs = pages
 
 					# if error parsing time/pages or error in command
 					if (time < 0):
@@ -154,7 +159,7 @@ def run_commands(curr_student, commands, part, script_dir, allowed_files, curr_s
 						# check if Maximum Number of IOs exceeded
 						if (pages > tcmd.maxIOs):
 							RD.score = 0
-							RD.comment += "Command exceeded maximum number of Pages Read (" + str(tcmd.maxIOs) + ")"
+							RD.comment += "Command exceeded maximum number of Pages Read (" + str(tcmd.maxIOs) + "maxIOs, command: " + tcmd.cmd + ")"
 							#print comments
 						else:
 							# Expected result format
@@ -181,10 +186,10 @@ def run_commands(curr_student, commands, part, script_dir, allowed_files, curr_s
 							# read grader's solution file
 							grader_result = open(solution_file, 'r').read()
 
-							score, comments = grade_output(student_result, grader_result)
+							score, comments, solution_tuples, student_tuples = grade_output(student_result, grader_result, tcmd.cmd)
 
-							RD.correct_ans = grader_result
-							RD.student_ans = student_result
+							RD.correct_ans = solution_tuples
+							RD.student_ans = student_tuples
 							RD.score = tcmd.points * score
 							RD.comment += comments
 
@@ -290,7 +295,7 @@ def parse_select_stats(result):
 # grader_result is a file
 # RETURNS:	score (0 <= score <= 1)
 #		comments ( information about score, if necessary)
-def grade_output(student_result, grader_result):
+def grade_output(student_result, grader_result, cmd):
 	score = 0
 	comment = ""
 
@@ -319,14 +324,17 @@ def grade_output(student_result, grader_result):
 	# calculate score
 	fraction_correct = float(len(set(solution_tuples) & set(student_tuples))) / float(len(solution_tuples))
 	score = round (fraction_correct, 2)
+	
+	# score is either 0% or 100% (not partial score allowed)
+	if (score != 1):
+		score = 0
 
 	if (score != 1):
-		comment = "SELECT command result is incorrect"
-#	if (score != 1):
+		comment = "SELECT command result is incorrect (command: " + cmd + ")"
 #		print "SOLUTION:", solution_tuples
 #		print "STUDENT OUT:",student_tuples
 	
-	return score, comment
+	return score, comment, solution_tuples, student_tuples
 
 def install_clean_bruinbase(bruinbase_loc, clean_bruinbase):
 	# remove current bruinbase version

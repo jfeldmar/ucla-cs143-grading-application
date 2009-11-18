@@ -54,34 +54,43 @@ for student in grading_results:
 	fd.write(output)
 fd.close()
 	
-
+############# CREATE LOG FILE ##############
+# NOTE: | represents tab ('\t')
+# SID | Query | student ans| time(seconds) | pages read | correct ans | time threshold | pages read threshold | score | comment | #
+#####################################################################################
+# SID | penalty | comment
+#####################################################################################
 #print results to file
-fd =open("results_file.out", 'w')
+fd =open(commands_log_file, 'w')
+fd_diff =open(diff_log_file, 'w')
 
 for student in grading_results:
-	out_str = "##### Grades for: " + student.sid + " (" + student.name + ") ##### " 
-	fd.write(out_str)
+	out_str = ""
 
-	fd.write("Diff Among Submissions Penalties:")
-	for penalty in student.diff_penalties:
-		out_str = "Penalty Amount: " + str(penalty.penalty) + '\n'
-		out_str += "Comment: "+ penalty.comment + '\n'
-		fd.write(out_str)
+	for diff_penalty in student.diff_penalties:
+		out_str = student.sid + "\t"
+		out_str += str(diff_penalty.penalty) + "\t"
+		out_str += diff_penalty.comment + "\n"
+		fd_diff.write(out_str)
 
-	fd.write("Bruinbase Commands Results:")
 	for result in student.results:
-		out_str = '\t'+ result.part+ " - "+ result.query+ '\n'
-		out_str += "\tMax Time/IOs: "+ str(result.max_time) + '/'+ str(result.maxIOs) + '\n'
-		out_str += "\tResult Time/Score:"+ str(result.time) + '/'+ str(result.score) + '\n'
-		if (result.score == 0):
-			out_str += "Student Ans: "+ result.student_ans + '\n'
-			out_str += "Correct Ans: "+ result.correct_ans + '\n'
-		out_str += "Comments: "+ result.comment+ '\n'
-
+		out_str = student.sid + "\t"
+		out_str += result.query + "\t"
+		out_str += '\n'.join(result.student_ans) + "\t"
+		out_str += str(result.time) + "\t"		
+		out_str += str(result.IOs) + "\t"
+		out_str += '\n'.join(result.correct_ans) + "\t"
+		out_str += str(result.max_time) + "\t"
+		out_str += str(result.maxIOs) + "\t"
+		out_str += str(result.score) + "\t"
+		out_str += result.comment + "\n"
 		fd.write(out_str)
+		
 	fd.flush()
+	fd_diff.flush()
 
 fd.close()
+fd_diff.close()
 
 
 # switch back to the caller's directory

@@ -38,9 +38,10 @@ class query_result:
 		self.part = ""		# which submitted part is being graded (A,B,C, or D)
 		self.max_time = 0.0
 		self.maxIOs = 0		# default value, should be reset according to config file
-		self.student_ans = ""
-		self.correct_ans = ""
+		self.student_ans = []
+		self.correct_ans = []
 		self.time = 0		# in seconds (-1 if command timed out or process failed)
+		self.IOs = 0
 		self.score = 0
 		self.comment = ""
 

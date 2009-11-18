@@ -1,8 +1,14 @@
 # Lines starting with # are ignored
 # Syntax:
-# (one command per line)
+#		LINE 1: Bruinbase Command
+#		LINE 2: Points/Timeout(seconds)/MaxIOs Description
+#(optional)	LINE 3: Select Command Results File
+#
+# (one command per line, do not split command into 2 lines)
 #	    LOAD command:	LOAD tablename FROM 'filename'
 #	  SELECT command:	SELECT ... FROM ... WHERE
+# NOTE:
+#	- LOAD command maxIOs can be set to anything
 
 LOAD xsmall FROM '../graderinput/sample_load_data/xsmall.del' WITH INDEX
 5 60 0 "loading xsmall.del"
@@ -36,5 +42,3 @@ select_cmd_results/count_medium_result.txt
 SELECT * FROM medium WHERE key = 489
 select_cmd_results/medium_result_2.txt
 10 60 100 "= condition on medium"
-
-

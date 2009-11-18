@@ -110,9 +110,12 @@ print "\tFound ", num_diff_penalties, " violations of threshold value ", diff_th
 print "Commands to run on Part A: ", len(commands_part_A)
 print "Commands to run on Part D ", len(commands_part_D)
 
+# correct solutions
+#	grade_these = ("503481206","903397574","603470655","503463561","603586321")
 for student in grading_results:
 	sys.stderr.flush()
 
+#	if (student.sid in grade_these):
 	print "=== Grading SID - ", student.sid, " - Part A"
 	print >> sys.stderr, "=== Grading SID - ", student.sid, " - Part A"
 
@@ -126,11 +129,7 @@ for student in grading_results:
 		run_commands(student, commands_part_D, "D", script_dir, part_D_files, submission_dir_d)
 
 	#print >> sys.stderr, "Results Size: ", len(student.results)
-	
-	# use to run only the first (x=4) submissions [ for error checking ]
-#	if (grading_results.index(student) == 4):
-#		break	
-		
+
 	
 # delete temporary file
 if os.path.exists(temp_file):

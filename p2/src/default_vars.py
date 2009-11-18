@@ -65,4 +65,10 @@ make_bruinbase = "make -s"
 run_bruinbase = "./bruinbase"
 
 # MyUCLA Gradebook compatible File Destination
-UCLA_Gradebook_GRADES_File = "cs143-TSV-Grades.tab"
+UCLA_Gradebook_GRADES_File = "RESULTS/cs143-TSV-Grades.tab"
+
+# Log of running diff on submissions
+diff_log_file = "RESULTS/diff_results_log.out"
+
+# Log of running commands on submissions
+commands_log_file = "RESULTS/command_results_log.out"

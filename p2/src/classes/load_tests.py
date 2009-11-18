@@ -143,8 +143,8 @@ def is_restart_command(cmd):
 
 def is_load_command(cmd):
 	# regular expressions for matching LOAD statements
-	# case-insensitive, filename optionally included in SINGLE quotes
-	load_re = "^\s*LOAD\s+[^\s]+\s+FROM\s+'?([^'\s]+)'?(\s+WITH\s+INDEX)?\s*"
+	# case-insensitive, filename must be included in SINGLE quotes
+	load_re = "^\s*LOAD\s+[^\s]+\s+FROM\s+'([^'\s]+)'(\s+WITH\s+INDEX)?\s*"
 
 	if (None != re.match(load_re, cmd, re.IGNORECASE)):
 		# make sure file to be loaded from exists
