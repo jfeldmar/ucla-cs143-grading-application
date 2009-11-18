@@ -6,9 +6,10 @@ from subprocess import Popen, PIPE, STDOUT;
 def write_grade(fd, sid, name, score, comment):
 	try:
 		total_score = str(round(score,1))
-		fd.write(sid + "\t" + name + "\t"+ total_score + "\t" + comment + "\n")
+		out_str = str(sid) + "\t" + str(name) + "\t"+ str(total_score) + "\t" + str(comment) + "\n"
+		fd.write(out_str)
 		fd.flush()
-	except e:
+	except OSError, e:
 		print >>sys.stderr, "Unable to store gradebook entry for SID: " + sid
 		exit()
 	return
