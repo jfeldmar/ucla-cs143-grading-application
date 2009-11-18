@@ -1,2 +1,0 @@
-100
-  -- 0.000 seconds to run the select command. Read 14 pages

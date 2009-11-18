@@ -1,7 +1,0 @@
-175 'Angel Unchained'
-173 'Angel Levine, The'
-272 'Baby Take a Bow'
-303 'Bananas'
-395 'Big Jake'
-489 'Blue Hawaii'
-  -- 0.000 seconds to run the select command. Read 7 pages

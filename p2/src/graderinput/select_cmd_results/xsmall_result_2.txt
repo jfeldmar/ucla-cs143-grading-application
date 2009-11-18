@@ -1,5 +1,0 @@
-272 'Baby Take a Bow'
-1578 'G.I. Blues'
-2244 'King Creole'
-2342 'Last Ride, The'
-  -- 0.000 seconds to run the select command. Read 3 pages
