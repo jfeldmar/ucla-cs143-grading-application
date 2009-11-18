@@ -17,7 +17,7 @@ from load_tests import *	# module to load grader-specified test cases
 from diff_submissions import *	# module to check differences among parts of submissions
 from helper_functions import *
 
-output = open('data.pkl', 'rb')
+output = open(pickle_file, 'rb')
 grading_results = pickle.load(output)
 output.close()
 

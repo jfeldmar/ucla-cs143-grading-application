@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-
 import sys, csv, os, time, pickle
 from subprocess import Popen, PIPE, STDOUT
 
@@ -153,10 +152,15 @@ print >> sys.stderr,  "Max Part D Points: ", str(pts_d)
 print >> sys.stderr,  "Max TOTAL Points: ", str(pts_a + pts_d)
 
 
-output = open('data.pkl', 'wb')
+if (not os.path.exists(dirname(pickle_file)):
+	os.mkdir(dirname(pickle_file))
+	
+output = open(pickle_file, 'wb')
 pickle.dump(grading_results, output)
 output.close()
 
+# generate log files from object data created in this script
+#	(this allowed regeneration of log files without re-running the whole grading program)
 os.system('python generate_output.py')
 
 # switch back to the caller's directory

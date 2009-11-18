@@ -72,3 +72,6 @@ diff_log_file = "RESULTS/diff_results_log.out"
 
 # Log of running commands on submissions
 commands_log_file = "RESULTS/command_results_log.out"
+
+# Name of pickle object (stores object data before it's written to log files)
+pickle_file = "RESULTS/data.pkl"
