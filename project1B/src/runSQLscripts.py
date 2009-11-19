@@ -12,15 +12,7 @@ os.chdir(script_dir)
 
 
 from helper_UDfunctions import *;	# import helper functions from helper_UDfunctions.py
-from default_vars import *;	# loads global variables from default_vars.py
-
-# Load SID-Student Name tuples from submissions.csv file
-# (use default_vars.py to change file name/location)
-# store sid-name pairs in dictionary
-submissions_reader = csv.DictReader(open(submissions_data_file), ['sid', 'name'], delimiter=',', quotechar='"')
-name_dictionary = {}
-for row in submissions_reader:
-	name_dictionary[row['sid']] = row['name']
+from default_vars import *;		# loads global variables from default_vars.py
 
 ################ Global Variables ####################
 
@@ -53,8 +45,13 @@ except getopt.GetoptError, err:
 for opt, arg in options:
 	if opt in ('-s', '--submissions'):
 		print "Changing submission directory to %s" % (arg)
+		
 		# drop forward slash at the end of string if present
-		submission_dir = re.sub('/$', '', submission_dir)	
+		submission_dir = re.sub('/$', '', arg)
+		
+		# calculate new submitted files location
+		submissions_data_file = submission_dir + "/submission.csv"
+		
 	elif opt in ('-d', '--database'):
 		print "Changing mysql database to %s" % (arg)
 		test_DB = arg
@@ -68,6 +65,15 @@ for opt, arg in options:
 		assert False, "unhandled option"
 
 ################ END - Global Variables ####################
+
+# Load SID-Student Name tuples from submissions.csv file
+# (use default_vars.py to change file name/location)
+# store sid-name pairs in dictionary
+submissions_reader = csv.DictReader(open(submissions_data_file), ['sid', 'name'], delimiter=',', quotechar='"')
+name_dictionary = {}
+for row in submissions_reader:
+	name_dictionary[row['sid']] = row['name']
+
 
 #get all submission SID directories
 

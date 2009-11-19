@@ -81,10 +81,10 @@ def run_query(query, grader_result, num, timeout):
 		    if retcode < 0:
         		toprint = "ERROR: Child was terminated by signal", -retcode
 		    else:
-			toprint = "ERROR: returncode: ", retcode
+			toprint = "ERROR: returncode: " + str(retcode)
 
-		    toprint += " when executing command: ", query
-		    toprint +='stderr: ', repr(stderr)
+		    toprint += " when executing command: " + query
+		    toprint +='stderr: ' + repr(stderr)
 	except OSError, e:
 		print >>sys.stderr, "ERROR: Execution failed:", e
 	return fail_query, score, toprint
@@ -97,7 +97,7 @@ def test_query(student_query, timeout):
 	(failed, stdout, stderr, retcode) = runCmd(student_query, timeout)
 	
 	if (failed):
-		error_str = 'Command timed out (timeout = ', timeout, ' seconds).'
+		error_str = 'Command timed out (timeout = ' + str(timeout) + ' seconds).'
 		return failed, error_str
 
 	#returncode 0 if no error, 1 if error, less than 0 if terminated by signal
@@ -108,12 +108,12 @@ def test_query(student_query, timeout):
 		else: 
 		    fail_query = 1
 		    if retcode < 0:
-        		toprint = "ERROR: Child was terminated by signal", -retcode
+        		toprint = "ERROR: Child was terminated by signal: " + stderr
 		    else:
-			toprint = "ERROR: returncode: ", retcode
+			toprint = "ERROR: " + stderr
 
-		    toprint += " when executing command: ", student_query
-		    toprint += "stderr: " , repr(stderr)
+		    toprint += " when executing command: " + student_query
+		    toprint += "stderr: " + repr(stderr)
 	except OSError, e:
 		print >>sys.stderr, "ERROR: Execution failed:", e
 	return fail_query, toprint
