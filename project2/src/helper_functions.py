@@ -14,9 +14,8 @@ def listdirs(folder):
 	return dirs
 
 
-
 # Re-installs clean version of Bruinbase (base code given to students)
-# Copies student's submitted files to Bruinbase (if none, score = 0)
+# Copies student's submitted files to Bruinbase (if none, score = 0; if directory not found, score = 0)
 # "MAKE" Bruinbase solution (if compile error, score = 0)
 # RETURNS: 1 if success, 0 if error encountered
 
@@ -26,6 +25,20 @@ def set_up(curr_student, part, allowed_files, curr_submission_dir):
 
 	# copy allowed files into test bruinbase (if student submitted any)
 	student_files = curr_submission_dir + '/' + curr_student.sid
+	
+	if (not os.path.exists(student_files)):
+		RD = query_result()
+		RD.part = part	
+		RD.query = "All queries for SID " + curr_student.sid
+		RD.score = 0
+		RD.comment += " Student Submission Directory not found."
+		
+		print "\t\tScore: ", RD.score
+		print "\t\tComments: ", RD.comment
+		
+		curr_student.results.append(RD)
+		return 0
+		
 	num_copied = copy_student_files(student_files, bruinbase_loc, allowed_files)
 
 	if (num_copied == 0):

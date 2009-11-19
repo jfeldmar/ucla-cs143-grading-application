@@ -152,7 +152,7 @@ print >> sys.stderr,  "Max Part D Points: ", str(pts_d)
 print >> sys.stderr,  "Max TOTAL Points: ", str(pts_a + pts_d)
 
 
-if (not os.path.exists(dirname(pickle_file)):
+if (not os.path.exists(os.path.dirname(pickle_file))):
 	os.mkdir(dirname(pickle_file))
 	
 output = open(pickle_file, 'wb')
