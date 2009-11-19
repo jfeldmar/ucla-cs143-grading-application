@@ -17,7 +17,6 @@ def write_grade(fd, sid, name, score, comment):
 # given a set of expected results and a set of student's results
 # assign score (0 to 1.0) based on how many results are matching
 def grade(grader_results, student_results, q_num):	
-#	if (q_num == 1):
 	if (len(grader_results) == 0):
 		print "ERROR: Unexpected Input - Grader's query output file has length 0"
 		return -1
@@ -25,8 +24,8 @@ def grade(grader_results, student_results, q_num):
 	# if results all match, score is 100
 	fraction_correct = float(len(grader_results & student_results)) / float(len(grader_results))
 	score = round (fraction_correct, 2)
-	if (q_num == 2 and score != 1):
-		print "Query 2: expecting " , '\\n'.join(grader_results), " got ", '\\n'.join(student_results)		
+	if (score != 1):
+		print "Query ", q_num, ": expecting " , '\\n'.join(grader_results), " got ", '\\n'.join(student_results)		
 	return score
 
 # SPLIT UP THE QUERIES IN THE STUDENT'S SUBMITTED FILE
