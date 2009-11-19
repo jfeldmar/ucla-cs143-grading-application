@@ -69,6 +69,11 @@ for opt, arg in options:
 # Load SID-Student Name tuples from submissions.csv file
 # (use default_vars.py to change file name/location)
 # store sid-name pairs in dictionary
+if (not os.path.exists(submissions_data_file)):
+	print >>sys.stderr, "Submissions directory/file submissions.csv not found!!!!"
+	print >>sys.stderr, "Please specify location of submissions either as a command line parameter using '-s'"
+	print >>sys.stderr, "or change the variable 'submission_dir' in default_vars.py"
+	exit()
 submissions_reader = csv.DictReader(open(submissions_data_file), ['sid', 'name'], delimiter=',', quotechar='"')
 name_dictionary = {}
 for row in submissions_reader:
@@ -518,7 +523,7 @@ for sid in sids:
 resultsFile.close()
 
 total_time = time.time() - loop_start
-print >> sys.stderr, "Total Elapsed Time: ", int(total_time/60), "min ", round(total_time%60.0,2) , "secs."
+print >> sys.stderr, "Total Elapsed Time: ", int(total_time/60), "min ", str(int(total_time%60)) , "secs."
 
 print >> sys.stderr, "MyUCLA Gradebook (tsv) file written to ", result_file
 
