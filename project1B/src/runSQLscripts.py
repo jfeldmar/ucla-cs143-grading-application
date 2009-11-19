@@ -55,6 +55,7 @@ for opt, arg in options:
 	elif opt in ('-d', '--database'):
 		print "Changing mysql database to %s" % (arg)
 		test_DB = arg
+
 	elif opt in ('-u', '--user'):
 		print "Changing mysql user to %s" % (arg)
 		user = arg
@@ -65,6 +66,17 @@ for opt, arg in options:
 		assert False, "unhandled option"
 
 ################ END - Global Variables ####################
+
+# Based on selected test MySQL database, generate correct drop/create database command
+fd_drop = open( drop_DB_script,'w')
+output_str = "drop database if exists " + test_DB + ";"
+fd_drop.write(output_str)
+fd_drop.close()
+
+fd_create = open( create_DB_script,'w')
+output_str = "create database " + test_DB + ";"
+fd_create.write(output_str)
+fd_create.close()
 
 # Load SID-Student Name tuples from submissions.csv file
 # (use default_vars.py to change file name/location)
@@ -97,10 +109,10 @@ if ( os.path.exists(result_file)):
 # get list of all files and directories
 directories = os.listdir(submission_dir)
 
-# extract only directory names from directories
+# extract only directory names from directories ***directory names must be 9 digit numbers***
 onlydirs = []
 for d in directories:
-	if ( os.path.isdir(submission_dir + '/' + d) == True ):
+	if ( os.path.isdir(submission_dir + '/' + d) == True and re.match("^[0-9]{9}$",d)):
 		onlydirs.append(d)
 
 print "Number of directories (submissions) found: ", len(onlydirs)
@@ -130,11 +142,17 @@ q2.close()
 f1 = open(graders_query1_output, 'r') or sys.exit("Unable to open grader's query 1 solution file: " + graders_query1_output)
 f1.readline()			# skip first line which lists field names
 right_records_set_q1 = set(f1.read().splitlines())
+for line in right_records_set_q1:
+	if not line.strip():
+		right_records_set_q1.remove(line)	
 f1.close()
 
 f2 = open(graders_query2_output, 'r') or sys.exit("Unable to open grader's query 2 solution file: " + graders_query2_output)
 f2.readline()			# skip first line which lists field names
-right_records_set_q2 = list(f2.read().splitlines())
+right_records_set_q2 = set(f2.read().splitlines())
+for line in right_records_set_q2:
+	if not line.strip():
+		right_records_set_q2.remove(line)	
 f2.close()
 
 print "\n===Query 1==="

@@ -15,25 +15,18 @@ def write_grade(fd, sid, name, score, comment):
 	return
 
 # given a set of expected results and a set of student's results
-# assign score (0 to 1.0) based on how many results ar e matching
+# assign score (0 to 1.0) based on how many results are matching
 def grade(grader_results, student_results, q_num):	
-	if (q_num == 1):
-		if (len(grader_results) == 0):
-			print "ERROR: Unexpected Input - Grader's query output file has length 0"
-			return -1
+#	if (q_num == 1):
+	if (len(grader_results) == 0):
+		print "ERROR: Unexpected Input - Grader's query output file has length 0"
+		return -1
 
-		# if results all match, score is 100
-		fraction_correct = float(len(grader_results & student_results)) / float(len(grader_results))
-		score = round (fraction_correct, 2)
-	elif (q_num == 2):
-		grader = grader_results[0]
-		student = student_results.pop()
-		if (grader == student):
-			score = 1
-		else:
-			score = 0
-			print "Query 2: expecting " , grader, " got ", student
-		
+	# if results all match, score is 100
+	fraction_correct = float(len(grader_results & student_results)) / float(len(grader_results))
+	score = round (fraction_correct, 2)
+	if (q_num == 2 and score != 1):
+		print "Query 2: expecting " , '\\n'.join(grader_results), " got ", '\\n'.join(student_results)		
 	return score
 
 # SPLIT UP THE QUERIES IN THE STUDENT'S SUBMITTED FILE
@@ -66,10 +59,17 @@ def run_query(query, grader_result, num, timeout):
 	try:
 		if retcode == 0:
 		    fail_query = 0
-		    student_result = list (stdout.splitlines())
+		    student_result = stdout.splitlines()
+		    
+		    # remove empty entries
+		    for line in student_result:
+			    if not line.strip():
+				    student_result.remove(line)
+
 		    # remove field names line
 		    if (len(student_result) != 0):
 	    		student_result.pop(0)
+
 		    score = grade(grader_result, set(student_result), num)
 		    toprint = "Query ", num , " Score: ", score
 		    if score != 1:
