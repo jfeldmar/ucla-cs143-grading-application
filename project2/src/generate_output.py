@@ -3,20 +3,22 @@
 import sys, csv, os, time, pickle
 from subprocess import Popen, PIPE, STDOUT
 
-# IMPORTANT IF THIS SCRIPT IS NOT RUN FROM ITS OWN DIRECTORY
+# IMPORTANT: If this script is not run from the caller's directory
 #	saves caller's directory, changes to script's directory
 #	at the end of script, changes back to caller's directory
 caller_dir = os.getcwd()
 script_dir = sys.path[0]
 os.chdir(script_dir)
 
-
+# append 'classes' directory to system path
+# in order to be able to 'import' files from the directory
 sys.path.append('./classes')
 from default_vars import *	# loads global variables and helper function from default_vars.py
 from load_tests import *	# module to load grader-specified test cases
 from diff_submissions import *	# module to check differences among parts of submissions
 from helper_functions import *
 
+# read and load Pickle file created by the main.py script
 output = open(pickle_file, 'rb')
 grading_results = pickle.load(output)
 output.close()

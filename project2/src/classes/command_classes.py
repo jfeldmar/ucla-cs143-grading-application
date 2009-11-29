@@ -1,5 +1,10 @@
 import sys;
 
+###########################################################################################
+# Data structures wich help with
+#	storing results of running grader's test commands on student submissions
+###########################################################################################
+
 class command:
 	# parameter: one line command string
 	# returns: 0 if failed, command object otherwise (change this to be external)
@@ -34,14 +39,14 @@ class student_result:
 # stores details query result
 class query_result:
 	def __init__(self):
-		self.query = ""
+		self.query = ""		# query string for this command
 		self.part = ""		# which submitted part is being graded (A,B,C, or D)
-		self.max_time = 0.0
+		self.max_time = 0.0	# timeout threshold for current command
 		self.maxIOs = 0		# default value, should be reset according to config file
-		self.student_ans = []
-		self.correct_ans = []
+		self.student_ans = []	# list of tuples of student answers (for SELECT command)
+		self.correct_ans = []	# list of tuples of student answers (for SELECT command)
 		self.time = 0		# in seconds (-1 if command timed out or process failed)
-		self.IOs = 0
+		self.IOs = 0		# pages read for current command
 		self.score = 0
 		self.comment = ""
 

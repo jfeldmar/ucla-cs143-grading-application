@@ -1,23 +1,38 @@
 import sys, os, re, subprocess, time, signal
 from subprocess import Popen, PIPE, STDOUT
 
+#
+#	PROJECT 2 - GRADING APPLICATION - Helper Function
+#
+#	(this file contains functions used by main.py with allow the main
+#		script to be more readable)
+
+
+# append 'classes' directory to system path
+# in order to be able to 'import' files from the directory
 sys.path.append('./classes')
 from default_vars import *	# loads global variables and helper function from default_vars.py
-from command_classes import *
+from command_classes import *	# loads data structures used by the program
 
-# returns all directories in 'folder' whose name is 9 digits (i.e. SID number)
+# returns all directories in 'directory' whose name is 9 digits (i.e. SID number)
 def listdirs(folder):
 	dirs = []
 	for d in (os.listdir(folder)):
+		# only return directories that have a 9-digit name
 		if (os.path.isdir(os.path.join(folder, d)) and re.match("^[0-9]{9}$",d)):
 			dirs.append(d)
 	return dirs
 
 
-# Re-installs clean version of Bruinbase (base code given to students)
-# Copies student's submitted files to Bruinbase (if none, score = 0; if directory not found, score = 0)
+# Re-installs clean version of Bruinbase (is it the original Bruinbase code given to students)
+# Copies student's submitted files to Bruinbase (if none, score = 0; if student directory not found, score = 0)
 # "MAKE" Bruinbase solution (if compile error, score = 0)
-# RETURNS: 1 if success, 0 if error encountered
+
+# parameters:	curr_student		=> student_result object for student being currently graded
+#		part			=> name of Project 2 part being graded ("A" or "D")
+#		allowed_files		=> list of files students are allowed to submit for this part
+#		curr_submission_dir	=> directory containing student submission for current part
+# returns:	1 of success, 0 if error encountered
 
 def set_up(curr_student, part, allowed_files, curr_submission_dir):
 
@@ -26,6 +41,7 @@ def set_up(curr_student, part, allowed_files, curr_submission_dir):
 	# copy allowed files into test bruinbase (if student submitted any)
 	student_files = curr_submission_dir + '/' + curr_student.sid
 	
+	# if student files not found, create query_result with score=0, go to next student
 	if (not os.path.exists(student_files)):
 		RD = query_result()
 		RD.part = part	
@@ -41,6 +57,7 @@ def set_up(curr_student, part, allowed_files, curr_submission_dir):
 		
 	num_copied = copy_student_files(student_files, bruinbase_loc, allowed_files)
 
+	# if not files found/copied, create query_result with score=0, go to next student
 	if (num_copied == 0):
 		RD = query_result()
 		RD.part = part	
@@ -59,7 +76,7 @@ def set_up(curr_student, part, allowed_files, curr_submission_dir):
 	print "\t=== Executing make"
 	(mstdout, err, err_code, time) = runCmd(make_bruinbase, None, 0, bruinbase_loc) 	# stdin=subprocess.PIPE, timeout 0 (i.e. not timed)
 
-	# if compilation failed, score 0, go to next student
+	# if compilation failed, score 0, create query_result with score=0, go to next student
 	if err_code != 0:
 		# score = 0 for this submission (for current Part)
 		RD = query_result()
@@ -79,6 +96,15 @@ def set_up(curr_student, part, allowed_files, curr_submission_dir):
 
 	return 1
 
+# Run's test commands for current Part of Project 2 on current student
+# parameters:	curr_student		=> student_result object for student being currently graded
+#		commands		=> list of commands to run on current student's submissions
+#		part			=> name of Project 2 part being graded ("A" or "D")
+#		script_dir		=> location of main grading script
+#		allowed_files		=> list of files students are allowed to submit for current part
+#		curr_submission_dir	=> directory containing student submission for current part
+# returns:	Nothing
+
 def run_commands(curr_student, commands, part, script_dir, allowed_files, curr_submission_dir):
 	# execute for each scheduled command in selected Part
 	for tcmd in commands:
@@ -88,32 +114,33 @@ def run_commands(curr_student, commands, part, script_dir, allowed_files, curr_s
 
 		# if command is RESTART
 		# 	run set up again:
-		#		unzip clean bruinbase solution
+		#		decompress clean Bruinbase solution
 		#		copy student's files into clean solution
 		#		run make
+		#		continue to next Command
 		if (tcmd.cmd_type == 'RESTART'):
 			set_up(curr_student, part, allowed_files, curr_submission_dir)
 			continue
 
+		# create new 'query_result' object
 		RD = query_result()
 		RD.part = part
 
-		# store query
+		# store query string
 		RD.query = tcmd.cmd
-		# store timeout value
+		# store timeout value (minimum of global value and command's value)
 		RD.max_time = min(tcmd.timeout, global_command_timeout)
 		# store max pages read value
 		RD.maxIOs = tcmd.maxIOs
-		# store expected solution
 
-		# write command to a file so it can be passed to STDIN of bruinbase process
+		# write command to a file so it can be passed to STDIN of Bruinbase process
 		fd = open(temp_file, 'w')
 		fd.write(tcmd.cmd)
 		fd.write('\n')
 		fd.close()
 		fd = open(temp_file, 'r')
 		
-		# run command, get output/error stream, parse
+		# run command, get output/error stream, parse result
 		if (os.path.exists(bruinbase_loc)):
 
 			# start bruinbase process and pass command as STDIN
@@ -132,7 +159,6 @@ def run_commands(curr_student, commands, part, script_dir, allowed_files, curr_s
 			if ( err_code != 0 ):
 				RD.score = 0
 				RD.comment += " command (" + tcmd.cmd + ") failed - " + err
-#				print "Command timed out or error encountered - ", mstdout, "/", err
 			# otherwise, parse output
 			else:
 				# for LOAD command, check for error, assign points
@@ -151,7 +177,6 @@ def run_commands(curr_student, commands, part, script_dir, allowed_files, curr_s
 				# for SELECT command
 				# check for error, if no error
 				# parse output and timing info
-				#
 				elif (tcmd.cmd_type == "SELECT"):
 					# check if error
 					#	(error can come for invalid syntax, or error returned by Bruinbase)
@@ -160,36 +185,35 @@ def run_commands(curr_student, commands, part, script_dir, allowed_files, curr_s
 					# store the number of pages read
 					RD.IOs = pages
 
-					# if error parsing time/pages or error in command
+					# if error encountered while parsing time/pages or error running command
 					if (time < 0):
 						RD.score = 0
 						#err_str
 						RD.comment += "Error running select command (" + str(tcmd.cmd) + ") output=> " + str(err_str)
-#						print comments
-
 					# otherwise, parse and grade result
 					else:
-						# check if Maximum Number of IOs exceeded
+						# check if Maximum number of IOs exceeded
 						if (pages > tcmd.maxIOs):
 							RD.score = 0
 							RD.comment += "Command exceeded maximum number of Pages Read (" + str(tcmd.maxIOs) + "maxIOs, command: " + tcmd.cmd + ")"
 							#print comments
 						else:
-							# Expected result format
+							# Regular Expression: expected result format
 							re_select_stdout = "^\s*Bruinbase>\s*(.+)Bruinbase>\s*$"
 
 							# match output between "Bruinbase>", '.' matches newline, case ignored
 							q_result = re.match(re_select_stdout, mstdout, re.IGNORECASE|re.S)
 
-							# if not match, output does not match format specifications
+							# if no match, output does not match format specifications
 							if q_result == None:
 								RD.score = 0
 								RD.comment += "Invalid Bruinbase Output for Select Query"
 
-							# store query result
+							# extract and store query result
 							student_result = q_result.group(1)
 
 							# check if output correct
+							#	location of solution file
 							solution_file = script_dir + '/' + graders_file_directory + '/' + tcmd.solution
 
 							if (not os.path.exists(solution_file)):
@@ -199,6 +223,7 @@ def run_commands(curr_student, commands, part, script_dir, allowed_files, curr_s
 							# read grader's solution file
 							grader_result = open(solution_file, 'r').read()
 
+							# compare student result to grader's solution and assign score
 							score, comments, solution_tuples, student_tuples = grade_output(student_result, grader_result, tcmd.cmd)
 
 							RD.correct_ans = solution_tuples
@@ -218,23 +243,22 @@ def run_commands(curr_student, commands, part, script_dir, allowed_files, curr_s
 		print "\t\t\tScore: ", RD.score
 		print "\t\t\tComments: ", RD.comment
 		
+		# append current 'query_result' object to current student's record
 		curr_student.results.append(RD)
 
 	return
 
 
-
-
-
-
-# run command with timeout threshold
+# run command as a subprocess with timeout threshold
+# returns error if error encountered while running command or
+#	if timeout threshold is exceeded
 def runCmd(cmd, fd_stdin, timeout, change_dir):
 	'''
 	Will execute a command, read the output and return it back.
 
 	@param cmd: command to execute
 	@param timeout: process timeout in seconds
-	@return: a tuple of three: first stdout, then stderr, then exit code
+	@return: a tuple of four: first stdout, then stderr, then exit code, then execution time
 			if exit code = 1, error encountered
 	'''
 
@@ -275,28 +299,35 @@ def runCmd(cmd, fd_stdin, timeout, change_dir):
 			return (ph_out, ph_err, ph_ret, ph_time)	# return timeout error
 
 		ph_ret = p.returncode
-		ph_time = int(now - start_time)
+		ph_time = int(now - start_time)		# time it took to run command
 
 
 	ph_out, ph_err = p.communicate()
 
 	return (ph_out, ph_err, ph_ret, ph_time)
 
-# parse
+# parse last line output of running SELECT query in Bruinbase
+#	(this line either contains an error, or the running time and pages read data)
+# this function assumes the strict format specified in the regular expressions below
 def parse_select_stats(result):
+
 	# expected format: -- 0.000 seconds to run the select command. Read 1 pages
 	stats_re = ".*--\s+([0-9]*\.?[0-9]+)\s+seconds.*Read\s+([\d]+)\s+pages\s*$"
 	err_re = ".*Error.*"
 
+	# if result matches Error, return error
 	if (re.match(err_re, result, re.IGNORECASE|re.S)):
 		err_str =  result
 		stats_re = "--\s+([0-9]*\.?[0-9]+)\s+seconds.*Read\s+([\d]+)\s+pages\s*$"
 		err_str = re.sub(stats_re, '', err_str)
 		return -1, 0, err_str
+	# if doesn't match expected format, return error
 	elif (None == re.match(stats_re, result, re.IGNORECASE|re.S)):
 		err_str = result, ": Invalid syntax for Timing/Page Data"
 		return -1, 0, err_str
+	# if results matches expected correct format
 	else:
+		# extract running time and number of pages read (using Regular Expressions)
 		time = re.match(stats_re, result, re.IGNORECASE|re.S).group(1)
 		pages = re.match(stats_re, result, re.IGNORECASE|re.S).group(2)
 		print "\t\t\tTime: ", time
@@ -304,8 +335,10 @@ def parse_select_stats(result):
 		return float(time), int(pages), ""
 
 # compare student's output to expected output for current SELECT query
-# student_result is a string
-# grader_result is a file
+# student_result	=> string
+# grader_result		=> file
+# solution_tuples	=> list of grader's results
+# student_tuples	=> list of student's results
 # RETURNS:	score (0 <= score <= 1)
 #		comments ( information about score, if necessary)
 def grade_output(student_result, grader_result, cmd):
@@ -334,7 +367,7 @@ def grade_output(student_result, grader_result, cmd):
 		if not line.strip():
 			student_tuples.remove(line)
 					
-	# calculate score
+	# calculate score (by intersecting the two sets)
 	fraction_correct = float(len(set(solution_tuples) & set(student_tuples))) / float(len(solution_tuples))
 	score = round (fraction_correct, 2)
 	
@@ -349,6 +382,11 @@ def grade_output(student_result, grader_result, cmd):
 	
 	return score, comment, solution_tuples, student_tuples
 
+#  Installs a clean Bruinbase solution (i.e. original version given to students)
+#  parameters:
+#		bruinbase_loc	=>	location of where to install Bruinbase
+#		clean_bruinbase	=>	empty Bruinbase compressed file
+#  returns:	None.
 def install_clean_bruinbase(bruinbase_loc, clean_bruinbase):
 	# remove current bruinbase version
 	if os.path.exists(bruinbase_loc):
@@ -369,6 +407,10 @@ def install_clean_bruinbase(bruinbase_loc, clean_bruinbase):
 # copy student submitted files into test Bruinbase
 # if file doesn't exists in student's submission, do nothing
 # only copies files which are allowed (specified by grader)
+# PARAMETERS:
+#	student_files	=>	location of files submitted by student
+#	bruinbase_loc	=>	location of test Bruinbase installation
+#	allowed_files	=>	list of files allowed for this submissions
 # RETURNS: number of files copied
 def copy_student_files(student_files, bruinbase_loc, allowed_files):
 
@@ -380,6 +422,7 @@ def copy_student_files(student_files, bruinbase_loc, allowed_files):
 		# if student submitted the file, copy it to test Bruinbase directory
 		if (os.path.exists(src)):
 			retcode = subprocess.call(["cp", src, bruinbase_loc])
+			
 			if retcode == 0:
 				print "\t=== Copied file '", allowed_file, "' to bruinbase"
 				num_copied += 1
@@ -388,6 +431,9 @@ def copy_student_files(student_files, bruinbase_loc, allowed_files):
 				exit(err_str)
 	return num_copied
 
+# returns a readable time format
+# PARAMETER:	seconds	=> time in seconds
+# RETURNS:	time as a string in hours, minutes, and seconds
 def GetInHMS(seconds):
     hours = seconds / 3600
     seconds -= 3600*hours

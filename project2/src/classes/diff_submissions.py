@@ -70,7 +70,9 @@ def compare_submissions(dir_loc, grading_results, dirs_b, dirs_c, dirs_d):
 	return num_penalties
 
 
-
+# given two files, run the unix diff command
+# return percent difference between the two files
+# NOTE: ignore blank lines, all spaces, space change, case of letters
 def compare_files(file_old, file_new, sid):
 	cmd1 = "diff -y  --ignore-blank-lines --ignore-all-space --ignore-space-change --ignore-case " + file_old + " " + file_new + "  | egrep '[<>]'|wc -l"
 	cmd2 = "diff -y  --ignore-blank-lines --ignore-all-space --ignore-space-change --ignore-case " + file_old + " " + file_new + "  | wc -l"
@@ -110,6 +112,8 @@ def call_system_command(cmd):
 	    print >>sys.stderr, "ERROR: Execution failed:", e
 	    return 0, 0
 
+# given a value and a list, determine if the value is in the list
+# return: True or False
 def find(value, mylist):
 	for item in mylist:
 		if (item == value):

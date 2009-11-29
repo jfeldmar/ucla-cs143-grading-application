@@ -7,7 +7,7 @@ from command_classes import *;	# data structures storing test command informatio
 sys.path.append('../')
 from default_vars import *;	# loads global variables from ../default_vars.py
 
-# upper/lower case important in commands
+# NOTE: upper/lower case important in commands
 
 # read command file
 # for each command (skip comments), create command object and add it to the commands array
@@ -54,6 +54,18 @@ def load_grader_test_file(graderscriptfile):
 	# return array of extracted commands
 	return commands
 		
+# PARAMETERS:
+#	fd			=> file descriptor to grader's test script (at correct location)
+#	command1		=> current line from file containing command
+#	graderscriptfile	=> name of grader's test script file
+# RETURNS:
+# 	cmd_type	=> command type ('LOAD' or 'SELECT')
+#	cmd		=> command string
+#	points		=> maximum points for a successful execution of the command
+#	timeout		=> command timeout thresheld
+#	maxIOs		=> maximum allowed IOs (i.e. Pages Read)
+#	description	=> description of test command
+#	solution_file	=> name/location of solution file (for SELECT command)
 
 def validate_command(fd, command1, graderscriptfile):
 	cmd_type = ""
@@ -114,6 +126,15 @@ def validate_command(fd, command1, graderscriptfile):
 			
 	return cmd_type, cmd, points, timeout, maxIOs, description, solution_file
 
+# read max points, timeout threshold, maxIOs values from given string tokens
+# PARAMETERS:
+#	cmd	=>	command string
+#	tokens	=>	tokens of line from grader's test script (for current command)
+# RETURNS:
+#	points		=>	max points allowed for current command
+#	timeout		=>	timeout threshold for current command
+#	maxIOs		=>	max pages read for current command
+#	description	=>	description of current command
 def get_command_info(cmd, tokens):
 	# store POINTS/TIMEOUT/MAXIOS values (error if not number)
 	try:
@@ -133,6 +154,8 @@ def get_command_info(cmd, tokens):
 	
 	return points, timeout, maxIOs, description
 
+# detect if given string is the RESTART command
+# returns 1 if matched, 0 otherwise
 def is_restart_command(cmd):
 	restart_re = "\s*RESTART\s*"
 	
@@ -141,6 +164,8 @@ def is_restart_command(cmd):
 	else:
 		return 0
 
+# detect if given string is the LOAD command
+# returns 1 if matched, 0 otherwise
 def is_load_command(cmd):
 	# regular expressions for matching LOAD statements
 	# case-insensitive, filename must be included in SINGLE quotes
@@ -157,6 +182,8 @@ def is_load_command(cmd):
 	else:
 		return 0
 
+# detect if given string is the SELECT command
+# returns 1 if matched, 0 otherwise
 def is_select_command(cmd):
 	# regular expressions for matching SELECT statements
 	# case-insensitive
