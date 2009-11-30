@@ -20,7 +20,6 @@ submissions_data_file = "submission.csv"
 #	Bruinbase code location
 graders_file_directory = 'graderinput'
 graderscriptfileA = graders_file_directory + '/testinputcommandsA.txt'
-#graderscriptfileA = graders_file_directory + '/testinputcommands_small.txt'
 
 # files containing test commands for Part D
 graderscriptfileD = graders_file_directory + '/testinputcommandsD.txt'

@@ -1,7 +1,7 @@
 # Lines starting with # are ignored
 # Syntax:
 #		LINE 1: Bruinbase Command
-#		LINE 2: Points/Timeout(seconds)/MaxIOs Description
+#		LINE 2: Points Timeout(seconds) MaxIOs Description
 #(optional)	LINE 3: Select Command Results File
 #
 # (one command per line, do not split command into 2 lines)
