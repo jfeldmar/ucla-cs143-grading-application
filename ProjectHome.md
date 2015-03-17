@@ -1,0 +1,1 @@
+This web-based application provides an easy and intuitive GUI design to simplify the job of a grader who is testing students submissions for UCLA-CS143 - Database Systems.
